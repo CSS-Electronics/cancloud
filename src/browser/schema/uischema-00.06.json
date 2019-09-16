@@ -1,0 +1,430 @@
+{
+  "navConf": {
+    "order": [
+      "GENERAL",
+      "LOG",
+      "RTC",
+      "CONNECT",
+      "2ND-PORT",
+      "CAN CH1",
+      "CAN CH2",
+      "SECURITY",
+      "DEBUG"
+    ]
+  },
+  "general": {
+    "nav": "GENERAL"
+  },
+  "rtc": {
+    "nav": "RTC",
+    "sync": {},
+    "timezone": {
+      "ui:widget": "updown"
+    },
+    "adjustment": {
+      "ui:widget": "updown"
+    },
+    "manual_date_time": {
+      "ui:widget": "alt-datetime",
+      "ui:options": {
+        "yearsRange": [
+          1980,
+          2030
+        ]
+      }
+    },
+    "ntp_server": {
+      "classNames": "col-sm-4"
+    },
+    "ntp_fallback": {
+      "classNames": "col-sm-4"
+    },
+    "tolerance": {
+      "classNames": "col-sm-4"
+    }
+  },
+  "can_1": {
+    "nav": "CAN CH1",
+    "phy": {
+      "mode": {},
+      "fd_spec": {},
+      "retransmission": {},
+      "bit_rate_cfg_mode": {},
+      "bit_rate_std": {
+        "classNames": "col-sm-6"
+      },
+      "bit_rate_fd": {
+        "classNames": "col-sm-6"
+      },
+      "brp": {
+        "ui:widget": "updown",
+        "classNames": "col-sm-3"
+      },
+      "seg1": {
+        "ui:widget": "updown",
+        "classNames": "col-sm-3"
+      },
+      "seg2": {
+        "ui:widget": "updown",
+        "classNames": "col-sm-3"
+      },
+      "sjw": {
+        "ui:widget": "updown",
+        "classNames": "col-sm-3"
+      }
+    },
+    "filter": {
+      "items": {
+        "state": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "type": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "id_format": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "method": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "prescaler": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "Prescaler",
+          "ui:widget": "updown",
+          "ui:title": " "
+        },
+        "f1": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "From/ID (HEX)",
+          "ui:title": " "
+        },
+        "f2": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "To/Mask (HEX)",
+          "ui:title": " "
+        },
+        "name": {
+          "ui:title": " ",
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:placeholder": "Name"
+        }
+      }
+    },
+    "transmit": {
+      "items": {
+        "id_format": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "frame_format": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:title": " "
+        },
+        "brs": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:title": " "
+        },
+        "log": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:title": " "
+        },
+        "period": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:placeholder": "Period",
+          "ui:widget": "updown",
+          "ui:title": " "
+        },
+        "delay": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:placeholder": "Delay",
+          "ui:widget": "updown",
+          "ui:title": " "
+        },
+        "id": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:placeholder": "ID (HEX)",
+          "ui:title": " "
+        },
+        "data": {
+          "classNames": "smaller-margins col-sm-2",
+          "ui:placeholder": "Data (HEX), e.g. 020c",
+          "ui:title": " "
+        },
+        "state": {
+          "ui:title": " ",
+          "classNames": "col-sm-1 smaller-margins"
+        },
+        "name": {
+          "ui:title": " ",
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:placeholder": "Name"
+        }
+      }
+    }
+  },
+  "can_2": {
+    "nav": "CAN CH2",
+    "phy": {
+      "mode": {},
+      "fd_spec": {},
+      "retransmission": {},
+      "bit_rate_cfg_mode": {},
+      "bit_rate_std": {
+        "classNames": "col-sm-6"
+      },
+      "bit_rate_fd": {
+        "classNames": "col-sm-6"
+      },
+      "brp": {
+        "ui:widget": "updown",
+        "classNames": "col-sm-3"
+      },
+      "seg1": {
+        "ui:widget": "updown",
+        "classNames": "col-sm-3"
+      },
+      "seg2": {
+        "ui:widget": "updown",
+        "classNames": "col-sm-3"
+      },
+      "sjw": {
+        "ui:widget": "updown",
+        "classNames": "col-sm-3"
+      }
+    },
+    "filter": {
+      "items": {
+        "state": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "type": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "id_format": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "method": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "prescaler": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "Prescaler",
+          "ui:widget": "updown",
+          "ui:title": " "
+        },
+        "f1": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "From/ID (HEX)",
+          "ui:title": " "
+        },
+        "f2": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "To/Mask (HEX)",
+          "ui:title": " "
+        },
+        "name": {
+          "ui:title": " ",
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:placeholder": "Name"
+        }
+      }
+    },
+    "transmit": {
+      "items": {
+        "id_format": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
+        "frame_format": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:title": " "
+        },
+        "brs": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:title": " "
+        },
+        "log": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:title": " "
+        },
+        "period": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:placeholder": "Period",
+          "ui:widget": "updown",
+          "ui:title": " "
+        },
+        "delay": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:placeholder": "Delay",
+          "ui:widget": "updown",
+          "ui:title": " "
+        },
+        "id": {
+          "classNames": "smaller-margins col-sm-1",
+          "ui:placeholder": "ID (HEX)",
+          "ui:title": " "
+        },
+        "data": {
+          "classNames": "smaller-margins col-sm-2",
+          "ui:placeholder": "Data (HEX), e.g. 020c",
+          "ui:title": " "
+        },
+        "state": {
+          "ui:title": " ",
+          "classNames": "col-sm-1 smaller-margins"
+        },
+        "name": {
+          "ui:title": " ",
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:placeholder": "Name"
+        }
+      }
+    }
+  },
+  "secondaryport": {
+    "nav": "2ND-PORT",
+    "power": {}
+  },
+  "connect": {
+    "nav": "CONNECT",
+    "wifi": {
+      "accesspoint": {
+        "items": {
+          "ssid": {
+            "classNames": "col-sm-3 smaller-margins",
+            "ui:placeholder": "Hotspot name (SSID)",
+            "ui:title": " "
+          },
+          "minrssi": {
+            "classNames": "col-sm-3 smaller-margins",
+            "ui:title": " ",
+            "ui:widget": "updown",
+            "ui:placeholder": "Minimum RSSI, 0-100%"
+          },
+          "pwd": {
+            "classNames": "col-sm-3 smaller-margins",
+            "ui:placeholder": "Plain/encrypted password",
+            "ui:title": " "
+          }
+        }
+      }
+    },
+    "s3": {
+      "sync": {
+        "ota": {
+          "state": {
+            "classNames": "col-sm-6"
+          },
+          "period": {
+            "classNames": "col-sm-6"
+          }
+        },
+        "heartbeat": {
+          "state": {
+            "classNames": "col-sm-6"
+          },
+          "period": {
+            "classNames": "col-sm-6"
+          }
+        },
+        "logfiles": {
+          "state": {
+            "classNames": "col-sm-12"
+          }
+        }
+      },
+      "server": {
+        "endpoint": {
+          "ui:placeholder": "E.g. https://s3.amazonaws.com",
+          "classNames": "col-sm-3"
+        },
+        "port": {
+          "ui:placeholder": "E.g. 80 (http)",
+          "classNames": "col-sm-3"
+        },
+        "bucket": {
+          "ui:placeholder": "E.g. mybucket",
+          "classNames": "col-sm-3"
+        },
+        "region": {
+          "classNames": "col-sm-3"
+        },
+        "accesskey": {
+          "classNames": "col-sm-4"
+        },
+        "keyformat": {
+          "classNames": "col-sm-4"
+        },
+        "secretkey": {
+          "classNames": "col-sm-4"
+        }
+      }
+    }
+  },
+  "log": {
+    "nav": "LOG",
+    "split_size": {
+      "ui:widget": "updown"
+    },
+    "split_time_period": {
+      "ui:widget": "updown"
+    },
+    "split_time_offset": {
+      "ui:widget": "updown"
+    }
+  },
+  "devicemeta": {
+    "nav": "DEVICE META",
+    "devices": {
+      "items": {
+        "serialno": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "Serialno",
+          "ui:title": " "
+        },
+        "name": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "Name",
+          "ui:title": " "
+        },
+        "group": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "Group",
+          "ui:title": " "
+        },
+        "subgroup": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "Subgroup",
+          "ui:title": " "
+        },
+        "comment": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "Comment",
+          "ui:title": " "
+        },
+        "imageurl": {
+          "classNames": "col-sm-2 smaller-margins",
+          "ui:placeholder": "truck.png, https://...",
+          "ui:title": " "
+        }
+      }
+    }
+  },
+  "security": {
+    "nav": "SECURITY"
+  },
+  "other": {
+    "nav": "OTHER",
+    "preview": {
+      "ui:widget": "updown"
+    }
+  }
+}

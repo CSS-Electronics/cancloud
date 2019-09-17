@@ -20,11 +20,8 @@ class AwsSdk {
             if (event.Records) {
               result = result.concat(event.Records.Payload.toString());
             } else if (event.Stats) {
-              console.log(
-                `Processed ${event.Stats.Details.BytesProcessed} bytes`
-              );
+              
             } else if (event.End) {
-              console.log("SelectObjectContent completed");
               resolve(result);
             }
           }

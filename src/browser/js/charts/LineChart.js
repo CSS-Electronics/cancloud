@@ -1,27 +1,20 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
 import hexToRgba from "hex-to-rgba";
-import Moment from "moment";
 
-let lineChartColors = [
-  "#3d85c6",
-  "#073763",
-  "#0b5394",
-  "#6fa8dc",
-  "#9fc5e8",
-  "#e69138",
-  "#ff9900",
-  "#f6b26b",
-  "#f9cb9c"
-];
+const LineChart = (props) => {
 
-
-const LineChart = ({ datasets }) => {
+  const {
+    datasets,
+    chartColors,
+    aspectRatio,
+    chHeight
+  } = props;
 
   // set the header labels for use in indexing object properties
   const device_serialno = datasets[0].label
   const time_stamp = datasets[1].label
-  const parameter = datasets[2].label
+  const parameter = datasets[2].label // could be extended for multiple parameters 
   const datasetsRestructured = [];
 
   // restructure the dataset to be suitable for Line/Scatter types
@@ -46,7 +39,7 @@ const LineChart = ({ datasets }) => {
     let datasetsDevice = datasetsRestructured
       .filter(e => e[device_serialno] == deviceIds[i])
       .map(e => {
-        const x = Moment(e[time_stamp]).format("MM/DD h:mm:ss");
+        const x = e[time_stamp];
         const y = e[parameter];
         return { x, y };
       });
@@ -54,8 +47,8 @@ const LineChart = ({ datasets }) => {
     datasetsAllDevices[i] = {
       label: deviceIds[i],
       data: datasetsDevice,
-      borderColor: lineChartColors[i],
-      backgroundColor: hexToRgba(lineChartColors[i], "0.1")
+      borderColor: chartColors[i],
+      backgroundColor: hexToRgba(chartColors[i], "0.1")
     };
   }
 
@@ -66,7 +59,9 @@ const LineChart = ({ datasets }) => {
           data={{
             datasets: datasetsAllDevices
           }}
+          height={chHeight ? chHeight : null}
           options={{
+            maintainAspectRatio: aspectRatio,
             scales: {
               xAxes: [
                 {

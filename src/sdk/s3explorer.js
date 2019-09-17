@@ -436,7 +436,6 @@ class S3Explorer {
    */
 
   getWidgetQueryResult(dataFileName, sqlExpression, cb) {
-    console.log(sqlExpression);
     const params = {
       Bucket: this.bucketName,
       Key: dataFileName,
@@ -476,6 +475,7 @@ class S3Explorer {
           dataset,
           records
         });
+
         return cb(null, response);
       })
       .catch(err => {

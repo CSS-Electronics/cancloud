@@ -8,22 +8,11 @@ export const prepareWidgetInputs = configDashboard => {
   let recordsArray = _.map(configDashboard.widgets, widget =>
     web.getWidgetQueryResult({
       dataFileName: widget.data_file_name,
-      sqlExpression:
-        widget.chart_type == "line"
-          ? `SELECT ${chDefaults.device_header}, ${
-              chDefaults.timestamp_header
-            }, ${widget.parameters} FROM S3Object WHERE ${
-              chDefaults.device_header
-            } in [${"'" +
-              widget.def_devices.replace(/ /g, "', '") +
-              "'"}] and ${chDefaults.timestamp_header} > '${
-              widget.def_start
-            }' and ${chDefaults.timestamp_header} < '${widget.def_end}' limit ${
-              widget.limit
-            }`
-          : widget.chart_type == "pie"
-          ? `SELECT ${chDefaults.device_header}, ${chDefaults.timestamp_header}, ${widget.parameters} FROM S3Object`
-          : null
+      sqlExpression: `SELECT ${chDefaults.device_header}, ${chDefaults.timestamp_header}, ${widget.parameters} FROM S3Object 
+                      WHERE ${chDefaults.device_header} in [${"'" + widget.def_devices.replace(/ /g, "', '") + "'"}] 
+                      and ${chDefaults.timestamp_header} > '${widget.def_start}' 
+                      and ${chDefaults.timestamp_header} < '${widget.def_end}' 
+                      limit ${widget.limit}`
     })
   );
 

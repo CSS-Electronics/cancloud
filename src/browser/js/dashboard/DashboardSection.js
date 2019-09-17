@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import * as dashboardActions from "./actions";
-import { LineChart, DoughnutChart } from "../charts";
+import { LineChart, DoughnutChart, BaseChart } from "../charts";
 import { defaults } from "react-chartjs-2";
 
 // FIGURE OUT HOW TO CONTROL THE HEIGHT
@@ -19,7 +19,7 @@ let configDashboard = {
     legend_labels_padding: 4,
     show_lines: 0,
     chart_colors:
-      "#3d85c6 #073763 #0b5394 #6fa8dc #9fc5e8 #e69138 #ff9900 f6b26b #f9cb9c"
+      "#3d85c6 #ff9900 #073763 #0b5394 #6fa8dc #9fc5e8 #e69138 f6b26b #f9cb9c"
   },
   widgets: [
     {
@@ -70,11 +70,11 @@ let configDashboard = {
       chart_type: "pie",
       data_file_name: "pie.csv",
       parameters: "type1, type2, type3, type4",
-      def_devices: "",
-      def_start: "",
-      def_end: "",
+      def_devices: "ALL",
+      def_start: "2019-04-17 18:01:25",
+      def_end: "2019-04-17 21:01:25",
       limit: 800,
-      class_name: "col-sm-6",
+      class_name: "col-sm-2",
       aspect_ratio: false,
       height: 0
     }
@@ -98,8 +98,8 @@ function DashboardWidget(props) {
     <div className={"zero-padding " + props.className}>
       <div className="dashboard-widget">
         <span>{props.widgetTitle}</span>
-        {props.chartType == "line" ? (
-          <LineChart
+        <BaseChart
+            chartType={props.chartType}
             chartColors={chartColors}
             aspectRatio={props.aspectRatio}
             chHeight={props.chHeight}
@@ -107,16 +107,6 @@ function DashboardWidget(props) {
               props.records.records ? props.records.records.dataset : null
             }
           />
-        ) : props.chartType == "pie" ? (
-          <DoughnutChart
-            chartColors={chartColors}
-            aspectRatio={props.aspectRatio}
-            chHeight={props.chHeight}
-            datasets={
-              props.records.records ? props.records.records.dataset : null
-            }
-          />
-        ) : null}
       </div>
     </div>
   );

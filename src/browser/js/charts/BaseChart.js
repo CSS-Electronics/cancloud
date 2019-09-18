@@ -1,16 +1,23 @@
 import React from "react";
 import _ from "lodash";
-import { Line, Doughnut } from "react-chartjs-2";
+import { HorizontalBar, Line, Doughnut } from "react-chartjs-2";
 
 const BaseChart = props => {
-  const { datasets, chartColors, chartColorsTransparent, aspectRatio, chHeight, chartType } = props;
+  const {
+    datasets,
+    chartColors,
+    chartColorsTransparent,
+    aspectRatio,
+    chHeight,
+    chartType
+  } = props;
 
   // set the header labels for use in indexing object properties
   const device_serialno = datasets[0].label;
   const time_stamp = datasets[1].label;
   const parameter = datasets[2].label; // could be extended for multiple parameters
   const datasetsRestructured = [];
- 
+
   // set chart specific options
   const lineOptions = {
     maintainAspectRatio: aspectRatio,
@@ -49,6 +56,20 @@ const BaseChart = props => {
     }
   };
 
+  const barOptions = {
+    maintainAspectRatio: aspectRatio,
+    scales: {
+      yAxes: [
+        {
+          gridLines: { display: false },
+          ticks: {
+            beginAtZero: true
+          }
+        }
+      ]
+    }
+  };
+
   // restructure the dataset to be suitable for the chart types
   datasets.map(element =>
     element.data.map(
@@ -81,7 +102,7 @@ const BaseChart = props => {
         const y = e[parameter];
         return { x, y };
       });
-    } else if (chartType == "pie") {
+    } else if (chartType == "pie" || chartType == "bar") {
       datasetsDevice = datasetsDeviceFiltered.map(e => {
         const parameters = _.omit(e, time_stamp, device_serialno);
         return { parameters };
@@ -91,9 +112,15 @@ const BaseChart = props => {
 
     datasetsAllDevices[i] = {
       label: deviceIds[i],
-      data: chartType == "line" ? datasetsDevice : Object.values(datasetsDevice),
-      borderColor: chartType == "line" ? chartColors[i] :  "#ffffff",
-      backgroundColor: chartType == "line" ? chartColorsTransparent[i] : chartColors,
+      data:
+        chartType == "line" ? datasetsDevice : Object.values(datasetsDevice),
+      borderColor: chartType == "line" ? chartColors[i] : "#ffffff",
+      backgroundColor:
+        chartType == "line"
+          ? chartColorsTransparent[i]
+          : chartType == "bar"
+          ? chartColors[i]
+          : chartColors,
       hoverBorderColor: chartColorsTransparent
     };
   }
@@ -117,6 +144,15 @@ const BaseChart = props => {
             }}
             height={chHeight ? chHeight : null}
             options={pieOptions}
+          />
+        ) : chartType == "bar" ? (
+          <HorizontalBar
+            data={{
+              datasets: datasetsAllDevices,
+              labels: pieLabels
+            }}
+            height={chHeight ? chHeight : null}
+            options={barOptions}
           />
         ) : null
       ) : null}

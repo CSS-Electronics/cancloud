@@ -76,19 +76,32 @@ let confDash = {
       class_name: "col-sm-2",
       aspect_ratio: false,
       height: 0
-    }
-    ,
+    },
     {
       id: "widget5",
       title: "Device Status",
       chart_type: "pie",
-      data_file_name: "pie-multiple-devices-dates.csv",
+      data_file_name: "pie-multiple-devices.csv",
       parameters: "type1, type2, type3, type4",
       def_devices: "7F34B296 AB22438D",
       def_start: "2019-04-15 18:01:25",
       def_end: "2019-04-18 21:01:25",
       limit: 800,
       class_name: "col-sm-2",
+      aspect_ratio: false,
+      height: 0
+    },
+    {
+      id: "widget6",
+      title: "Device Status",
+      chart_type: "bar",
+      data_file_name: "pie-multiple-devices.csv",
+      parameters: "type1, type2, type3, type4",
+      def_devices: "7F34B296 AB22438D",
+      def_start: "2019-04-15 18:01:25",
+      def_end: "2019-04-18 21:01:25",
+      limit: 800,
+      class_name: "col-sm-6",
       aspect_ratio: false,
       height: 0
     }

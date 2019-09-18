@@ -1,17 +1,16 @@
 import React from "react";
 import _ from "lodash";
 import { Line, Doughnut } from "react-chartjs-2";
-import hexToRgba from "hex-to-rgba";
 
 const BaseChart = props => {
-  const { datasets, chartColors, aspectRatio, chHeight, chartType } = props;
+  const { datasets, chartColors, chartColorsTransparent, aspectRatio, chHeight, chartType } = props;
 
   // set the header labels for use in indexing object properties
   const device_serialno = datasets[0].label;
   const time_stamp = datasets[1].label;
   const parameter = datasets[2].label; // could be extended for multiple parameters
   const datasetsRestructured = [];
-
+ 
   // set chart specific options
   const lineOptions = {
     maintainAspectRatio: aspectRatio,
@@ -35,7 +34,22 @@ const BaseChart = props => {
     }
   };
 
-  // restructure the dataset to be suitable for Line/Scatter types
+  const pieOptions = {
+    maintainAspectRatio: aspectRatio,
+    tooltips: {
+      callbacks: {
+        label: function(item, data) {
+          return (
+            data.datasets[item.datasetIndex].label +
+            ": " +
+            data.datasets[item.datasetIndex].data[item.index]
+          );
+        }
+      }
+    }
+  };
+
+  // restructure the dataset to be suitable for the chart types
   datasets.map(element =>
     element.data.map(
       (e, i) =>
@@ -51,12 +65,10 @@ const BaseChart = props => {
     ...new Set(datasetsRestructured.map(x => x[device_serialno]))
   ];
 
-  // Line chart: Construct array of the data, separated by device (and add labels/colors for each)
-  // Pie chart: Construct arrays of parameter labels and values
-
+  // construct array of the data, separated by device (and add labels/colors for each)
   let datasetsAllDevices = [];
   let datasetsDevice = [];
-
+  let pieLabels = [];
 
   for (let i = 0; i < deviceIds.length; i++) {
     let datasetsDeviceFiltered = datasetsRestructured.filter(
@@ -69,30 +81,22 @@ const BaseChart = props => {
         const y = e[parameter];
         return { x, y };
       });
-
-      datasetsAllDevices[i] = {
-        label: deviceIds[i],
-        data: datasetsDevice,
-        borderColor: chartColors[i],
-        backgroundColor: hexToRgba(chartColors[i], "0.1")
-      };
     } else if (chartType == "pie") {
       datasetsDevice = datasetsDeviceFiltered.map(e => {
         const parameters = _.omit(e, time_stamp, device_serialno);
         return { parameters };
-      })[0].parameters;
-
-      datasetsAllDevices[i] = {
-        label: Object.keys(datasetsDevice),
-        data: Object.values(datasetsDevice),
-        borderColor: "#ffffff",
-        backgroundColor: chartColors.slice(0,Object.keys(datasetsDevice).length),
-        hoverBackgroundColor: chartColors.slice(0,Object.keys(datasetsDevice).length)
-
-      };
+      })[0].parameters; // note: If multiple entries for one device, the top one is selected
+      pieLabels = Object.keys(datasetsDevice);
     }
-  }
 
+    datasetsAllDevices[i] = {
+      label: deviceIds[i],
+      data: chartType == "line" ? datasetsDevice : Object.values(datasetsDevice),
+      borderColor: chartType == "line" ? chartColors[i] :  "#ffffff",
+      backgroundColor: chartType == "line" ? chartColorsTransparent[i] : chartColors,
+      hoverBorderColor: chartColorsTransparent
+    };
+  }
 
   return (
     <div>
@@ -107,15 +111,12 @@ const BaseChart = props => {
           />
         ) : chartType == "pie" ? (
           <Doughnut
-          
             data={{
               datasets: datasetsAllDevices,
-              labels: datasetsAllDevices[0].label
+              labels: pieLabels
             }}
             height={chHeight ? chHeight : null}
-            options={{
-              maintainAspectRatio: aspectRatio
-            }}
+            options={pieOptions}
           />
         ) : null
       ) : null}

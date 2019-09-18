@@ -2,13 +2,12 @@ import React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import * as dashboardActions from "./actions";
-import { LineChart, DoughnutChart, BaseChart } from "../charts";
+import { BaseChart } from "../charts";
 import { defaults } from "react-chartjs-2";
-
-// FIGURE OUT HOW TO CONTROL THE HEIGHT
+import hexToRgba from "hex-to-rgba";
 
 // below will later be put into the server Schema/Config:
-let configDashboard = {
+let confDash = {
   chart_defaults: {
     timestamp_header: "time_stamp",
     device_header: "device_serialno",
@@ -66,7 +65,7 @@ let configDashboard = {
     },
     {
       id: "widget4",
-      title: "Device Status",
+      title: "Overall Status",
       chart_type: "pie",
       data_file_name: "pie.csv",
       parameters: "type1, type2, type3, type4",
@@ -78,12 +77,29 @@ let configDashboard = {
       aspect_ratio: false,
       height: 0
     }
+    ,
+    {
+      id: "widget5",
+      title: "Device Status",
+      chart_type: "pie",
+      data_file_name: "pie-multiple-devices-dates.csv",
+      parameters: "type1, type2, type3, type4",
+      def_devices: "7F34B296 AB22438D",
+      def_start: "2019-04-15 18:01:25",
+      def_end: "2019-04-18 21:01:25",
+      limit: 800,
+      class_name: "col-sm-2",
+      aspect_ratio: false,
+      height: 0
+    }
   ]
 };
 
 // set chart defaults
-let chDefaults = configDashboard.chart_defaults;
+let chDefaults = confDash.chart_defaults;
 let chartColors = chDefaults.chart_colors.split(" ");
+let chartColorsTransparent = chartColors.map(color => hexToRgba(color, "0.1"))
+
 defaults.global.elements.line.borderWidth = chDefaults.line_border_width;
 defaults.global.elements.point.radius = chDefaults.point_radius;
 defaults.global.defaultFontSize = chDefaults.font_size;
@@ -101,10 +117,10 @@ function DashboardWidget(props) {
         <BaseChart
             chartType={props.chartType}
             chartColors={chartColors}
+            chartColorsTransparent={chartColorsTransparent}
             aspectRatio={props.aspectRatio}
             chHeight={props.chHeight}
-            datasets={
-              props.records.records ? props.records.records.dataset : null
+            datasets={props.records.records ? props.records.records.dataset : null
             }
           />
       </div>
@@ -119,7 +135,7 @@ class DashboardSection extends React.Component {
 
   // S3 select the data
   componentWillMount() {
-    this.props.prepareWidgetInputs(configDashboard);
+    this.props.prepareWidgetInputs(confDash);
   }
 
   render() {
@@ -130,16 +146,20 @@ class DashboardSection extends React.Component {
         {recordsArray.length != 0 ? (
           <div>
             {recordsArray.map((records, i) => (
-              <DashboardWidget
-                key={i}
-                widgetTitle={configDashboard.widgets[i].title}
-                chartType={configDashboard.widgets[i].chart_type}
-                className={configDashboard.widgets[i].class_name}
-                chWidth={configDashboard.widgets[i].width}
-                chHeight={configDashboard.widgets[i].height}
-                aspectRatio={configDashboard.widgets[i].aspect_ratio}
-                records={records}
-              />
+              <div key={confDash.widgets[i].id} className={"zero-padding " + confDash.widgets[i].class_name}>
+              <div className="dashboard-widget">
+                <span>{confDash.widgets[i].title}</span>
+                <BaseChart
+                    chartType={confDash.widgets[i].chart_type}
+                    chartColors={chartColors}
+                    chartColorsTransparent={chartColorsTransparent}
+                    aspectRatio={confDash.widgets[i].aspect_ratio}
+                    chHeight={confDash.widgets[i].height}
+                    datasets={records.records ? records.records.dataset : null
+                    }
+                  />
+              </div>
+            </div>
             ))}
           </div>
         ) : null}

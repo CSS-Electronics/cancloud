@@ -1,16 +1,25 @@
 import React from "react";
 import _ from "lodash";
-import { HorizontalBar, Line, Doughnut } from "react-chartjs-2";
+import hexToRgba from "hex-to-rgba";
+import { HorizontalBar, Bar, Line, Doughnut } from "react-chartjs-2";
 
 const BaseChart = props => {
-  const {
-    datasets,
-    chartColors,
-    chartColorsTransparent,
-    aspectRatio,
-    chHeight,
-    chartType
-  } = props;
+  const { datasets, chartColors, aspectRatio, chHeight, chartType } = props;
+
+  let chartColorsTransparent = chartColors.map(color =>
+    hexToRgba(color, "0.1")
+  );
+
+  if (datasets.length == 0) {
+    return (
+      <div>
+        <p className="widget-no-data">
+          The widget configuration did not yield any data
+        </p>
+      </div>
+    );
+  }
+
 
   // set the header labels for use in indexing object properties
   const device_serialno = datasets[0].label;
@@ -102,7 +111,7 @@ const BaseChart = props => {
         const y = e[parameter];
         return { x, y };
       });
-    } else if (chartType == "pie" || chartType == "bar") {
+    } else {
       datasetsDevice = datasetsDeviceFiltered.map(e => {
         const parameters = _.omit(e, time_stamp, device_serialno);
         return { parameters };
@@ -118,12 +127,14 @@ const BaseChart = props => {
       backgroundColor:
         chartType == "line"
           ? chartColorsTransparent[i]
-          : chartType == "bar"
+          : (chartType == "bar" || chartType == "horizontal-bar")
           ? chartColors[i]
           : chartColors,
       hoverBorderColor: chartColorsTransparent
     };
   }
+
+
 
   return (
     <div>
@@ -145,8 +156,17 @@ const BaseChart = props => {
             height={chHeight ? chHeight : null}
             options={pieOptions}
           />
-        ) : chartType == "bar" ? (
+        ) : chartType == "horizontal-bar" ? (
           <HorizontalBar
+            data={{
+              datasets: datasetsAllDevices,
+              labels: pieLabels
+            }}
+            height={chHeight ? chHeight : null}
+            options={barOptions}
+          />
+        ) : chartType == "bar" ? (
+          <Bar
             data={{
               datasets: datasetsAllDevices,
               labels: pieLabels

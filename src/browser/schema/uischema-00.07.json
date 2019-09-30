@@ -615,7 +615,7 @@
           "classNames": "col-md-4"
         },
         "end": {
-		"ui:placeholder:": "YYYY-MM-DD-HH:MM:SS",
+		  "ui:placeholder:": "YYYY-MM-DD-HH:MM:SS",
           "classNames": "col-md-4"
         },
         "class_name": {

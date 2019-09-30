@@ -8,7 +8,6 @@ import { SECRET_CODE } from "../browser/js/constants";
 import { S3Client } from "./s3client";
 import StorageResponses from "./response";
 import AwsSdk from "./aws-sdk-client";
-import { strictEqual } from "assert";
 
 class S3Explorer {
   constructor(options, token) {
@@ -437,7 +436,7 @@ class S3Explorer {
    */
 
   getWidgetQueryResult(dataFileName, sqlExpression, cb) {
-    
+
     const params = {
       Bucket: this.bucketName,
       Key: dataFileName,

@@ -121,7 +121,7 @@ export class DeviceMetaHeaderContainer extends Component {
     const { bucket } = pathSlice(history.location.pathname);
     return (
       <div>
-        {serverConfig.devicemeta ? (
+        {serverConfig.devicemeta && serverConfig.devicemeta.devices ? (
           <DeviceMetaHeader
             serverConfig={serverConfig}
             currentBucket={bucket}

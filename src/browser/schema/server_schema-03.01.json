@@ -1,0 +1,322 @@
+{
+  "type": "object",
+  "properties": {
+    "devicemeta": {
+      "title": "Device meta data",
+      "type": "object",
+      "properties": {
+        "display": {
+          "title": "Meta data header in device folders",
+          "type": "integer",
+          "default": 1,
+          "anyOf": [
+            {
+              "type": "integer",
+              "title": "Disable meta header",
+              "enum": [
+                0
+              ]
+            },
+            {
+              "type": "integer",
+              "title": "Enable meta header",
+              "enum": [
+                1
+              ]
+            }
+          ]
+        },
+        "devices": {
+          "title": "Devices",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "serialno": {
+                "title": "serialno",
+                "type": "string",
+                "pattern": "^[a-fA-F0-9]{8}$",
+                "minLength": 8,
+                "maxLength": 8
+              },
+              "name": {
+                "title": "Name",
+                "type": "string",
+                "pattern": "^.*$",
+                "minLength": 0,
+                "maxLength": 16
+              },
+              "group": {
+                "title": "Group",
+                "type": "string",
+                "pattern": "^.*$",
+                "minLength": 0,
+                "maxLength": 16
+              },
+              "subgroup": {
+                "title": "Subgroup",
+                "type": "string",
+                "pattern": "^.*$",
+                "minLength": 0,
+                "maxLength": 16
+              },
+              "comment": {
+                "title": "Comment",
+                "type": "string",
+                "pattern": "^.*$",
+                "minLength": 0,
+                "maxLength": 64
+              },
+              "imageurl": {
+                "title": "Image Name/URL",
+                "type": "string",
+                "pattern": "^.*$",
+                "minLength": 0,
+                "maxLength": 400
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Add device serialno & meta data. Images can be URLs or refer to object names of images uploaded to the server folder (.png, .jpg, .svg). Meta data is used in the left menu, search bar and in the device folder header"
+        },
+        "other": {
+          "title": " ",
+          "type": "object",
+          "properties": {
+            "pending": {
+              "title": " ",
+              "type": "object",
+              "properties": {
+                "tbd": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Create your own dashboard with customizable widgets. Note that you will need to set up a backend process to provide the data in CSV form for use in the widgets",
+      "type": "object",
+      "properties": {
+        "default_settings": {
+          "title": "Default widget settings",
+          "description": "Specify default settings for use across widgets",
+          "type": "object",
+          "properties": {
+            "timestamp_header": {
+              "title": "Timestamp header",
+              "description": "Header name of column containing timestamps",
+              "type": "string",
+              "pattern": "^(?!time$)(?!timestamp$)[a-zA-Z0-9_-]*$",
+              "default": "timestamps",
+              "minLength": 3,
+              "maxLength": 30
+            },
+            "device_header": {
+              "title": "Device header",
+              "description": "Header name of column containing device names or serial numbers",
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9_-]*$",
+              "default": "device_header",
+              "minLength": 3,
+              "maxLength": 30
+            },
+            "chart_colors": {
+              "title": "Chart colors",
+              "description": "This prioritized list of HEX color codes serves as the default set of colors for use in charts",
+              "type": "string",
+              "pattern": "^(((0x){0,1}|#{0,1})([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6})(\\s?))+$",
+              "default": "#3d85c6 #ff9900 #073763 #0b5394 #6fa8dc #9fc5e8 #e69138 #f6b26b #f9cb9c"
+            },
+            "line_border_width": {
+              "title": "Line chart width",
+              "description": "Width of line chart lines",
+              "type": "integer",
+              "default": 2,
+              "minimum": 1,
+              "maximum": 10
+            },
+            "point_radius": {
+              "title": "Point radius",
+              "description": "Radius of line chart points",
+              "type": "integer",
+              "default": 0,
+              "minimum": 0,
+              "maximum": 10
+            },
+            "chart_font_size": {
+              "title": "Chart font size",
+              "description": "Font size of charts",
+              "type": "integer",
+              "default": 8,
+              "minimum": 4,
+              "maximum": 20
+            },
+            "table_font_size": {
+              "title": "Table font size",
+              "description": "Font size of tables",
+              "type": "integer",
+              "default": 11,
+              "minimum": 4,
+              "maximum": 20
+            },
+            "legend_labels_box_width": {
+              "title": "Legend box width",
+              "description": "Width of legend boxes - larger width makes the boxes wider",
+              "type": "integer",
+              "default": 10,
+              "minimum": 0,
+              "maximum": 20
+            },
+            "legend_labels_padding": {
+              "title": "Legend box padding",
+              "description": "Padding of legend boxes - larger padding puts the labels further apart",
+              "type": "integer",
+              "default": 4,
+              "minimum": 0,
+              "maximum": 20
+            }
+          },
+          "required": [
+            "timestamp_header",
+            "device_header",
+            "chart_colors",
+            "line_border_width",
+            "point_radius",
+            "chart_font_size",
+            "table_font_size",
+            "legend_labels_box_width",
+            "legend_labels_padding"
+          ]
+        },
+        "widgets": {
+          "type": "array",
+          "title": "Widgets",
+          "description": "Add custom widgets incl. charts, KPIs, tables & maps",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "title": "Widget title",
+                "description": "Title displayed at top of widget",
+                "type": "string",
+                "default": "[Widget title]",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "widget_type": {
+                "title": "Widget type",
+                "description": "The widget type controls the type of widget displayed. Note that the dataset structure differs across some widget types",
+                "type": "string",
+                "default": "line",
+                "enum": [
+                  "line",
+                  "pie",
+                  "bar",
+                  "horizontal-bar",
+                  "kpi",
+                  "table",
+                  "map"
+                ]
+              },
+              "data_file_name": {
+                "title": "Data file name",
+                "description": "Path or file name of *.csv containing data for use in the widget. The file must be available in this S3 server bucket. Example: 'server/timeseries.csv' or 'pie.csv'",
+                "type": "string",
+                "default": "data.csv",
+                "pattern": "^[A-Za-z0-9-/]+.(csv|CSV)$",
+                "minLength": 5,
+                "maxLength": 70
+              },
+              "parameters": {
+                "title": "Data parameters",
+                "description": "Enter the column header names of the parameters to be extracted from the dataset. Multiple parameters can be extracted by separating each name with a space",
+                "type": "string",
+                "default": "ParameterX",
+                "pattern": "^[A-Za-z0-9-_(\\s?)]+$",
+                "minLength": 0,
+                "maxLength": 200
+              },
+              "devices": {
+                "title": "Devices",
+                "description": "Enter the devices to be displayed in the widget by referencing the name(s)/serial numbers from the device column of your dataset. Example: '11F23D78 AA2F3892'. If left blank, all devices are extracted",
+                "type": "string",
+                "pattern": "^(|[A-Za-z0-9-_(\\s?)]+)$"
+              },
+              "period_sec": {
+                "title": "Period (sec)",
+                "description": "This determines how far back data is extracted vs. the date & time the dashboard is rendered, enabling widgets to update dynamically. Setting this to e.g. 86400 seconds (24 hours) means that data from within the last 24 hours will be displayed (based on the timestamp column in your dataset). If an explicit end time & date is specified, the period will be set against this time. If an explicit start is specified, the period is ignored",
+                "type": "integer",
+                "default": 86400,
+                "minLength": 0
+              },
+              "start": {
+                "title": "Start",
+                "description": "Optionally use this to set a specific start time for the widget data- e.g. for development purposes",
+                "type": "string",
+                "pattern": "^(|[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})$"
+              },
+              "end": {
+                "title": "End",
+                "description": "Optionally use this to set a specific end time for the widget data - e.g. for development purposes",
+                "type": "string",
+                "pattern": "^(|[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})$"
+              },
+              "class_name": {
+                "title": "Class names for widget",
+                "description": "Add a CSS class to the widget. In particular, you can use 'col-sm-X' to control how wide the widget should be as a fraction of 12. Example: 'col-sm-4' will make the widget take up one third of the dashboard on desktop resolution",
+                "type": "string",
+                "default": "col-sm-4"
+              },
+              "aspect_ratio": {
+                "title": "Maintain chart aspect ratio",
+                "description": "Control if the aspect ratio should stay fixed or not (only relevant for charts)",
+                "type": "integer",
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "title": "False",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "type": "integer",
+                    "title": "True",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ],
+                "default": 0
+              },
+              "height": {
+                "title": "Widget height",
+                "description": "Control the widget height in pixels. Setting a non-default value may require some testing to get the height to align with other widgets",
+                "type": "integer",
+                "default": 200
+              },
+              "colors": {
+                "title": "Widget specific colors",
+                "description": "This prioritized list of HEX color codes serves as the widget-specific set of colors for use in charts. If left blank, the default color list will be used",
+                "type": "string",
+                "pattern": "^(|(((0x){0,1}|#{0,1})([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6})(\\s?))+)$"
+              }
+            },
+            "required": [
+              "title",
+              "widget_type",
+              "data_file_name",
+              "parameters",
+              "period_sec",
+              "class_name",
+              "aspect_ratio",
+              "height"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

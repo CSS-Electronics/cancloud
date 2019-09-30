@@ -8,6 +8,7 @@ import { SECRET_CODE } from "../browser/js/constants";
 import { S3Client } from "./s3client";
 import StorageResponses from "./response";
 import AwsSdk from "./aws-sdk-client";
+import { strictEqual } from "assert";
 
 class S3Explorer {
   constructor(options, token) {
@@ -436,7 +437,7 @@ class S3Explorer {
    */
 
   getWidgetQueryResult(dataFileName, sqlExpression, cb) {
-    console.log(sqlExpression)
+    
     const params = {
       Bucket: this.bucketName,
       Key: dataFileName,
@@ -481,6 +482,7 @@ class S3Explorer {
       })
       .catch(err => {
         console.log("err", err);
+        console.log("Attempted SQL expression:",sqlExpression)
         return cb(err);
       });
   }

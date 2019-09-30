@@ -16,10 +16,45 @@
 @brand-info : @blue;
 @navbar-default-link-color : @text-color;
 @border-color: #ededed;
+@sidebar-search: rgba(255,255,255,0.40);
 
 /*--------------------------
     Frontend Customizations
 ----------------------------*/
+
+.widget-kpi{
+  font-size:300%;
+  text-align:center;
+  margin-top:-10px;
+}
+
+.widget-table{
+  overflow-y:auto;
+  width:100%;
+}
+
+.widget-table-head{
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background-color:white;
+}
+
+.widget-table::-webkit-scrollbar {
+  width: 10px;
+}
+
+.widget-table::-webkit-scrollbar-track {
+  background:@border-color; 
+}
+ 
+.widget-table::-webkit-scrollbar-thumb {
+  background: darken(@border-color,10%) ; 
+}
+
+.widget-table::-webkit-scrollbar-thumb:hover {
+  background: darken(@border-color,20%); 
+}
 
 .widget-no-data{
   font-size:80%;
@@ -435,6 +470,8 @@ fieldset {
 .navbar-nav > li > a {
   padding-top: 10px;
   padding-bottom: 12px;
+  padding-left:10px;
+  padding-right:10px;
 }
 
 .navbar-nav > li > a:hover{
@@ -518,7 +555,7 @@ fieldset {
 @teal : #009688;
 @brown : #795548;
 @blue-gray : #374952;
-@dark-gray : #32393F;
+@dark-gray : #00303F; //#32393F;
 
 /*--------------------------
     Dropdown

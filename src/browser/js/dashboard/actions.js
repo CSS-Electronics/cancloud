@@ -7,14 +7,14 @@ const currentTimestamp = Moment();
 
 // Create S3 Select call to get max of timestamp column across all devices
 export const prepareWidgetInputs = configDashboard => {
-  let chDefaults = configDashboard.chart_defaults;
+  let chDefaults = configDashboard.default_settings;
 
   let recordsArray = _.map(configDashboard.widgets, widget =>
     web.getWidgetQueryResult({
       dataFileName: widget.data_file_name,
       sqlExpression: `SELECT ${chDefaults.device_header}, ${
         chDefaults.timestamp_header
-      }, ${widget.parameters} FROM S3Object WHERE ${
+      }, ${widget.parameters.trim().replace(/ /g, ", ")} FROM S3Object WHERE ${
         widget.devices
           ? chDefaults.device_header +
             " in ['" +

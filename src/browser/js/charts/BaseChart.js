@@ -4,9 +4,9 @@ import hexToRgba from "hex-to-rgba";
 import { HorizontalBar, Bar, Line, Doughnut } from "react-chartjs-2";
 
 const BaseChart = props => {
-  const { datasets, chartColors, aspectRatio, chHeight, chartType } = props;
+  const { datasets, chColors, aspectRatio, chHeight, chartType } = props;
 
-  let chartColorsTransparent = chartColors.map(color =>
+  let chColorsTrans = chColors.map(color =>
     hexToRgba(color, "0.1")
   );
 
@@ -123,14 +123,14 @@ const BaseChart = props => {
       label: deviceIds[i],
       data:
         chartType == "line" ? datasetsDevice : Object.values(datasetsDevice),
-      borderColor: chartType == "line" ? chartColors[i] : "#ffffff",
+      borderColor: chartType == "line" ? chColors[i] : "#ffffff",
       backgroundColor:
         chartType == "line"
-          ? chartColorsTransparent[i]
+          ? chColorsTrans[i]
           : (chartType == "bar" || chartType == "horizontal-bar")
-          ? chartColors[i]
-          : chartColors,
-      hoverBorderColor: chartColorsTransparent
+          ? chColors[i]
+          : chColors,
+      hoverBorderColor: chColorsTrans
     };
   }
 

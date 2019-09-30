@@ -10,9 +10,9 @@ import {
 } from "react-leaflet";
 
 const BaseMap = props => {
-  const { datasets, chartColors, chHeight } = props;
+  const { datasets, chColors, chHeight } = props;
 
-  let chartColorsTransparent = chartColors.map(color => hexToRgba(color, "0.1"));
+  let chColorsTrans = chColors.map(color => hexToRgba(color, "0.1"));
 
   if(datasets.length == 0){
     return(<div><p className="widget-no-data">The widget configuration did not yield any data</p></div>);
@@ -60,9 +60,9 @@ const BaseMap = props => {
     datasetsAllDevices[i] = {
       label: deviceIds[i],
       data: datasetsDevice,
-      borderColor: chartColors[i],
-      backgroundColor: chartColorsTransparent[i],
-      hoverBorderColor: chartColorsTransparent,
+      borderColor: chColors[i],
+      backgroundColor: chColorsTrans[i],
+      hoverBorderColor: chColorsTrans,
       position: {
         lat: datasetsDevice[datasetsDevice.length - 1][0],
         lng: datasetsDevice[datasetsDevice.length - 1][1]

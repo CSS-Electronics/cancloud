@@ -113,12 +113,12 @@
               "minLength": 3,
               "maxLength": 30
             },
-            "device_header": {
-              "title": "Device header",
-              "description": "Header name of column containing device names or serial numbers",
+            "segment_header": {
+              "title": "Segment header",
+              "description": "Header name of column containing segment names (e.g. device serial numbers)",
               "type": "string",
               "pattern": "^[a-zA-Z0-9_-]*$",
-              "default": "device_header",
+              "default": "segments",
               "minLength": 3,
               "maxLength": 30
             },
@@ -180,7 +180,7 @@
           },
           "required": [
             "timestamp_header",
-            "device_header",
+            "segment_header",
             "chart_colors",
             "line_border_width",
             "point_radius",
@@ -238,9 +238,9 @@
                 "minLength": 0,
                 "maxLength": 200
               },
-              "devices": {
-                "title": "Devices",
-                "description": "Enter the devices to be displayed in the widget by referencing the name(s)/serial numbers from the device column of your dataset. Example: '11F23D78 AA2F3892'. If left blank, all devices are extracted",
+              "segments": {
+                "title": "Segments",
+                "description": "Enter the segments to be displayed in the widget by referencing the names (e.g. device serial numbers) from the segments column of your dataset. Example: '11F23D78 AA2F3892'. If left blank, all segments are extracted",
                 "type": "string",
                 "pattern": "^(|[A-Za-z0-9-_(\\s?)]+)$"
               },

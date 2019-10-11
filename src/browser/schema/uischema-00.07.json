@@ -57,7 +57,18 @@
   },
   "secondaryport": {
     "nav": "2ND-PORT",
-    "power": {}
+    "power_schedule": {
+      "items": {
+        "from": {
+          "classNames": "col-sm-6",
+          "ui:placeholder": "E.g. 00:00"
+        },
+        "to": {
+          "classNames": "col-sm-6",
+          "ui:placeholder": "E.g. 12:30"
+        }
+      }
+    }
   },
   "can_1": {
     "nav": "CAN CH1",
@@ -611,11 +622,11 @@
           "classNames": "col-md-4"
         },
         "start": {
-		  "ui:placeholder:": "YYYY-MM-DD-HH:MM:SS",
+          "ui:placeholder:": "YYYY-MM-DD-HH:MM:SS",
           "classNames": "col-md-4"
         },
         "end": {
-		  "ui:placeholder:": "YYYY-MM-DD-HH:MM:SS",
+          "ui:placeholder:": "YYYY-MM-DD-HH:MM:SS",
           "classNames": "col-md-4"
         },
         "class_name": {

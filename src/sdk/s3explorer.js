@@ -34,7 +34,7 @@ class S3Explorer {
       this.bucketName = options.bucketName;
     }
 
-    this.AwsSdk = new AwsSdk(this.accessKey, this.secretKey);
+    this.AwsSdk = new AwsSdk(this.accessKey, this.secretKey, this.endPoint);
   }
 
   /**
@@ -436,7 +436,6 @@ class S3Explorer {
    */
 
   getWidgetQueryResult(dataFileName, sqlExpression, cb) {
-
     const params = {
       Bucket: this.bucketName,
       Key: dataFileName,
@@ -481,7 +480,7 @@ class S3Explorer {
       })
       .catch(err => {
         console.log("err", err);
-        console.log("Attempted SQL expression:",sqlExpression)
+        console.log("Attempted SQL expression:", sqlExpression);
         return cb(err);
       });
   }

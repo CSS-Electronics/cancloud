@@ -61,6 +61,10 @@ export default (
       object: "",
       url: ""
     },
+    previewObject: {
+      show: false,
+      content: ""
+    },
     files: {},
     showAbortModal: false,
     checkedList: []
@@ -125,6 +129,15 @@ export default (
           show: action.show,
           object: action.object,
           url: action.url
+        }
+      };
+    case actionsObjects.SET_PREVIEW_OBJECT:
+      return {
+        ...state,
+        previewObject: {
+          show: action.show,
+          object: action.object,
+          content: action.content
         }
       };
     case actionsObjects.CHECKED_LIST_ADD:

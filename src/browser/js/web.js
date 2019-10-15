@@ -176,6 +176,10 @@ class Web {
   getWidgetQueryResult(args) {
     return this.makeCall("GetWidgetQueryResult", args);
   }
+
+  GetPartialObject(args) {
+    return this.makeCall("GetPartialObject", args);
+  }
 }
 
 const web = new Web();

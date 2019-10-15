@@ -44,6 +44,7 @@ export const SET_SORT_ORDER = "objects/SET_SORT_ORDER";
 export const SET_CURRENT_PREFIX = "objects/SET_CURRENT_PREFIX";
 export const SET_PREFIX_WRITABLE = "objects/SET_PREFIX_WRITABLE";
 export const SET_SHARE_OBJECT = "objects/SET_SHARE_OBJECT";
+export const SET_PREVIEW_OBJECT = "objects/SET_PREVIEW_OBJECT";
 export const CHECKED_LIST_ADD = "objects/CHECKED_LIST_ADD";
 export const CHECKED_LIST_REMOVE = "objects/CHECKED_LIST_REMOVE";
 export const CHECKED_LIST_RESET = "objects/CHECKED_LIST_RESET";
@@ -416,6 +417,31 @@ export const deleteCheckedObjects = () => {
   };
 };
 
+export const previewObject = object => {
+  return function(dispatch, getState) {
+    const currentBucket = getCurrentBucket(getState());
+    const currentPrefix = getCurrentPrefix(getState());
+    const objectName = `${currentPrefix}${object.name}`;
+    console.log("Preview object", objectName);
+    return web
+      .GetPartialObject({
+        bucketName: currentBucket,
+        objectName: objectName
+      })
+      .then(objContent => {
+        dispatch(showPreviewObject(object, objContent));
+      })
+      .catch(err => {
+        dispatch(
+          alertActions.set({
+            type: "danger",
+            message: err.message
+          })
+        );
+      });
+  };
+};
+
 export const shareObject = (object, days, hours, minutes) => {
   return function(dispatch, getState) {
     const currentBucket = getCurrentBucket(getState());
@@ -448,6 +474,20 @@ export const shareObject = (object, days, hours, minutes) => {
       });
   };
 };
+
+export const showPreviewObject = (object, content) => ({
+  type: SET_PREVIEW_OBJECT,
+  object: object,
+  content: content,
+  show: true
+});
+
+export const hidePreviewObject = (object, content) => ({
+  type: SET_PREVIEW_OBJECT,
+  object: object,
+  content: content,
+  show: false
+});
 
 export const showShareObject = (object, url) => ({
   type: SET_SHARE_OBJECT,

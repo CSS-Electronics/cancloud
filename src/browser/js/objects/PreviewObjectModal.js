@@ -28,6 +28,7 @@ const PreviewObjectModal = ({
     animation={false}
     onHide={hidePreviewObject}
     bsSize="large"
+    className="preview-modal"
   >
     <ModalHeader>Preview {object.name}</ModalHeader>
     <ModalBody style={{ wordBreak: "break-word" }}>

@@ -16,6 +16,7 @@ import CrcModal from "../editorTools/CrcModal";
 import DeviceFileModal from "../editorTools/DeviceFileModal";
 import FilterModal from "../editorTools/FilterModal";
 import BitRateModal from "../editorTools/BitRateModal";
+import PartialConfigLoader from "../editorTools/PartialConfigLoader";
 
 class Editor extends React.Component {
   componentWillMount() {
@@ -41,7 +42,8 @@ class Editor extends React.Component {
       editorSchemaSidebarOpen,
       filterSidebarOpen,
       bitRateSidebarOpen,
-      deviceFileTableOpen
+      deviceFileTableOpen,
+      partialConfigLoaderSidebarOpen
     } = this.props;
     return (
       <div
@@ -52,7 +54,8 @@ class Editor extends React.Component {
             encryptionSidebarOpen ||
             crcSidebarOpen ||
             filterSidebarOpen ||
-            bitRateSidebarOpen
+            bitRateSidebarOpen ||
+            partialConfigLoaderSidebarOpen
         })}
       >
         {!EDITOR.offline && <SideBar />}
@@ -63,6 +66,8 @@ class Editor extends React.Component {
         {filterSidebarOpen ? <FilterModal /> : null}
         {bitRateSidebarOpen ? <BitRateModal /> : null}
         {deviceFileTableOpen ? <DeviceFileModal /> : null}
+        {partialConfigLoaderSidebarOpen ? <PartialConfigLoader /> : null}
+
       </div>
     );
   }
@@ -75,7 +80,8 @@ const mapStateToProps = state => {
     crcSidebarOpen: state.editorTools.crcSidebarOpen,
     filterSidebarOpen: state.editorTools.filterSidebarOpen,
     bitRateSidebarOpen: state.editorTools.bitRateSidebarOpen,
-    deviceFileTableOpen: state.editorTools.deviceFileTableOpen
+    deviceFileTableOpen: state.editorTools.deviceFileTableOpen,
+    partialConfigLoaderSidebarOpen: state.editorTools.partialConfigLoaderSidebarOpen
   };
 };
 

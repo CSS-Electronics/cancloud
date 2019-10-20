@@ -5,6 +5,7 @@ export default (
     encryptionSidebarOpen: false,
     filterSidebarOpen: false,
     bitRateSidebarOpen: false,
+    partialConfigLoaderSidebarOpen: false,
     crc32EditorLive: "",
     crc32EditorPre: "",
     deviceFileTableOpen: false,
@@ -26,7 +27,8 @@ export default (
         crcSidebarOpen: false,
         editorSchemaSidebarOpen: false,
         filterSidebarOpen: false,
-        bitRateSidebarOpen: false
+        bitRateSidebarOpen: false,
+        partialConfigLoaderSidebarOpen: false
       });
     case actionsEditorTools.TOGGLE_ENCRYPTION_SIDEBAR:
       return Object.assign({}, state, {
@@ -35,6 +37,10 @@ export default (
     case actionsEditorTools.TOGGLE_BITRATE_SIDEBAR:
       return Object.assign({}, state, {
         bitRateSidebarOpen: !state.bitRateSidebarOpen
+      });
+    case actionsEditorTools.TOGGLE_PARTIAL_CONFIG_LOADER_SIDEBAR:
+      return Object.assign({}, state, {
+        partialConfigLoaderSidebarOpen: !state.partialConfigLoaderSidebarOpen
       });
     case actionsEditorTools.TOGGLE_DEVICE_FILE_TABLE:
       return Object.assign({}, state, {

@@ -22,6 +22,36 @@
     Frontend Customizations
 ----------------------------*/
 
+.browse-file-preview{
+  height:200px !important;
+  word-wrap: break-word;
+  overflow-y:auto;
+  // overflow-x:hidden;
+  font-size:80%;
+  font-family: Consolas;
+  background-color:white;
+  border-style:solid;
+  border-color:@body-bg;
+  border-width:1px;
+}
+
+.file-dropzone{
+  padding-top:10px;
+  padding-right:5px;
+  cursor:pointer;
+}
+
+.browse-file-name{
+  padding-left:10px;
+  font-size:80%;
+  display: inline-block;
+  color:@link-color;
+}
+
+.browse-file-name:hover{
+  color:darken(@link-color,20);
+}
+
 .widget-kpi{
   font-size:300%;
   text-align:center;
@@ -40,19 +70,20 @@
   background-color:white;
 }
 
-.widget-table::-webkit-scrollbar {
+.widget-table::-webkit-scrollbar, .browse-file-preview::-webkit-scrollbar {
   width: 10px;
+  height:10px;
 }
 
-.widget-table::-webkit-scrollbar-track {
+.browse-file-preview::-webkit-scrollbar-track, .widget-table::-webkit-scrollbar-track {
   background:@border-color; 
 }
  
-.widget-table::-webkit-scrollbar-thumb {
+.browse-file-preview::-webkit-scrollbar-thumb, .widget-table::-webkit-scrollbar-thumb {
   background: darken(@border-color,10%) ; 
 }
 
-.widget-table::-webkit-scrollbar-thumb:hover {
+.browse-file-preview::-webkit-scrollbar-thumb:hover, .widget-table::-webkit-scrollbar-thumb:hover {
   background: darken(@border-color,20%); 
 }
 

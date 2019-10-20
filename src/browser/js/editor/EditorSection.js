@@ -121,7 +121,7 @@ class LoadEditorFiles extends React.Component {
     this.setState({
       isLiveValidation: !this.state.isLiveValidation
     });
-    this.props.setConfigContentPreSubmit();
+    this.props.setConfigContentPreSubmit();    
   }
 
   enableDownload() {
@@ -146,35 +146,23 @@ class LoadEditorFiles extends React.Component {
       this.props.setCrc32EditorPre(cfgCrc32EditorPre);
     }
 
-    if (
-      nextProps.editorUISchemaFiles.filter(file =>
-        file.name.includes("(local)")
-      ).length
-    ) {
+    let uiLocal = nextProps.editorUISchemaFiles.filter(file => file.name.includes("(local)"));
+    let schemaLocal = nextProps.editorSchemaFiles.filter(file => file.name.includes("(local)"));
+    let configLocal = nextProps.editorConfigFiles.filter(file => file.name.includes("(local)"));
+
+    if (uiLocal.length) {
       this.setState({
-        selectedUISchema: nextProps.editorUISchemaFiles.filter(file =>
-          file.name.includes("(local)")
-        )[0].name
+        selectedUISchema: uiLocal[0].name
       });
     }
-    if (
-      nextProps.editorSchemaFiles.filter(file => file.name.includes("(local)"))
-        .length
-    ) {
+    if (schemaLocal.length) {
       this.setState({
-        selectedSchema: nextProps.editorSchemaFiles.filter(file =>
-          file.name.includes("(local)")
-        )[0].name
+        selectedSchema: schemaLocal[0].name
       });
     }
-    if (
-      nextProps.editorConfigFiles.filter(file => file.name.includes("(local)"))
-        .length
-    ) {
+    if (configLocal.length) {
       this.setState({
-        selectedConfig: nextProps.editorConfigFiles.filter(file =>
-          file.name.includes("(local)")
-        )[0].name
+        selectedConfig: configLocal[0].name
       });
     }
   }
@@ -334,7 +322,7 @@ class LoadEditorFiles extends React.Component {
       selectedSchemaAdj =
         editorSchemaFiles[0] && editorSchemaFiles[0].name
           ? editorSchemaFiles[0].name
-          : "";
+          : selectedSchemaAdj;
     }
 
     if (testConfigLoaded === 0 && selectedConfigAdj.includes("(local)")) {
@@ -349,6 +337,7 @@ class LoadEditorFiles extends React.Component {
       : editorSchemaFiles[0]
       ? editorSchemaFiles[0].name.replace(".json", "")
       : "None";
+
     let menuConfigName = selectedConfigAdj
       ? selectedConfigAdj.replace(".json", "")
       : editorConfigFiles[0]

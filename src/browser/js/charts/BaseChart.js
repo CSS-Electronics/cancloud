@@ -20,7 +20,6 @@ const BaseChart = props => {
     );
   }
 
-
   // set the header labels for use in indexing object properties
   const device_serialno = datasets[0].label;
   const time_stamp = datasets[1].label;
@@ -111,6 +110,7 @@ const BaseChart = props => {
         const y = e[parameter];
         return { x, y };
       });
+
     } else {
       datasetsDevice = datasetsDeviceFiltered.map(e => {
         const parameters = _.omit(e, time_stamp, device_serialno);
@@ -134,7 +134,9 @@ const BaseChart = props => {
     };
   }
 
-
+  if(chartType == "horizontal-bar"){
+  console.log(datasetsAllDevices)
+  }
 
   return (
     <div>

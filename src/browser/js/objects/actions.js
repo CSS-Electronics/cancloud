@@ -238,6 +238,9 @@ export const selectPrefix = prefix => {
     if (bucket == "dashboard") {
       return;
     }
+    if (bucket == "status-dashboard") {
+      return;
+    }
 
     dispatch(setCurrentPrefix(prefix));
     dispatch(fetchObjects());

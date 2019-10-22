@@ -1,0 +1,107 @@
+{
+  "devicemeta": {
+    "display": 0,
+    "devices": [],
+    "other": {
+      "pending": {}
+    }
+  },
+  "dashboard": {
+    "default_settings": {
+      "timestamp_header": "timestamps",
+      "segment_header": "segments",
+      "chart_colors": "#3d85c6 #ff9900 #073763 #0b5394 #6fa8dc #9fc5e8 #e69138 #f6b26b #f9cb9c",
+      "line_border_width": 2,
+      "point_radius": 0,
+      "chart_font_size": 8,
+      "table_font_size": 11,
+      "legend_labels_box_width": 8,
+      "legend_labels_padding": 4
+    },
+    "widgets": [
+      {
+        "title": "Devices connected",
+        "widget_type": "kpi",
+        "dataset": "kpiConnected",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": ""
+      },
+      {
+        "title": "GB uploaded",
+        "widget_type": "kpi",
+        "dataset": "kpiUploaded",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": ""
+      },
+      {
+        "title": "MB/device/day",
+        "widget_type": "kpi",
+        "dataset": "kpiDataPerDeviceDay",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": ""
+      },
+      {
+        "title": "Files uploaded",
+        "widget_type": "kpi",
+        "dataset": "kpiFiles",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": ""
+      },
+      {
+        "title": "MB/file",
+        "widget_type": "kpi",
+        "dataset": "kpiAvgFileSize",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": ""
+      },
+      {
+        "title": "Total sessions",
+        "widget_type": "kpi",
+        "dataset": "kpiSessions",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": ""
+      },
+	    {
+        "title": "Device latest heartbeat",
+        "widget_type": "pie",
+        "dataset": "deviceStatus",
+        "class_name": "col-sm-2",
+        "height": 210,
+        "colors": "#3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff"
+      },
+	    {
+        "title": "Device free storage",
+        "widget_type": "pie",
+        "dataset": "deviceStorage",
+        "class_name": "col-sm-2",
+        "aspect_ratio": 0,
+        "height": 210,
+        "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3"
+      },
+	    {
+        "title": "Device config & FW",
+        "widget_type": "pie",
+        "dataset": "deviceConfigFW",
+        "class_name": "col-sm-2",
+        "aspect_ratio": 0,
+        "height": 210,
+        "colors": "#666666 #999999 #b7b7b7 #cccccc #d9d9d9"
+      },
+	  
+      {
+        "title": "Log file data uploaded over time (MB)",
+        "widget_type": "bar",
+        "dataset": "dataUploadTime",
+        "class_name": "col-sm-6",
+        "height": 210,
+        "colors": ""
+      }
+    ]
+  }
+}

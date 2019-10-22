@@ -53,9 +53,31 @@
 }
 
 .widget-kpi{
-  font-size:300%;
+  font-size:340%;
   text-align:center;
   margin-top:-10px;
+  font-weight: bold;
+  
+  @media(min-width: @screen-sm-min) {
+    font-size:200%;
+    text-align:center;
+    margin-top:10px;
+    font-weight: bold;
+  }
+  
+  @media(min-width: @screen-lg-min) {
+    font-size:240%;
+    text-align:center;
+    margin-top:0px;
+    font-weight: bold;
+  }
+
+  @media(min-width: 1400px) {
+    font-size:340%;
+    text-align:center;
+    margin-top:-10px;
+    font-weight: bold;
+  }
 }
 
 .widget-table{
@@ -93,7 +115,22 @@
 }
 
 .widget-title{
+  font-size:100%;
   white-space: nowrap;
+
+  @media(min-width: @screen-sm-min) {
+    font-size:80%;
+  }
+  
+  @media(min-width: @screen-lg-min) {
+    font-size:90%;
+  }
+
+  @media(min-width: 1400px) {
+    font-size:100%;
+
+  }
+
 }
 
 .required{

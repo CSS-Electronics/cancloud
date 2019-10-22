@@ -24,6 +24,8 @@ import editor from "./editor/reducer";
 import editorTools from "./editorTools/reducer";
 import alertModals from "./alertModals/reducer";
 import dashboard from "./dashboard/reducer";
+import dashboardStatus from "./dashboardStatus/reducer";
+
 
 const rootReducer = combineReducers({
   browser,
@@ -33,6 +35,7 @@ const rootReducer = combineReducers({
   uploads,
   editor,
   dashboard,
+  dashboardStatus,
   editorTools,
   alertModals
 });

@@ -36,7 +36,7 @@ export const prepareWidgetInputs = configDashboard => {
       }'`
     })
   );
-
+  
   return function(dispatch) {
     Promise.all(recordsArray)
       .then(res => dispatch(widgetData(res)))

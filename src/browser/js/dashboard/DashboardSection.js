@@ -15,11 +15,11 @@ class DashboardSection extends React.Component {
     super(props);
   }
 
-  render() {
-    const { recordsArray, serverConfig } = this.props;
+  componentWillReceiveProps(nextProps){
+    const { serverConfig } = nextProps;
 
     // upon load of serverConfig, set chart defaults & prepare widget data
-    if (Object.keys(serverConfig).length > 0) {
+    if (this.props.serverConfig != nextProps.serverConfig && Object.keys(serverConfig).length > 0) {
       confDash = serverConfig.dashboard;
       chDefaults = confDash.default_settings;
       chColors = chDefaults.chart_colors.split(" ");
@@ -32,7 +32,13 @@ class DashboardSection extends React.Component {
       defaults.global.legend.labels.padding = chDefaults.legend_labels_padding;
 
       this.props.prepareWidgetInputs(serverConfig.dashboard);
+
     }
+  }
+
+  render() {
+   
+    const {recordsArray, serverConfig} = this.props;
 
     return (
       <div className="feb-container dashboard">

@@ -133,6 +133,12 @@ export default class JSONrpc {
           options.params.sqlExpression
         );
         break;
+      case "GetPartialObject":
+        result = s3Explorer.getPartialObject(
+          options.params.bucketName,
+          options.params.objectName
+        );
+        break;
       default:
         result = {};
         break;

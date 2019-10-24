@@ -4,15 +4,33 @@ export default (
   state = {
     objectsData: {},
     deviceFileContents: [],
-    deviceFileObjects: []
+    deviceFileObjects: [],
+    configObjectsUnique: [],
+    configFileContents:[],
+    configFileCrc32: []
   },
   action
 ) => {
   switch (action.type) {
-    case dashboardStatusActions.OBJECTS_RESULT:
+    case dashboardStatusActions.SET_OBJECTS_DATA:
       return {
         ...state,
         objectsData: action.objectsData
+      };
+    case dashboardStatusActions.SET_CONFIG_OBJECTS:
+      return {
+        ...state,
+        configObjectsUnique: action.configObjectsUnique
+      };
+    case dashboardStatusActions.CONFIG_FILE_CONTENT:
+      return {
+        ...state,
+        configFileContents: action.configFileContents
+      };
+    case dashboardStatusActions.SET_CONFIG_FILE_CRC32:
+      return {
+        ...state,
+        configFileCrc32: action.configFileCrc32
       };
     case dashboardStatusActions.DEVICE_FILE_CONTENT:
       return {

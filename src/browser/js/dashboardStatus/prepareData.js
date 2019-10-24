@@ -4,14 +4,18 @@ let deviceFileObjectsFiltered = [];
 let deviceFileContentsFiltered = [];
 let chartData = {};
 
+
+
 export const prepareData = (  periodEnd,
   periodHours,
   periodStart,
   mf4Objects,
   deviceFileObjects,
-  deviceFileContents) => {
-
+  deviceFileContents,
+  configFileCrc32) => {
+  
  
+  // filter log files & devices based on time period
   mf4ObjectsFiltered = mf4Objects.filter(
     e =>
       e.lastModifiedMin <= periodEnd.format("YYYY-MM-DD HH:mm") &&
@@ -30,6 +34,7 @@ export const prepareData = (  periodEnd,
     deviceIdList.includes(e.id) ? e : null
   );
 
+  // device status pie chart
   let deviceStatusLabel = [
     "<5 min",
     "<1 hours",
@@ -59,6 +64,7 @@ export const prepareData = (  periodEnd,
       : 0
   );
 
+  // kpi data
   const kpiConnectedVal = deviceFileObjectsFiltered
     .map(item => item.deviceId)
     .filter((value, index, self) => self.indexOf(value) === index).length;
@@ -70,29 +76,14 @@ export const prepareData = (  periodEnd,
       (mf4ObjectsFiltered.reduce((a, b) => +a + +b.size, 0) / 1000) * 10
     ) / 10;
   const kpiDataPerDeviceDayVal = Math.round(
-    (kpiUploadedVal / kpiConnectedVal) * 1000
+    ((kpiUploadedVal / kpiConnectedVal)/(periodHours/24)) * 1000
   );
   const kpiFilesVal = Object.keys(mf4ObjectsFiltered).length;
   const kpiAvgFileSize =
     Math.round((kpiUploadedVal / kpiFilesVal) * 1000 * 10) / 10;
 
-  uploadedPerHour = mf4ObjectsFiltered.reduce(
-    (acc, { lastModifiedH, size }) => {
-      if (!acc[lastModifiedH]) {
-        acc[lastModifiedH] = [];
-      }
-      if (!acc[periodEnd.format("YYYY-MM-DD HH")]) {
-        acc[periodEnd.format("YYYY-MM-DD HH")] = [];
-      }
-      if (!acc[periodStart.format("YYYY-MM-DD HH")]) {
-        acc[periodStart.format("YYYY-MM-DD HH")] = [];
-      }
-      acc[lastModifiedH] = parseFloat(acc[lastModifiedH] + size);
-      return acc;
-    },
-    {}
-  );
 
+  // firmware pie chart
   const deviceFWUnsorted = _.countBy(
     deviceFileContentsFiltered.map(device => device.fw_ver)
   );
@@ -113,6 +104,38 @@ export const prepareData = (  periodEnd,
 
   deviceFWLabel[0] = Object.keys(deviceFWSorted)[0];
   deviceFWLabel[1] = Object.keys(deviceFWSorted)[1];
+
+  // config pie chart
+  
+  console.log(configFileCrc32)
+
+  let configCrc32Data = [0,0]
+  let test = false
+
+  deviceFileContentsFiltered.map(e =>{
+    test = configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 == e.cfg_crc32
+    configCrc32Data[1-test] += 1
+  }
+  )
+
+  // uploaded per hour bar chart
+  uploadedPerHour = mf4ObjectsFiltered.reduce(
+    (acc, { lastModifiedH, size }) => {
+      if (!acc[lastModifiedH]) {
+        acc[lastModifiedH] = [];
+      }
+      if (!acc[periodEnd.format("YYYY-MM-DD HH")]) {
+        acc[periodEnd.format("YYYY-MM-DD HH")] = [];
+      }
+      if (!acc[periodStart.format("YYYY-MM-DD HH")]) {
+        acc[periodStart.format("YYYY-MM-DD HH")] = [];
+      }
+      acc[lastModifiedH] = parseFloat(acc[lastModifiedH] + size);
+      return acc;
+    },
+    {}
+  );
+
 
   chartData = {
     kpiConnected: kpiConnectedVal,
@@ -151,7 +174,7 @@ export const prepareData = (  periodEnd,
           label: "#devices"
         },
         {
-          data: [13, 2],
+          data: configCrc32Data,
           backgroundColor: "#3d85c6 #cfe2f3".split(" "),
           label: "#devices"
         }

@@ -2,11 +2,15 @@ import web from "../web";
 import * as alertActions from "../alert/actions";
 import Moment from "moment";
 import _ from "lodash";
-export const OBJECTS_RESULT = "dashboardStatus/OBJECTS_RESULT";
+export const SET_OBJECTS_DATA = "dashboardStatus/OBJECTS_RESULT";
 export const DEVICE_FILE_CONTENT = "dashboardStatus/DEVICE_FILE_CONTENT";
 export const SET_DEVICE_FILE_OBJECT = "dashboardStatus/SET_DEVICE_FILE_OBJECT";
+export const SET_CONFIG_OBJECTS = "dashboardStatus/SET_CONFIG_OBJECTS";
+export const CONFIG_FILE_CONTENT = "dashboardStatus/CONFIG_FILE_CONTENT"
+export const SET_CONFIG_FILE_CRC32 = "dashboardStatus/SET_CONFIG_FILE_CRC32"
+const { crc32 } = require("crc");
 
-const currentTimestamp = Moment();
+let crc32Val = ""
 
 export const listAllObjects = () => {
   return function(dispatch) {
@@ -53,13 +57,25 @@ export const listAllObjects = () => {
 
         const loggerConfigRegex = new RegExp(/^([0-9A-Fa-f]){8}\/config-[0-9]{2}.[0-9]{2}.json/, "g");
 
-        console.log("TESTING", loggerConfigRegex.test("aaaaaaaa/config-00.02.json"))
+        console.log("TEST",loggerConfigRegex.test("071E61AD/config-00.07.json"))
+        
         const configObjects = allObjects.filter(
           obj =>
-          loggerConfigRegex.test(obj.name)
+          obj.name.match(loggerConfigRegex)
         )
 
-        console.log(configObjects)
+        let configObjectsGrouped = _.groupBy(configObjects, function(
+          object
+        ) {
+          const name = object.name;
+          const deviceId = object.deviceId;
+           return object.deviceId
+        });
+
+        let configObjectsUnique = []
+        Object.keys(configObjectsGrouped).map(function(key, index) {
+          configObjectsUnique[index] = configObjectsGrouped[key][configObjectsGrouped[key].length-1]
+        });
 
         const mf4Objects = allObjects
           .filter(
@@ -67,9 +83,12 @@ export const listAllObjects = () => {
               obj.name.substring(obj.name.length - 3, obj.name.length) == "mf4"
           )
 
-        dispatch(objectsData(mf4Objects));
+        dispatch(setObjectsData(mf4Objects));
+        dispatch(setConfigObjects(configObjectsUnique));
         dispatch(setDeviceFileObject(deviceFileObjects));
         dispatch(fetchDeviceFileContentAll(deviceFileObjects));
+        dispatch(fetchConfigFileContentAll(configObjectsUnique));
+
       })
       .catch(err => {
         if (web.LoggedIn()) {
@@ -87,9 +106,14 @@ export const listAllObjects = () => {
   };
 };
 
-export const objectsData = objectsData => ({
-  type: OBJECTS_RESULT,
+export const setObjectsData = objectsData => ({
+  type: SET_OBJECTS_DATA,
   objectsData
+});
+
+export const setConfigObjects = configObjectsUnique => ({
+  type: SET_CONFIG_OBJECTS,
+  configObjectsUnique
 });
 
 export const fetchDeviceFileContentAll = deviceFileObjects => {
@@ -127,9 +151,68 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
   };
 };
 
+export const fetchConfigFileContentAll = configObjectsUnique => {
+  const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
+  let configFileContents = [];
+  let configFileCrc32 = [];
+
+  return function(dispatch) {
+    configObjectsUnique.map((configObject, i) =>
+      web
+        .PresignedGet({
+          bucket: configObject.deviceId,
+          object: configObject.name.split("/")[1],
+          expiry: expiry
+        })
+        .then(res => {
+          fetch(res.url)
+            .then(r => r.json())
+            .then(data => {
+
+              configFileContents.push(data)
+
+              crc32Val = crc32(
+                JSON.stringify(data, null, 2)
+              )
+                .toString(16)
+                .toUpperCase()
+                .padStart(8, "0");
+
+              configFileCrc32.push({deviceId: configObject.deviceId, crc32: crc32Val});
+
+              if (configObjectsUnique.length == configFileContents.length && configObjectsUnique.length == configFileCrc32.length) {        
+                dispatch(configFileContent(configFileContents));
+                dispatch(setConfigFileCrc32(configFileCrc32));
+
+              }
+            });
+        })
+        .catch(e => {
+          dispatch(
+            alertActions.set({
+              type: "danger",
+              message: e.message,
+              autoClear: true
+            })
+          );
+        })
+    );
+  };
+};
+
 export const deviceFileContent = deviceFileContents => ({
   type: DEVICE_FILE_CONTENT,
   deviceFileContents
+});
+
+export const configFileContent = configFileContents => ({
+  type: CONFIG_FILE_CONTENT,
+  configFileContents
+});
+
+export const setConfigFileCrc32 = configFileCrc32 => ({
+  type: SET_CONFIG_FILE_CRC32,
+  configFileCrc32
 });
 
 export const setDeviceFileObject = deviceFileObjects => ({

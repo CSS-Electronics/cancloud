@@ -143,9 +143,7 @@ export const fetchServerConfigContent = fileObject => {
               dispatch(setServerConfigModDate(fileObject.lastModified));
 
               // Below ensures that the device image is loaded on the initial mount
-              const testRegex = loggerRegex.test(
-                getState().buckets.currentBucket
-              );
+              const testRegex = getState().buckets.currentBucket.match(loggerRegex) 
 
               const { bucket, prefix } = pathSlice(history.location.pathname);
 

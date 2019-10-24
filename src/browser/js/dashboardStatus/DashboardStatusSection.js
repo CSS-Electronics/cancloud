@@ -70,13 +70,13 @@ class DashboardStatusSection extends React.Component {
   }
 
   render() {
-    const { mf4Objects, deviceFileContents, deviceFileObjects } = this.props;
+    const { mf4Objects, deviceFileContents, deviceFileObjects, configFileCrc32 } = this.props;
 
     let chartData = {};
     const dataLoaded =
       Object.keys(mf4Objects).length *
       Object.keys(deviceFileObjects).length *
-      Object.keys(deviceFileContents).length;
+      Object.keys(deviceFileContents).length * Object.keys(configFileCrc32).length;
 
     let periodEnd = Moment();
     let periodHours = 24 * 7;
@@ -89,7 +89,8 @@ class DashboardStatusSection extends React.Component {
         periodStart,
         mf4Objects,
         deviceFileObjects,
-        deviceFileContents
+        deviceFileContents,
+        configFileCrc32
       );
 
       return (
@@ -159,7 +160,8 @@ const mapStateToProps = state => {
   return {
     mf4Objects: state.dashboardStatus.objectsData,
     deviceFileContents: state.dashboardStatus.deviceFileContents,
-    deviceFileObjects: state.dashboardStatus.deviceFileObjects
+    deviceFileObjects: state.dashboardStatus.deviceFileObjects,
+    configFileCrc32: state.dashboardStatus.configFileCrc32
   };
 };
 

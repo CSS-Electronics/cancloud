@@ -22,6 +22,42 @@
     Frontend Customizations
 ----------------------------*/
 
+.period-hours-form{
+  padding-right:10px;
+  margin:0px;
+  text-align:right;
+}
+
+.period-hours-selector{
+  position: relative;
+  margin:0px;
+  padding-left: 15px;
+  font-size: 80%;
+  color: @text-color;
+}
+
+.period-hours-selector:hover{
+  font-weight:bold;
+}
+
+.period-hours-form input[type="radio"] {
+  display: none;
+  padding:0px;
+}
+
+.period-hours-form label{
+  cursor: pointer;
+}
+
+.period-hours-form input[type="radio"]:checked+label{
+  background-color:lighten(@text-color,20);
+  color:white;
+  border-radius:5px;
+  border:2px;
+  border-color: lighten(@text-color,20);
+}
+
+
 .browse-file-preview{
   height:200px !important;
   word-wrap: break-word;

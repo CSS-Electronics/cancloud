@@ -76,7 +76,7 @@
         "colors": "#3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff"
       },
 	    {
-        "title": "Device free storage",
+        "title": "Device storage (WIP)",
         "widget_type": "pie",
         "dataset": "deviceStorage",
         "class_name": "col-sm-2",
@@ -95,7 +95,7 @@
       },
 	  
       {
-        "title": "Log file data uploaded over time (MB)",
+        "title": "Log file data uploaded per hour (MB)",
         "widget_type": "bar",
         "dataset": "dataUploadTime",
         "class_name": "col-sm-6",

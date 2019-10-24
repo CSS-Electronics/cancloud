@@ -56,8 +56,6 @@ export const listAllObjects = () => {
         )
 
         const loggerConfigRegex = new RegExp(/^([0-9A-Fa-f]){8}\/config-[0-9]{2}.[0-9]{2}.json/, "g");
-
-        console.log("TEST",loggerConfigRegex.test("071E61AD/config-00.07.json"))
         
         const configObjects = allObjects.filter(
           obj =>
@@ -67,8 +65,6 @@ export const listAllObjects = () => {
         let configObjectsGrouped = _.groupBy(configObjects, function(
           object
         ) {
-          const name = object.name;
-          const deviceId = object.deviceId;
            return object.deviceId
         });
 

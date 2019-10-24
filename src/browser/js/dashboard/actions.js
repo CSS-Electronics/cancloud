@@ -12,14 +12,15 @@ export const prepareWidgetInputs = configDashboard => {
   let recordsArray = _.map(configDashboard.widgets, widget =>
     web.getWidgetQueryResult({
       dataFileName: widget.data_file_name,
-      sqlExpression: `SELECT ${chDefaults.segment_header}, ${
+      sqlExpression: 
+      `SELECT ${chDefaults.segment_header}, ${
         chDefaults.timestamp_header
       }, ${widget.parameters.trim().replace(/ /g, ", ")} FROM S3Object WHERE ${
         widget.segments
           ? chDefaults.segment_header +
-            " in ['" +
+            " in ('" +
             widget.segments.replace(/ /g, "', '") +
-            "'] and "
+            "') and "
           : ""
       } ${chDefaults.timestamp_header} > '${
         widget.start

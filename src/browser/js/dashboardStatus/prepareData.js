@@ -4,17 +4,112 @@ let deviceFileObjectsFiltered = [];
 let deviceFileContentsFiltered = [];
 let chartData = {};
 
+export const barOptionsFunc = (periodHours) => {
+  return({
+  maintainAspectRatio: false,
+  legend: {
+    display: false
+  },
+  scales: {
+    xAxes: [
+      {
+        gridLines: { display: false },
+        ticks: {
+          beginAtZero: true
+        },
+        type: "time",
+        time: {
+          unit: periodHours <= 48 ? "hour" : "day"
+          ,
+          displayFormats: {
+            hour: "MM/DD HH:00",
+            day: "MM/DD"
+          }
+        }
+      }
+    ]
+  }
+})}
 
 
-export const prepareData = (  periodEnd,
+// export const barOptionsFunc = (periodHours,uploadedPerHourLabels) => {
+//   console.log(uploadedPerHourLabels)
+//   return(
+//     {
+//       responsive: true,
+//       tooltips: {
+//         mode: 'label'
+//       },
+//       elements: {
+//         line: {
+//           fill: false
+//         }
+//       },
+//       scales: {
+//         xAxes: [
+//           {
+//             gridLines: { display: false },
+//             ticks: {
+//               beginAtZero: true
+//             },
+//             type: "time",
+//             time: {
+//               unit: periodHours <= 48 ? "hour" : "day"
+//               ,
+//               displayFormats: {
+//                 hour: "MM/DD HH:00",
+//                 day: "MM/DD"
+//               }
+//             },
+//             labels: uploadedPerHourLabels,
+//           }
+//         ],
+//         yAxes: [
+//           {
+//             type: 'linear',
+//             display: true,
+//             position: 'left',
+//             id: 'y-axis-1',
+//             gridLines: {
+//               display: false
+//             },
+//             labels: {
+//               show: true
+//             }
+//           },
+//           {
+//             type: 'linear',
+//             display: true,
+//             position: 'right',
+//             id: 'y-axis-2',
+//             gridLines: {
+//               display: false
+//             },
+//             labels: {
+//               show: true
+//             }
+//           }
+//         ]
+//       }
+//     }
+// )}
+
+
+
+
+
+
+export const prepareData = (
+  periodEnd,
   periodHours,
   periodStart,
   mf4Objects,
   deviceFileObjects,
   deviceFileContents,
-  configFileCrc32) => {
-  
- 
+  configFileCrc32
+) => {
+
+
   // filter log files & devices based on time period
   mf4ObjectsFiltered = mf4Objects.filter(
     e =>
@@ -46,7 +141,7 @@ export const prepareData = (  periodEnd,
   let deviceStatusGrouped = _.groupBy(deviceFileObjectsFiltered, function(
     object
   ) {
-    const delta = object.lastModifiedDelta / 60;
+    const delta = object.lastModifiedDelta;
     return delta < 5
       ? deviceStatusLabel[0]
       : delta < 60
@@ -76,20 +171,21 @@ export const prepareData = (  periodEnd,
       (mf4ObjectsFiltered.reduce((a, b) => +a + +b.size, 0) / 1000) * 10
     ) / 10;
   const kpiDataPerDeviceDayVal = Math.round(
-    ((kpiUploadedVal / kpiConnectedVal)/(periodHours/24)) * 1000
-  );
+    (kpiUploadedVal / kpiConnectedVal / (periodHours / 24)) * 10000
+  )/10;
   const kpiFilesVal = Object.keys(mf4ObjectsFiltered).length;
   const kpiAvgFileSize =
     Math.round((kpiUploadedVal / kpiFilesVal) * 1000 * 10) / 10;
-
 
   // firmware pie chart
   const deviceFWUnsorted = _.countBy(
     deviceFileContentsFiltered.map(device => device.fw_ver)
   );
   const deviceFWSorted = {};
-  let deviceFWData = [0, 0, 0, 0, 0];
-  let deviceFWLabel = [0, 0, "other FW", "config synced", "config not synced"];
+  let deviceFWData = [];
+  let deviceFWLabel = [];
+  let deviceFWColorFull = "#666666 #999999 #cfcfcf #3d85c6 #cfe2f3".split(" ");
+  let deviceFWColor = [];
 
   Object.keys(deviceFWUnsorted)
     .sort()
@@ -98,25 +194,41 @@ export const prepareData = (  periodEnd,
       deviceFWSorted[key] = deviceFWUnsorted[key];
     });
 
-  deviceFWData[0] = Object.values(deviceFWSorted)[0];
-  deviceFWData[1] = Object.values(deviceFWSorted)[1];
-  deviceFWData[2] = kpiConnectedVal - deviceFWData[0] - deviceFWData[1];
+  let iColorCnt = 0;
+  for (var key in deviceFWSorted) {
+    if (deviceFWSorted.hasOwnProperty(key)) {
+      if (deviceFWData.length < 4) {
+        deviceFWData.push(deviceFWSorted[key]);
+        deviceFWLabel.push(key);
+        deviceFWColor.push(deviceFWColorFull[iColorCnt]);
+      } else {
+        deviceFWData[2] += deviceFWSorted[key];
+        deviceFWLabel[2] = "other FW";
+        deviceFWColor[2] = deviceFWColorFull[2];
+      }
+      iColorCnt += 1;
+    }
+  }
 
-  deviceFWLabel[0] = Object.keys(deviceFWSorted)[0];
-  deviceFWLabel[1] = Object.keys(deviceFWSorted)[1];
+  while (deviceFWData.length < 5) {
+    deviceFWData.push(0);
+    deviceFWData.push(0);
+  }
+
+  deviceFWLabel.push("config synced");
+  deviceFWColor.push(deviceFWColorFull[3]);
+  deviceFWLabel.push("config not synced");
+  deviceFWColor.push(deviceFWColorFull[4]);
 
   // config pie chart
-  
-  console.log(configFileCrc32)
+  let configCrc32Data = [0, 0];
+  let test = false;
 
-  let configCrc32Data = [0,0]
-  let test = false
-
-  deviceFileContentsFiltered.map(e =>{
-    test = configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 == e.cfg_crc32
-    configCrc32Data[1-test] += 1
-  }
-  )
+  deviceFileContentsFiltered.map(e => {
+    test =
+      configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 == e.cfg_crc32;
+    configCrc32Data[1 - test] += 1;
+  });
 
   // uploaded per hour bar chart
   uploadedPerHour = mf4ObjectsFiltered.reduce(
@@ -130,11 +242,38 @@ export const prepareData = (  periodEnd,
       if (!acc[periodStart.format("YYYY-MM-DD HH")]) {
         acc[periodStart.format("YYYY-MM-DD HH")] = [];
       }
-      acc[lastModifiedH] = parseFloat(acc[lastModifiedH] + size);
+      acc[lastModifiedH] = Math.round(parseFloat(acc[lastModifiedH] + size)*100)/100;
       return acc;
     },
     {}
   );
+
+  // let uploadedPerHourDevices = mf4ObjectsFiltered.reduce(
+  //   (acc, { lastModifiedH, deviceId }) => {
+  //     if (!acc[lastModifiedH]) {
+  //       acc[lastModifiedH] = [];
+  //     }
+  //     if (!acc[periodEnd.format("YYYY-MM-DD HH")]) {
+  //       acc[periodEnd.format("YYYY-MM-DD HH")] = [];
+  //     }
+  //     if (!acc[periodStart.format("YYYY-MM-DD HH")]) {
+  //       acc[periodStart.format("YYYY-MM-DD HH")] = [];
+  //     }
+      
+  //     // push device ID if unique
+  //     if(!acc[lastModifiedH].includes(deviceId)){
+  //       acc[lastModifiedH].push(deviceId);
+  //     }
+  //     return acc;
+  //   },
+  //   {}
+  // );
+
+  // for (var key in uploadedPerHourDevices) {
+  //   if (uploadedPerHourDevices.hasOwnProperty(key)) {
+  //     uploadedPerHourDevices[key] = uploadedPerHourDevices[key].length
+  //   }
+  // }
 
 
   chartData = {
@@ -148,7 +287,7 @@ export const prepareData = (  periodEnd,
       datasets: [
         {
           data: deviceStatusData,
-          backgroundColor: "#3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff".split(" "),
+          backgroundColor: "#0b5394 #3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff".split(" "),
           label: "#devices"
         }
       ],
@@ -170,7 +309,7 @@ export const prepareData = (  periodEnd,
       datasets: [
         {
           data: deviceFWData,
-          backgroundColor: "#666666 #999999 #cfcfcf #3d85c6 #cfe2f3".split(" "),
+          backgroundColor: deviceFWColor,
           label: "#devices"
         },
         {
@@ -183,8 +322,19 @@ export const prepareData = (  periodEnd,
     },
     dataUploadTime: {
       datasets: [
+      //   {          
+      //   type:'bar',
+      //   label:'Contributing devices (#)',
+      //   yAxisID: 'y-axis-2',
+      //   borderColor: '#ff9900',
+      //   backgroundColor: '#f9cb9c',
+      //   data: Object.values(uploadedPerHourDevices)
+      // },
         {
-          data: Object.values(uploadedPerHour),
+          type:'bar',
+          // label:'Data uploaded per hour (MB)',
+          // yAxisID: 'y-axis-1',
+          data: Object.values(uploadedPerHour),  
           backgroundColor: "#3d85c6"
         }
       ],
@@ -192,6 +342,5 @@ export const prepareData = (  periodEnd,
     }
   };
 
-  return chartData;
-
-  }
+  return [chartData,Object.keys(uploadedPerHour)];
+};

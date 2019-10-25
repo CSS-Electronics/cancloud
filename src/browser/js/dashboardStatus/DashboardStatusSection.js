@@ -166,7 +166,7 @@ class DashboardStatusSection extends React.Component {
                         </div>
                       ) : null}
 
-                      {widget.widget_type == "pie" ? (
+                      {(widget.widget_type == "pie" && chartDataArray[2].length) ? (
                         <Doughnut
                           data={chartData[widget.dataset]}
                           height={widget.height - 60}
@@ -174,7 +174,7 @@ class DashboardStatusSection extends React.Component {
                         />
                       ) : null}
 
-                      {widget.widget_type == "bar" ? (
+                      {(widget.widget_type == "bar")? (
                         <Bar
                           data={chartData[widget.dataset]}
                           height={widget.height - 60}

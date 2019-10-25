@@ -1,12 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import * as dashboardActions from "../dashboard/actions";
 import * as dashboardStatusActions from "./actions";
 import { defaults } from "react-chartjs-2";
-import { HorizontalBar, Bar, Line, Doughnut } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 import Moment from "moment";
-import { prepareData, barOptionsFunc } from "./prepareData";
-import { RadioGroup, RadioButton } from "react-radio-buttons";
+import { prepareData, barOptionsFunc, pieOptionsFunc } from "./prepareData";
+import DeviceTable from "./DeviceTable";
+
+// https://stackoverflow.com/questions/42394429/aws-sdk-s3-best-way-to-list-all-keys-with-listobjectsv2
 
 const statusConfig = require(`../../schema/status-config-03.01.json`);
 
@@ -20,21 +21,10 @@ defaults.global.elements.point.radius = chDefaults.point_radius;
 defaults.global.defaultFontSize = chDefaults.chart_font_size;
 defaults.global.legend.labels.boxWidth = chDefaults.legend_labels_box_width;
 defaults.global.legend.labels.padding = chDefaults.legend_labels_padding;
+defaults.global.animation.duration = 500;
+// defaults.global.animation.easing = "linear"
 
-let pieOptions = {
-  maintainAspectRatio: false,
-  tooltips: {
-    callbacks: {
-      label: function(item, data) {
-        return (
-          data.datasets[item.datasetIndex].label +
-          ": " +
-          data.datasets[item.datasetIndex].data[item.index]
-        );
-      }
-    }
-  }
-};
+let pieOptions = pieOptionsFunc();
 
 class DashboardStatusSection extends React.Component {
   constructor(props) {
@@ -48,7 +38,6 @@ class DashboardStatusSection extends React.Component {
   }
 
   handleChange(event) {
-    console.log(event.target.value);
     this.setState({
       periodHours: event.target.value
     });
@@ -63,7 +52,8 @@ class DashboardStatusSection extends React.Component {
       mf4Objects,
       deviceFileContents,
       deviceFileObjects,
-      configFileCrc32
+      configFileCrc32,
+      serverConfig
     } = this.props;
     const { periodHours } = this.state;
 
@@ -96,57 +86,56 @@ class DashboardStatusSection extends React.Component {
 
       return (
         <div className="feb-container dashboard">
+
+        
           <div className="period-hours-form">
-          <form onSubmit={this.handleSubmit}>
-            <label className="period-hours-selector">
-              <input
-                type="radio"
-                name="radios"
-                id="radio1"
-                value={24 * 30}
-                checked={this.state.periodHours == 24 * 30}
-                onChange={this.handleChange}
-                visibility="hidden"
-              />
-              <label htmlFor="radio1">&nbsp;monthly&nbsp;</label>
-              
-
-            </label>
-            <label className="period-hours-selector">
-              <input
-                type="radio"
-                name="radios"
-                id="radio2"
-                value={24 * 7}
-                checked={this.state.periodHours == 24 * 7}
-                onChange={this.handleChange}
-              />
-              <label htmlFor="radio2">&nbsp;weekly&nbsp;</label> 
-
-            </label>
-            <label className="period-hours-selector">
-              <input
-                type="radio"
-                name="radios"
-                id="radio3"
-                value={24}
-                checked={this.state.periodHours == 24}
-                onChange={this.handleChange}
-              />
-              <label htmlFor="radio3">&nbsp;daily&nbsp;</label>
-            </label>
-            <label className="period-hours-selector">
-              <input
-                type="radio"
-                name="radios"
-                id="radio4"
-                value={1}
-                checked={this.state.periodHours == 1}
-                onChange={this.handleChange}
-              />
-              <label htmlFor="radio4">&nbsp;hourly&nbsp;</label>
-            </label>
-          </form>
+            <form onSubmit={this.handleSubmit}>
+              <label className="period-hours-selector">
+                <input
+                  type="radio"
+                  name="radios"
+                  id="radio1"
+                  value={24 * 30}
+                  checked={this.state.periodHours == 24 * 30}
+                  onChange={this.handleChange}
+                  visibility="hidden"
+                />
+                <label htmlFor="radio1">&nbsp;monthly&nbsp;</label>
+              </label>
+              <label className="period-hours-selector">
+                <input
+                  type="radio"
+                  name="radios"
+                  id="radio2"
+                  value={24 * 7}
+                  checked={this.state.periodHours == 24 * 7}
+                  onChange={this.handleChange}
+                />
+                <label htmlFor="radio2">&nbsp;weekly&nbsp;</label>
+              </label>
+              <label className="period-hours-selector">
+                <input
+                  type="radio"
+                  name="radios"
+                  id="radio3"
+                  value={24}
+                  checked={this.state.periodHours == 24}
+                  onChange={this.handleChange}
+                />
+                <label htmlFor="radio3">&nbsp;daily&nbsp;</label>
+              </label>
+              <label className="period-hours-selector">
+                <input
+                  type="radio"
+                  name="radios"
+                  id="radio4"
+                  value={1}
+                  checked={this.state.periodHours == 1}
+                  onChange={this.handleChange}
+                />
+                <label htmlFor="radio4">&nbsp;hourly&nbsp;</label>
+              </label>
+            </form>
           </div>
 
           {dataLoaded ? (
@@ -188,34 +177,21 @@ class DashboardStatusSection extends React.Component {
                       {widget.widget_type == "bar" ? (
                         <Bar
                           data={chartData[widget.dataset]}
-                          // data={{
-                          //   datasets: [{
-                          //       label: 'Sales',
-                          //       type:'line',
-                          //       data: [51, 65, 40, 49, 60, 37, 40],
-                          //       fill: false,
-                          //       borderColor: '#EC932F',
-                          //       backgroundColor: '#EC932F',
-                          //       pointBorderColor: '#EC932F',
-                          //       pointBackgroundColor: '#EC932F',
-                          //       pointHoverBackgroundColor: '#EC932F',
-                          //       pointHoverBorderColor: '#EC932F',
-                          //       yAxisID: 'y-axis-2'
-                          //     },{
-                          //       type: 'bar',
-                          //       label: 'Visitor',
-                          //       data: [200, 185, 590, 621, 250, 400, 95],
-                          //       fill: false,
-                          //       backgroundColor: '#71B37C',
-                          //       borderColor: '#71B37C',
-                          //       hoverBackgroundColor: '#71B37C',
-                          //       hoverBorderColor: '#71B37C',
-                          //       yAxisID: 'y-axis-1'
-                          //     }]
-                          // }}
                           height={widget.height - 60}
                           options={barOptions}
                         />
+                      ) : null}
+
+                      {widget.widget_type == "table" ? (
+                        <div>
+                          <DeviceTable
+                            deviceIdListDeltaSort={chartDataArray[2]}
+                            deviceFileContents={deviceFileContents}
+                            configFileCrc32={configFileCrc32}
+                            serverConfig={serverConfig}
+                            mf4ObjectsFiltered={chartDataArray[3]}
+                          />
+                        </div>
                       ) : null}
                     </div>
                   </div>
@@ -240,7 +216,9 @@ const mapStateToProps = state => {
     mf4Objects: state.dashboardStatus.objectsData,
     deviceFileContents: state.dashboardStatus.deviceFileContents,
     deviceFileObjects: state.dashboardStatus.deviceFileObjects,
-    configFileCrc32: state.dashboardStatus.configFileCrc32
+    configFileCrc32: state.dashboardStatus.configFileCrc32,
+    serverConfig: state.browser.serverConfig,
+    configFileContents: state.dashboardStatus.configFileContents
   };
 };
 

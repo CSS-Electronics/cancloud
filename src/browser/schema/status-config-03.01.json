@@ -76,7 +76,7 @@
         "colors": "#3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff"
       },
 	    {
-        "title": "Device storage (WIP)",
+        "title": "SD free storage (WIP)",
         "widget_type": "pie",
         "dataset": "deviceStorage",
         "class_name": "col-sm-2",
@@ -99,6 +99,14 @@
         "widget_type": "bar",
         "dataset": "dataUploadTime",
         "class_name": "col-sm-6",
+        "height": 210,
+        "colors": ""
+      },
+	   {
+        "title": "Devices (sorted by last heartbeat)",
+        "widget_type": "table",
+        "dataset": "deviceTable",
+        "class_name": "col-sm-12",
         "height": 210,
         "colors": ""
       }

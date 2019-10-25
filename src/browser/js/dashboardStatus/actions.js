@@ -102,6 +102,7 @@ export const listAllObjects = () => {
   };
 };
 
+
 export const setObjectsData = objectsData => ({
   type: SET_OBJECTS_DATA,
   objectsData

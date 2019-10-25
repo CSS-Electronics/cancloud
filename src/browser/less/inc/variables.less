@@ -22,6 +22,54 @@
     Frontend Customizations
 ----------------------------*/
 
+
+.chart{
+  font-size:70%;
+  display:table;
+  table-layout: fixed;   
+  max-width:100px;
+  margin:0;
+  background-size: 100% 10px;
+  background-position: left top;
+  
+  li{
+    // position:relative;
+    display:table-cell;
+    vertical-align:bottom;
+    // height:200px;
+  }
+  
+  span{
+    margin:0;
+    display: block;
+    animation: draw 1s ease-in-out;
+    
+    &:before{
+      left:0;right:0;top:100%;
+  		display:block;
+      text-align:left;
+      content:attr(title);
+    }
+    
+  }
+  
+}
+
+@keyframes draw{
+  0%{height:0;} 
+}
+
+
+
+
+
+
+
+
+
+
+
+
 .period-hours-form{
   padding-right:10px;
   margin:0px;

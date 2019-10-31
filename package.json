@@ -125,6 +125,7 @@
     "redux-thunk": "^2.3.0",
     "request": "^2.88.0",
     "reselect": "^4.0.0",
+    "speed-date": "^1.0.0",
     "stream": "0.0.2",
     "string-to-stream": "^1.1.1",
     "superagent": "^4.0.0-beta.5",

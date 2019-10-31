@@ -1,11 +1,12 @@
 import Moment from "moment";
+var speedDate = require('speed-date');
+
 
 let uploadedPerTime = {};
 let mf4ObjectsFiltered = [];
 let deviceFileObjectsFiltered = [];
 let deviceFileContentsFiltered = [];
 let chartData = {};
-
 
 export const pieOptionsFunc = () => {
   return {
@@ -15,7 +16,8 @@ export const pieOptionsFunc = () => {
         label: function(item, data) {
           return (
             data.datasets[item.datasetIndex].label +
-            " " + data.labels[item.index] +
+            " " +
+            data.labels[item.index] +
             ": " +
             data.datasets[item.datasetIndex].data[item.index]
           );
@@ -25,7 +27,6 @@ export const pieOptionsFunc = () => {
   };
 };
 
-
 export const pieMultiOptionsFunc = () => {
   return {
     maintainAspectRatio: false,
@@ -33,8 +34,7 @@ export const pieMultiOptionsFunc = () => {
       callbacks: {
         label: function(item, data) {
           return (
-            data.datasets[item.datasetIndex].label 
-            +
+            data.datasets[item.datasetIndex].label +
             // " " + data.labels[item.index] +
             ": " +
             data.datasets[item.datasetIndex].data[item.index]
@@ -92,31 +92,28 @@ export const prepareData = (
   configFileCrc32,
   now
 ) => {
-
   // filter log files & devices based on time period
-  mf4ObjectsFiltered = mf4Objects.filter(
-    e =>
-      Moment(e.lastModified).format("YYYY-MM-DD HH:mm") <= periodEnd.format("YYYY-MM-DD HH:mm") &&
-      Moment(e.lastModified).format("YYYY-MM-DD HH:mm") >= periodStart.format("YYYY-MM-DD HH:mm")
-  );
+  let periodEndNew = new Date();
+  let periodStartNew = new Date();
+  periodStartNew.setTime(periodStartNew.getTime() - periodHours * 60 * 60 * 1000);
+
+  mf4ObjectsFiltered = mf4Objects.filter(e => e.lastModified >= periodStartNew);
 
   deviceFileObjectsFiltered = deviceFileObjects.filter(
-    e =>
-    Moment(e.lastModified).format("YYYY-MM-DD HH:mm") <= periodEnd.format("YYYY-MM-DD HH:mm") &&
-    Moment(e.lastModified).format("YYYY-MM-DD HH:mm") >= periodStart.format("YYYY-MM-DD HH:mm")
+    e => e.lastModified >= periodStartNew
   );
+
 
   const deviceIdList = deviceFileObjectsFiltered.map(device => device.deviceId);
 
   const deviceIdListDelta = deviceFileObjectsFiltered.map(device => {
     const deviceId = device.deviceId;
-    const lastModified = Moment(device.lastModified)
+    const lastModified = Moment(device.lastModified);
     const lastModifiedDelta = now.diff(lastModified, "minutes");
     const lastModifiedMin = lastModified.format("YYYY-MM-DD HH:mm");
 
     return { deviceId, lastModifiedDelta, lastModifiedMin };
   });
-
 
   deviceFileContentsFiltered = deviceFileContents.filter(e =>
     deviceIdList.includes(e.id) ? e : null
@@ -131,9 +128,7 @@ export const prepareData = (
     ">7 days"
   ];
 
-  let deviceStatusGrouped = _.groupBy(deviceIdListDelta, function(
-    object
-  ) {
+  let deviceStatusGrouped = _.groupBy(deviceIdListDelta, function(object) {
     const delta = object.lastModifiedDelta;
     return delta < 5
       ? deviceStatusLabel[0]
@@ -200,16 +195,16 @@ export const prepareData = (
   if (periodHours <= 1) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
-        const lastModifiedMin = Moment(lastModified).format("YYYY-MM-DD HH:mm")
+        const lastModifiedMin = speedDate.cached('YYYY-MM-DD HH:mm',lastModified)  
 
         if (!acc[lastModifiedMin]) {
           acc[lastModifiedMin] = [];
         }
-        if (!acc[periodEnd.format("YYYY-MM-DD HH:mm")]) {
-          acc[periodEnd.format("YYYY-MM-DD HH:mm")] = [];
+        if (!acc[speedDate.cached('YYYY-MM-DD HH:mm',periodEndNew)]) {
+          acc[speedDate.cached('YYYY-MM-DD HH:mm',periodEndNew)] = [];
         }
-        if (!acc[periodStart.format("YYYY-MM-DD HH:mm")]) {
-          acc[periodStart.format("YYYY-MM-DD HH:mm")] = [];
+        if (!acc[speedDate.cached('YYYY-MM-DD HH:mm',periodStartNew)]) {
+          acc[speedDate.cached('YYYY-MM-DD HH:mm',periodStartNew)] = [];
         }
         acc[lastModifiedMin] =
           Math.round(parseFloat(acc[lastModifiedMin] + size) * 100) / 100;
@@ -219,20 +214,19 @@ export const prepareData = (
     );
   }
 
-
-  if (periodHours > 1 && periodHours <= 24*7) {
+  if (periodHours > 1 && periodHours <= 24 * 7) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
-        const lastModifiedH = Moment(lastModified).format("YYYY-MM-DD HH")
+        const lastModifiedH = speedDate.cached('YYYY-MM-DD HH',lastModified);
 
         if (!acc[lastModifiedH]) {
           acc[lastModifiedH] = [];
         }
-        if (!acc[periodEnd.format("YYYY-MM-DD HH")]) {
-          acc[periodEnd.format("YYYY-MM-DD HH")] = [];
+        if (!acc[speedDate.cached('YYYY-MM-DD HH',periodEndNew)]) {
+          acc[speedDate.cached('YYYY-MM-DD HH',periodEndNew)] = [];
         }
-        if (!acc[periodStart.format("YYYY-MM-DD HH")]) {
-          acc[periodStart.format("YYYY-MM-DD HH")] = [];
+        if (!acc[speedDate.cached('YYYY-MM-DD HH',periodStartNew)]) {
+          acc[speedDate.cached('YYYY-MM-DD HH',periodStartNew)] = [];
         }
         acc[lastModifiedH] =
           Math.round(parseFloat(acc[lastModifiedH] + size) * 100) / 100;
@@ -242,19 +236,19 @@ export const prepareData = (
     );
   }
 
-  if (periodHours > 24*7) {
+  if (periodHours > 24 * 7) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
-        const lastModifiedD = Moment(lastModified).format("YYYY-MM-DD")
+        const lastModifiedD = speedDate.cached('YYYY-MM-DD',lastModified)
 
         if (!acc[lastModifiedD]) {
           acc[lastModifiedD] = [];
         }
-        if (!acc[periodEnd.format("YYYY-MM-DD")]) {
-          acc[periodEnd.format("YYYY-MM-DD")] = [];
+        if (!acc[speedDate.cached('YYYY-MM-DD',periodEndNew)]) {
+          acc[speedDate.cached('YYYY-MM-DD',periodEndNew)] = [];
         }
-        if (!acc[periodStart.format("YYYY-MM-DD")]) {
-          acc[periodStart.format("YYYY-MM-DD")] = [];
+        if (!acc[speedDate.cached('YYYY-MM-DD',periodStartNew)]) {
+          acc[speedDate.cached('YYYY-MM-DD',periodStartNew)] = [];
         }
         acc[lastModifiedD] =
           Math.round(parseFloat(acc[lastModifiedD] + size) * 100) / 100;
@@ -294,26 +288,24 @@ export const prepareData = (
     })
     .reverse();
 
-    // config pie chart
-    let configCrc32Data = [0, 0];
-    let test = false;
-  
-    if (configFileCrc32 && configFileCrc32[0] && configFileCrc32[0].crc32) {
-  
-      deviceFileContentsFiltered.map(e => {
-        test =
-          configFileCrc32.filter(c => c.deviceId == e.id) &&
-          configFileCrc32.filter(c => c.deviceId == e.id)[0] &&
-          configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32
-            ? configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 ==
-              e.cfg_crc32
-            : false;
-        configCrc32Data[1 - test] += 1;
-      });
-    }else{
-      configCrc32Data = [0, kpiConnectedVal]; // all configs set to not synced in this case
-    }
-  
+  // config pie chart
+  let configCrc32Data = [0, 0];
+  let test = false;
+
+  if (configFileCrc32 && configFileCrc32[0] && configFileCrc32[0].crc32) {
+    deviceFileContentsFiltered.map(e => {
+      test =
+        configFileCrc32.filter(c => c.deviceId == e.id) &&
+        configFileCrc32.filter(c => c.deviceId == e.id)[0] &&
+        configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32
+          ? configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 ==
+            e.cfg_crc32
+          : false;
+      configCrc32Data[1 - test] += 1;
+    });
+  } else {
+    configCrc32Data = [0, kpiConnectedVal]; // all configs set to not synced in this case
+  }
 
   chartData = {
     kpiConnected: kpiConnectedVal,

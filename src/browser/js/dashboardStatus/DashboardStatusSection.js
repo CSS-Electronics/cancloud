@@ -36,8 +36,7 @@ class DashboardStatusSection extends React.Component {
     this.handleChange = this.handleChange.bind(this);
 
     this.state = {
-      periodHours: 24 * 7,
-      renderDelay: false
+      periodHours: 24 * 7
     };
   }
 
@@ -49,13 +48,6 @@ class DashboardStatusSection extends React.Component {
 
   componentDidMount() {
     this.props.listAllObjects();
-
-    setTimeout(
-      function() {
-        this.setState({ renderDelay: true });
-      }.bind(this),
-      4000
-    );
   }
 
   componentWillUnmount() {
@@ -75,8 +67,8 @@ class DashboardStatusSection extends React.Component {
       loaded
     } = this.props;
 
-    const { periodHours, renderDelay} = this.state;
-    
+    const { periodHours} = this.state;
+
     const dataLoaded =
       Object.keys(mf4Objects).length *
       Object.keys(deviceFileObjects).length *
@@ -91,9 +83,7 @@ class DashboardStatusSection extends React.Component {
       return (
         <div className="feb-container dashboard">
           <p className="loading-dots">Loading data</p>
-          {renderDelay ? (
-            <p className="loading-delay">(this may take a while)</p>
-          ) : null}
+          <p className="loading-delay">(this may take a while)</p>
         </div>
       );
     }
@@ -243,13 +233,9 @@ class DashboardStatusSection extends React.Component {
           </div>
         </div>
       );
-    }
-
-    if (loaded && !dataLoaded) {
+    }else{
       return (
         <div className="feb-container dashboard">
-          <br/>
-          <p className="loading-delay">No data to display</p>
         </div>
       );
     }

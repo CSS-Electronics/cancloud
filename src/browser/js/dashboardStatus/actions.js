@@ -10,6 +10,9 @@ export const SET_CONFIG_FILE_CRC32 = "dashboardStatus/SET_CONFIG_FILE_CRC32";
 export const SET_UPLOADED_SIZE_TOTAL =
   "dashboardStatus/SET_UPLOADED_SIZE_TOTAL";
 export const LOADED_ALL = "dashboardStatus/LOADED_ALL";
+var speedDate = require('speed-date');
+var formatter = speedDate('YYYY-MM-DD HH:mm');
+
 
 const { crc32 } = require("crc");
 
@@ -24,6 +27,14 @@ export const listAllObjects = () => {
     let dataAll = [];
     let periodStart = new Date(); // get current date & time
     let periodDaysMax = 30; // all objects before this period are excluded
+    
+    console.log(periodStart)
+    console.log(formatter(periodStart))
+    let testMin = speedDate.cached('YYYY-MM-DD HH:mm', periodStart)
+    console.log(testMin.substr(0,12))
+
+
+
     periodStart.setDate(periodStart.getDate() - periodDaysMax);
 
     return web.ListBuckets().then(res => {
@@ -56,6 +67,7 @@ export const listAllObjects = () => {
             });
 
             dataAll = dataAll.concat(dataObjects);
+
             if (iCount == devices.length) {
               dispatch(prepareListedData(dataAll));
             }

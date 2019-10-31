@@ -4,26 +4,19 @@ import history from "../history";
 import { pathSlice } from "../utils";
 
 function DeviceImage(props) {
-  // Get the full META data of current device
-  const deviceMetaCurrent = props.serverConfig.devicemeta.devices.filter(
-    p => p.serialno === props.currentBucket
-  )[0];
+  const {metaDevice, serverImage} = props
 
   // Check if the current device has meta data - and if so, if it has an image name
-  if (
-    deviceMetaCurrent !== undefined &&
-    deviceMetaCurrent.imageurl !== undefined &&
-    props.serverImage !== undefined
-  ) {
-    const deviceImageName = deviceMetaCurrent.imageurl;
+  if (metaDevice.imageurl && serverImage) {
+    const deviceImageName = metaDevice.imageurl;
 
     // Check if the device image name is found in the state array, serverImage, based on a name/URL lookup
-    const deviceImage = props.serverImage.filter(
+    const deviceImage = serverImage.filter(
       p => p.name === deviceImageName
     )[0];
 
     // If there is no match in the state array, return blank. Also return blank if there's a match, but no result URL fetched
-    if (deviceImage === undefined || deviceImage.url === undefined) {
+    if (deviceImage == undefined || deviceImage.url == undefined) {
       return <div />;
     }
 
@@ -37,7 +30,7 @@ function DeviceImage(props) {
           position: "relative"
         }}
       >
-        <div style={{ width: 180, height: 180 }}>
+        <div className="meta-image">
           {deviceImageUrl ? (
             <img
               src={deviceImageUrl}
@@ -61,9 +54,7 @@ function DeviceImage(props) {
 }
 
 function DeviceMeta(props) {
-  let metaDevice = props.serverConfig.devicemeta.devices.filter(
-    p => p.serialno === props.currentBucket
-  )[0];
+  const {metaDevice} = props
 
   return (
     <div className="col-sm-6">
@@ -79,7 +70,7 @@ function DeviceMeta(props) {
               <tr>
                 <td className="col-md-2">Group</td>
                 <td>
-                  {metaDevice.group} / {metaDevice.subgroup}
+                  {metaDevice.group} {metaDevice.subgroup ? "/" + metaDevice.subgroup : ""}
                 </td>
               </tr>
               <tr>
@@ -96,37 +87,35 @@ function DeviceMeta(props) {
   );
 }
 
-const DeviceMetaHeader = props => {
-  return (
-    <div
-      style={{ position: "relative", height: "100%", width: "100%" }}
-      className={props.serverConfig.devicemeta.display ? "row" : "row hidden"}
-    >
-      <DeviceImage
-        currentBucket={props.currentBucket}
-        serverConfig={props.serverConfig}
-        serverImage={props.serverImage}
-      />
-      <DeviceMeta
-        currentBucket={props.currentBucket}
-        serverConfig={props.serverConfig}
-      />
-    </div>
-  );
-};
-
 export class DeviceMetaHeaderContainer extends Component {
   render() {
     const { serverConfig, serverImage } = this.props;
     const { bucket } = pathSlice(history.location.pathname);
+    const device = bucket;
+    let metaDevice = ""
+
+    console.log(bucket)
+
+    if(serverConfig.devicemeta && serverConfig.devicemeta.devices){
+      metaDevice = serverConfig.devicemeta.devices.filter(
+        p => p.serialno === device
+      )[0];
+    }
+   
     return (
       <div>
-        {serverConfig.devicemeta && serverConfig.devicemeta.devices ? (
-          <DeviceMetaHeader
-            serverConfig={serverConfig}
-            currentBucket={bucket}
-            serverImage={serverImage}
-          />
+        {metaDevice ? (
+          <div
+            style={{ position: "relative", height: "100%", width: "100%" }}
+            className={serverConfig.devicemeta.display ? "row" : "row hidden"}
+          >
+            <DeviceImage
+              device={device}
+              metaDevice={metaDevice}
+              serverImage={serverImage}
+            />
+            <DeviceMeta device={device} metaDevice={metaDevice} />
+          </div>
         ) : (
           <div />
         )}

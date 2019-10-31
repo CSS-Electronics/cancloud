@@ -20,3 +20,251 @@
   padding-left:0px;
   padding-right:0px;
 }
+
+
+.loading-delay{
+  font-size:80%;
+  text-align:center;
+}
+
+.loading-dots{
+  padding-top:40px;
+  font-size:80%;
+  text-align:center;
+}
+.loading-dots:after {
+  content: ' .';
+  animation: dots 1s steps(5, end) infinite;}
+
+@keyframes dots {
+  0%, 20% {
+    color: rgba(0,0,0,0);
+    text-shadow:
+      .25em 0 0 rgba(0,0,0,0),
+      .5em 0 0 rgba(0,0,0,0);}
+  40% {
+    color:@text-color;
+    text-shadow:
+      .25em 0 0 rgba(0,0,0,0),
+      .5em 0 0 rgba(0,0,0,0);}
+  60% {
+    text-shadow:
+      .25em 0 0 @text-color,
+      .5em 0 0 rgba(0,0,0,0);}
+  80%, 100% {
+    text-shadow:
+      .25em 0 0 @text-color,
+      .5em 0 0 @text-color;}
+  }
+
+.pie-icon:after {
+  font-family: FontAwesome;
+  content: "\f200";
+  font-style:normal;
+  margin-left:6px;
+}
+
+.chart {
+  font-size: 70%;
+  display: table;
+  table-layout: fixed;
+  max-width: 100%;
+  margin: 0;
+  background-size: 100% 10px;
+  background-position: left top;
+
+  li {
+    // position:relative;
+    display: table-cell;
+    vertical-align: bottom;
+  }
+
+  span {
+    margin: 0;
+    display: block;
+    animation: draw 1s ease-in-out;
+
+    &:before {
+      left: 0;
+      right: 0;
+      top: 100%;
+      display: block;
+      text-align: left;
+      content: attr(title);
+    }
+  }
+}
+
+@keyframes draw {
+  0% {
+    height: 0;
+  }
+}
+
+.period-hours-form {
+  padding-right: 10px;
+  margin: 0px;
+  text-align: right;
+}
+
+.period-hours-selector {
+  position: relative;
+  margin: 0px;
+  padding-left: 15px;
+  font-size: 80%;
+  color: @text-color;
+}
+
+.period-hours-selector:hover {
+  font-weight: bold;
+}
+
+.period-hours-form input[type="radio"] {
+  display: none;
+  padding: 0px;
+}
+
+.period-hours-form label {
+  cursor: pointer;
+}
+
+.period-hours-form input[type="radio"]:checked + label {
+  background-color: lighten(@text-color, 20);
+  color: white;
+  border-radius: 5px;
+  border: 2px;
+  border-color: lighten(@text-color, 20);
+}
+
+.browse-file-preview {
+  height: 200px !important;
+  word-wrap: break-word;
+  overflow-y: auto;
+  // overflow-x:hidden;
+  font-size: 80%;
+  font-family: Consolas;
+  background-color: white;
+  border-style: solid;
+  border-color: @body-bg;
+  border-width: 1px;
+}
+
+.file-dropzone {
+  padding-top: 10px;
+  padding-right: 5px;
+  cursor: pointer;
+}
+
+.browse-file-name {
+  padding-left: 10px;
+  font-size: 80%;
+  display: inline-block;
+  color: @link-color;
+}
+
+.browse-file-name:hover {
+  color: darken(@link-color, 20);
+}
+
+.widget-kpi {
+  font-size: 340%;
+  text-align: center;
+  margin-top: -10px;
+  font-weight: bold;
+
+  @media (min-width: @screen-sm-min) {
+    font-size: 200%;
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  @media (min-width: @screen-lg-min) {
+    font-size: 240%;
+    text-align: center;
+    margin-top: 0px;
+    font-weight: bold;
+  }
+
+  @media (min-width: 1400px) {
+    font-size: 340%;
+    text-align: center;
+    margin-top: -10px;
+    font-weight: bold;
+  }
+}
+
+.widget-table {
+  overflow-y: auto;
+  width: 100%;
+}
+
+.widget-table-head {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background-color: white;
+}
+
+.widget-table::-webkit-scrollbar,
+.browse-file-preview::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.browse-file-preview::-webkit-scrollbar-track,
+.widget-table::-webkit-scrollbar-track {
+  background: @border-color;
+}
+
+.browse-file-preview::-webkit-scrollbar-thumb,
+.widget-table::-webkit-scrollbar-thumb {
+  background: darken(@border-color, 10%);
+}
+
+.browse-file-preview::-webkit-scrollbar-thumb:hover,
+.widget-table::-webkit-scrollbar-thumb:hover {
+  background: darken(@border-color, 20%);
+}
+
+.widget-no-data {
+  font-size: 80%;
+  font-style: italic;
+}
+
+.widget-title {
+  font-size: 100%;
+  white-space: nowrap;
+
+  @media (min-width: @screen-sm-min) {
+    font-size: 80%;
+  }
+
+  @media (min-width: @screen-lg-min) {
+    font-size: 90%;
+  }
+
+  @media (min-width: 1400px) {
+    font-size: 100%;
+  }
+}
+
+.required {
+  display: none !important;
+}
+
+.host-text {
+  font-size: 13px;
+}
+
+label {
+  font-weight: normal;
+}
+
+legend {
+  font-size: 18px;
+}
+
+.panel-title {
+  font-size: 18px;
+}

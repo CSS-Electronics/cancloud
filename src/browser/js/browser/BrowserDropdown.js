@@ -69,7 +69,7 @@ export class BrowserDropdown extends React.Component {
 
   dashboard(e) {
     e.preventDefault();
-    history.push("/dashboard/");
+    history.push("/status-dashboard/");
   }
 
   render() {
@@ -87,15 +87,16 @@ export class BrowserDropdown extends React.Component {
               </a>
             </li>
             <li>
+              <a href="" onClick={this.dashboard.bind(this)}>
+                Status Dashboard <i className="pie-icon"/>
+              </a>
+            </li>
+            <li>
               <a href="" onClick={this.configureGeneral.bind(this)}>
                 Simple Editor <i className="fa fa-cog" />
               </a>
             </li>
-            {/* <li>
-              <a href="" onClick={this.dashboard.bind(this)}>
-                Dashboard <i className="fa fa-tachometer" />
-              </a>
-            </li> */}
+          
             <li>
               <a href="" id="logout" onClick={this.logout}>
                 Sign Out <i className="fa fa-sign-out" />

@@ -8,6 +8,8 @@ export default (
 ) => {
   switch (action.type) {
     case dashboardActions.WIDGET_RESULT:
+        console.log(action.record)
+
       return {
         ...state,
         widget: action.record

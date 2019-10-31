@@ -25,7 +25,17 @@
         "dataset": "kpiConnected",
         "class_name": "col-sm-2",
         "height": 105,
-        "colors": ""
+        "colors": "",
+		"comment": "Devices with a heartbeat within the period"
+      },
+	   {
+        "title": "Avg. free SD storage ",
+        "widget_type": "kpi",
+        "dataset": "kpiFreeStorage",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": "",
+		"comment": "Average free SD capacity across devices as of their last heartbeats"
       },
       {
         "title": "GB uploaded",
@@ -33,7 +43,8 @@
         "dataset": "kpiUploaded",
         "class_name": "col-sm-2",
         "height": 105,
-        "colors": ""
+        "colors": "",
+		"comment": "Log file data uploaded in GB"
       },
       {
         "title": "MB/device/day",
@@ -41,7 +52,8 @@
         "dataset": "kpiDataPerDeviceDay",
         "class_name": "col-sm-2",
         "height": 105,
-        "colors": ""
+        "colors": "",
+		"comment": "MB uploaded per device per day"
       },
       {
         "title": "Files uploaded",
@@ -49,7 +61,8 @@
         "dataset": "kpiFiles",
         "class_name": "col-sm-2",
         "height": 105,
-        "colors": ""
+        "colors": "",
+		"comment": "Total number of log files uploaded"
       },
       {
         "title": "MB/file",
@@ -57,15 +70,8 @@
         "dataset": "kpiAvgFileSize",
         "class_name": "col-sm-2",
         "height": 105,
-        "colors": ""
-      },
-      {
-        "title": "Total sessions",
-        "widget_type": "kpi",
-        "dataset": "kpiSessions",
-        "class_name": "col-sm-2",
-        "height": 105,
-        "colors": ""
+        "colors": "",
+		"comment": "Average size per uploaded file in MB"
       },
 	    {
         "title": "Device latest heartbeat",
@@ -73,16 +79,18 @@
         "dataset": "deviceStatus",
         "class_name": "col-sm-2",
         "height": 210,
-        "colors": "#3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff"
+        "colors": "#3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff",
+		"comment": "Overview of when the devices last checked-in to the server with a heartbeat"
       },
 	    {
-        "title": "SD free storage (WIP)",
+        "title": "SD free storage (FW WIP)",
         "widget_type": "pie",
         "dataset": "deviceStorage",
         "class_name": "col-sm-2",
         "aspect_ratio": 0,
         "height": 210,
-        "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3"
+        "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3",
+		"comment": "Free storage left on the SD card in % when the device last checked in"
       },
 	    {
         "title": "Device config & FW",
@@ -91,7 +99,8 @@
         "class_name": "col-sm-2",
         "aspect_ratio": 0,
         "height": 210,
-        "colors": "#666666 #999999 #b7b7b7 #cccccc #d9d9d9"
+        "colors": "#666666 #999999 #b7b7b7 #cccccc #d9d9d9",
+		"comment": "Overview of the FW version by device and whether the Configuration File on the device is identical to the server version"
       },
 	  
       {
@@ -100,15 +109,17 @@
         "dataset": "dataUploadTime",
         "class_name": "col-sm-6",
         "height": 210,
-        "colors": ""
+        "colors": "",
+		"comment": "Total log file data uploaded per period across devices"
       },
 	   {
-        "title": "Devices (sorted by last heartbeat)",
+        "title": "Devices (sorted by heartbeat)",
         "widget_type": "table",
         "dataset": "deviceTable",
         "class_name": "col-sm-12",
         "height": 210,
-        "colors": ""
+        "colors": "",
+		"comment": "Table showing device details, sorted by when the devices last checked into the server"
       }
     ]
   }

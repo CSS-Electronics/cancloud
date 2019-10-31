@@ -6,8 +6,9 @@ export default (
     deviceFileContents: [],
     deviceFileObjects: [],
     configObjectsUnique: [],
-    configFileContents:[],
-    configFileCrc32: []
+    configFileContents: [],
+    configFileCrc32: [],
+    loaded:false
   },
   action
 ) => {
@@ -17,6 +18,11 @@ export default (
         ...state,
         objectsData: action.objectsData
       };
+    case dashboardStatusActions.LOADED_ALL:
+        return {
+          ...state,
+          loaded: action.loaded
+        };
     case dashboardStatusActions.SET_CONFIG_OBJECTS:
       return {
         ...state,

@@ -1,4 +1,4 @@
-import React from "react";
+import Moment from "moment";
 
 let uploadedPerTime = {};
 let mf4ObjectsFiltered = [];
@@ -6,73 +6,81 @@ let deviceFileObjectsFiltered = [];
 let deviceFileContentsFiltered = [];
 let chartData = {};
 
-function sortObject(obj) {
-  var arr = [];
-  for (var prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        console.log(prop)
-        console.log(obj[prop])
-          arr.push({
-              'key': prop,
-              'value': obj[prop]
-          });
-      }
-  }
-  arr.sort(function(a, b) { return a.value - b.value; });
-  return arr; 
-}
 
 export const pieOptionsFunc = () => {
-  return(
-  {maintainAspectRatio: false,
-  tooltips: {
-    callbacks: {
-      label: function(item, data) {
-        return (
-          data.datasets[item.datasetIndex].label +
-          ": " +
-          data.datasets[item.datasetIndex].data[item.index]
-        );
-      }
-    }
-  }
-})}
-
-
-export const barOptionsFunc = (periodHours) => {
-  return({
-  maintainAspectRatio: false,
-  legend: {
-    display: false
-  },
-  scales: {
-    yAxes:[
-      {display: true,
-        ticks: {
-            beginAtZero: true
-        }}
-    ],
-    xAxes: [
-      {
-        gridLines: { display: false },
-        ticks: {
-          beginAtZero: true
-        },
-        type: "time",
-        time: {
-          unit: periodHours <= 1 ? "minute" : periodHours <= 48 ? "hour" : "day"
-          ,
-          displayFormats: {
-            minute: "MM/DD HH:mm",
-            hour: "MM/DD HH:mm",
-            day: "MM/DD"
-          }
+  return {
+    maintainAspectRatio: false,
+    tooltips: {
+      callbacks: {
+        label: function(item, data) {
+          return (
+            data.datasets[item.datasetIndex].label +
+            " " + data.labels[item.index] +
+            ": " +
+            data.datasets[item.datasetIndex].data[item.index]
+          );
         }
       }
-    ]
-  }
-})}
+    }
+  };
+};
 
+
+export const pieMultiOptionsFunc = () => {
+  return {
+    maintainAspectRatio: false,
+    tooltips: {
+      callbacks: {
+        label: function(item, data) {
+          return (
+            data.datasets[item.datasetIndex].label 
+            +
+            // " " + data.labels[item.index] +
+            ": " +
+            data.datasets[item.datasetIndex].data[item.index]
+          );
+        }
+      }
+    }
+  };
+};
+
+export const barOptionsFunc = periodHours => {
+  return {
+    maintainAspectRatio: false,
+    legend: {
+      display: false
+    },
+    scales: {
+      yAxes: [
+        {
+          display: true,
+          ticks: {
+            beginAtZero: true
+          }
+        }
+      ],
+      xAxes: [
+        {
+          gridLines: { display: false },
+          ticks: {
+            beginAtZero: true
+          },
+          type: "time",
+          time: {
+            unit:
+              periodHours <= 1 ? "minute" : periodHours <= 48 ? "hour" : "day",
+            displayFormats: {
+              minute: "MM/DD HH:mm",
+              hour: "MM/DD HH:mm",
+              day: "MM/DD"
+            }
+          }
+        }
+      ]
+    }
+  };
+};
 
 export const prepareData = (
   periodEnd,
@@ -81,29 +89,33 @@ export const prepareData = (
   mf4Objects,
   deviceFileObjects,
   deviceFileContents,
-  configFileCrc32
+  configFileCrc32,
+  now
 ) => {
 
   // filter log files & devices based on time period
   mf4ObjectsFiltered = mf4Objects.filter(
     e =>
-      e.lastModifiedMin <= periodEnd.format("YYYY-MM-DD HH:mm") &&
-      e.lastModifiedMin >= periodStart.format("YYYY-MM-DD HH:mm")
+      Moment(e.lastModified).format("YYYY-MM-DD HH:mm") <= periodEnd.format("YYYY-MM-DD HH:mm") &&
+      Moment(e.lastModified).format("YYYY-MM-DD HH:mm") >= periodStart.format("YYYY-MM-DD HH:mm")
   );
 
   deviceFileObjectsFiltered = deviceFileObjects.filter(
     e =>
-      e.lastModifiedMin <= periodEnd.format("YYYY-MM-DD HH:mm") &&
-      e.lastModifiedMin >= periodStart.format("YYYY-MM-DD HH:mm")
+    Moment(e.lastModified).format("YYYY-MM-DD HH:mm") <= periodEnd.format("YYYY-MM-DD HH:mm") &&
+    Moment(e.lastModified).format("YYYY-MM-DD HH:mm") >= periodStart.format("YYYY-MM-DD HH:mm")
   );
 
   const deviceIdList = deviceFileObjectsFiltered.map(device => device.deviceId);
+
   const deviceIdListDelta = deviceFileObjectsFiltered.map(device => {
-    
-    const deviceId = device.deviceId
-    const lastModifiedDelta = device.lastModifiedDelta
-    const lastModifiedMin = device.lastModifiedMin
-    return{deviceId, lastModifiedDelta, lastModifiedMin}});
+    const deviceId = device.deviceId;
+    const lastModified = Moment(device.lastModified)
+    const lastModifiedDelta = now.diff(lastModified, "minutes");
+    const lastModifiedMin = lastModified.format("YYYY-MM-DD HH:mm");
+
+    return { deviceId, lastModifiedDelta, lastModifiedMin };
+  });
 
 
   deviceFileContentsFiltered = deviceFileContents.filter(e =>
@@ -119,7 +131,7 @@ export const prepareData = (
     ">7 days"
   ];
 
-  let deviceStatusGrouped = _.groupBy(deviceFileObjectsFiltered, function(
+  let deviceStatusGrouped = _.groupBy(deviceIdListDelta, function(
     object
   ) {
     const delta = object.lastModifiedDelta;
@@ -139,24 +151,6 @@ export const prepareData = (
       ? deviceStatusGrouped[deviceStatusLabel[i]].length
       : 0
   );
-
-  // kpi data
-  const kpiConnectedVal = deviceFileObjectsFiltered
-    .map(item => item.deviceId)
-    .filter((value, index, self) => self.indexOf(value) === index).length;
-  const kpiSessionsVal = mf4ObjectsFiltered
-    .map(item => item.session)
-    .filter((value, index, self) => self.indexOf(value) === index).length;
-  const kpiUploadedVal =
-    Math.round(
-      (mf4ObjectsFiltered.reduce((a, b) => +a + +b.size, 0) / 1000) * 10
-    ) / 10;
-  const kpiDataPerDeviceDayVal = kpiConnectedVal ? Math.round(
-    ((kpiUploadedVal / kpiConnectedVal) / (periodHours / 24)) * 10000
-  )/10 : 0;
-  const kpiFilesVal = Object.keys(mf4ObjectsFiltered).length;
-  const kpiAvgFileSize = kpiFilesVal ? 
-    Math.round((kpiUploadedVal / kpiFilesVal) * 1000 * 10) / 10 : 0;
 
   // firmware pie chart
   const deviceFWUnsorted = _.countBy(
@@ -198,43 +192,16 @@ export const prepareData = (
   }
 
   deviceFWLabel.push("config synced");
-  deviceFWColor.push(deviceFWColorFull[3]);
   deviceFWLabel.push("config not synced");
+  deviceFWColor.push(deviceFWColorFull[3]);
   deviceFWColor.push(deviceFWColorFull[4]);
 
- 
-
-  // config pie chart
-  let configCrc32Data = [0, 0];
-  let test = false;
-
-  deviceFileContentsFiltered.map(e => {
-    test =
-      configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 == e.cfg_crc32;
-    configCrc32Data[1 - test] += 1;
-  });
-
-  // uploaded per hour bar chart
-  uploadedPerTime = mf4ObjectsFiltered.reduce(
-    (acc, { lastModifiedH, size }) => {
-      if (!acc[lastModifiedH]) {
-        acc[lastModifiedH] = [];
-      }
-      if (!acc[periodEnd.format("YYYY-MM-DD HH")]) {
-        acc[periodEnd.format("YYYY-MM-DD HH")] = [];
-      }
-      if (!acc[periodStart.format("YYYY-MM-DD HH")]) {
-        acc[periodStart.format("YYYY-MM-DD HH")] = [];
-      }
-      acc[lastModifiedH] = Math.round(parseFloat(acc[lastModifiedH] + size)*100)/100;
-      return acc;
-    },
-    {}
-  );
-
-  if(periodHours <= 1){
+  // bar chart
+  if (periodHours <= 1) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
-      (acc, { lastModifiedMin, size }) => {
+      (acc, { lastModified, size }) => {
+        const lastModifiedMin = Moment(lastModified).format("YYYY-MM-DD HH:mm")
+
         if (!acc[lastModifiedMin]) {
           acc[lastModifiedMin] = [];
         }
@@ -244,26 +211,109 @@ export const prepareData = (
         if (!acc[periodStart.format("YYYY-MM-DD HH:mm")]) {
           acc[periodStart.format("YYYY-MM-DD HH:mm")] = [];
         }
-        acc[lastModifiedMin] = Math.round(parseFloat(acc[lastModifiedMin] + size)*100)/100;
+        acc[lastModifiedMin] =
+          Math.round(parseFloat(acc[lastModifiedMin] + size) * 100) / 100;
         return acc;
       },
       {}
     );
   }
 
-  if(Object.values(uploadedPerTime).length == 0){
-    let default_value = periodEnd.format("YYYY-MM-DD HH")
-    uploadedPerTime = {default_value: 0}
+
+  if (periodHours > 1 && periodHours <= 24*7) {
+    uploadedPerTime = mf4ObjectsFiltered.reduce(
+      (acc, { lastModified, size }) => {
+        const lastModifiedH = Moment(lastModified).format("YYYY-MM-DD HH")
+
+        if (!acc[lastModifiedH]) {
+          acc[lastModifiedH] = [];
+        }
+        if (!acc[periodEnd.format("YYYY-MM-DD HH")]) {
+          acc[periodEnd.format("YYYY-MM-DD HH")] = [];
+        }
+        if (!acc[periodStart.format("YYYY-MM-DD HH")]) {
+          acc[periodStart.format("YYYY-MM-DD HH")] = [];
+        }
+        acc[lastModifiedH] =
+          Math.round(parseFloat(acc[lastModifiedH] + size) * 100) / 100;
+        return acc;
+      },
+      {}
+    );
   }
 
-  // device table
- /// ****** 
- 
+  if (periodHours > 24*7) {
+    uploadedPerTime = mf4ObjectsFiltered.reduce(
+      (acc, { lastModified, size }) => {
+        const lastModifiedD = Moment(lastModified).format("YYYY-MM-DD")
 
-  const deviceIdListDeltaSort = deviceIdListDelta.sort(function (a, b) {
-    return a.lastModifiedDelta - b.lastModifiedDelta;
-  }).reverse();
+        if (!acc[lastModifiedD]) {
+          acc[lastModifiedD] = [];
+        }
+        if (!acc[periodEnd.format("YYYY-MM-DD")]) {
+          acc[periodEnd.format("YYYY-MM-DD")] = [];
+        }
+        if (!acc[periodStart.format("YYYY-MM-DD")]) {
+          acc[periodStart.format("YYYY-MM-DD")] = [];
+        }
+        acc[lastModifiedD] =
+          Math.round(parseFloat(acc[lastModifiedD] + size) * 100) / 100;
+        return acc;
+      },
+      {}
+    );
+  }
 
+  // kpi data
+  const kpiConnectedVal = deviceFileObjectsFiltered
+    .map(item => item.deviceId)
+    .filter((value, index, self) => self.indexOf(value) === index).length;
+  const kpiFreeStorage = "WIP";
+  const kpiUploadedVal =
+    Math.round(
+      (mf4ObjectsFiltered.reduce((a, b) => +a + +b.size, 0) / 1000) * 10
+    ) / 10;
+  const kpiDataPerDeviceDayVal = kpiConnectedVal
+    ? Math.round(
+        (kpiUploadedVal / kpiConnectedVal / (periodHours / 24)) * 10000
+      ) / 10
+    : 0;
+  const kpiFilesVal = Object.keys(mf4ObjectsFiltered).length;
+  const kpiAvgFileSize = kpiFilesVal
+    ? Math.round((kpiUploadedVal / kpiFilesVal) * 1000 * 10) / 10
+    : 0;
+
+  if (Object.values(uploadedPerTime).length == 0) {
+    let default_value = periodEnd.format("YYYY-MM-DD HH");
+    uploadedPerTime = { default_value: 0 };
+  }
+
+  const deviceIdListDeltaSort = deviceIdListDelta
+    .sort(function(a, b) {
+      return a.lastModifiedDelta - b.lastModifiedDelta;
+    })
+    .reverse();
+
+    // config pie chart
+    let configCrc32Data = [0, 0];
+    let test = false;
+  
+    if (configFileCrc32 && configFileCrc32[0] && configFileCrc32[0].crc32) {
+  
+      deviceFileContentsFiltered.map(e => {
+        test =
+          configFileCrc32.filter(c => c.deviceId == e.id) &&
+          configFileCrc32.filter(c => c.deviceId == e.id)[0] &&
+          configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32
+            ? configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 ==
+              e.cfg_crc32
+            : false;
+        configCrc32Data[1 - test] += 1;
+      });
+    }else{
+      configCrc32Data = [0, kpiConnectedVal]; // all configs set to not synced in this case
+    }
+  
 
   chartData = {
     kpiConnected: kpiConnectedVal,
@@ -271,12 +321,14 @@ export const prepareData = (
     kpiDataPerDeviceDay: kpiDataPerDeviceDayVal,
     kpiFiles: kpiFilesVal,
     kpiAvgFileSize: kpiAvgFileSize,
-    kpiSessions: kpiSessionsVal,
+    kpiFreeStorage: kpiFreeStorage,
     deviceStatus: {
       datasets: [
         {
           data: deviceStatusData,
-          backgroundColor: "#0b5394 #3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff".split(" "),
+          backgroundColor: "#0b5394 #3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff".split(
+            " "
+          ),
           label: "#devices"
         }
       ],
@@ -299,13 +351,12 @@ export const prepareData = (
         {
           data: deviceFWData,
           backgroundColor: deviceFWColor,
-          label: "#devices (Firmware)"
-        }
-        ,
+          label: "#devices (FW)"
+        },
         {
           data: configCrc32Data,
           backgroundColor: "#3d85c6 #cfe2f3".split(" "),
-          label: "#devices (Configuration File)"
+          label: "#devices (config)"
         }
       ],
       labels: deviceFWLabel
@@ -313,8 +364,8 @@ export const prepareData = (
     dataUploadTime: {
       datasets: [
         {
-          type:'bar',
-          data: Object.values(uploadedPerTime),  
+          type: "bar",
+          data: Object.values(uploadedPerTime),
           backgroundColor: "#3d85c6"
         }
       ],
@@ -322,5 +373,10 @@ export const prepareData = (
     }
   };
 
-  return [chartData,Object.keys(uploadedPerTime), deviceIdListDeltaSort, mf4ObjectsFiltered];
+  return [
+    chartData,
+    Object.keys(uploadedPerTime),
+    deviceIdListDeltaSort,
+    mf4ObjectsFiltered
+  ];
 };

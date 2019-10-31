@@ -54,8 +54,8 @@ const DeviceTable = props => {
       ? Math.round((e.lastModifiedDelta / maxDelta) * 100) / 100
       : 0;
     const id = e.deviceId;
-    const meta = deviceFile.log_meta ? deviceFile.log_meta : "";
-    const fw_ver = deviceFile.fw_ver ? deviceFile.fw_ver : "";
+    const meta = (deviceFile && deviceFile.log_meta) ? deviceFile.log_meta : "";
+    const fw_ver = (deviceFile && deviceFile.fw_ver) ? deviceFile.fw_ver : "";
     const last_heartbeat = e.lastModifiedMin;
     const uploadedMb =
       maxUploaded && uploadedPerDevice[e.deviceId]
@@ -75,7 +75,7 @@ const DeviceTable = props => {
 
   const stringHeader = {
     last_heartbeat: "Last heartbeat",
-    time_since_heartbeat_min: "Min since last heartbeat",
+    time_since_heartbeat_min: "Min since heartbeat",
     id: "Device ID",
     meta: "Config meta",
     name: "Server meta",

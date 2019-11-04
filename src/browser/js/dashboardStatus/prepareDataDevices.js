@@ -186,7 +186,7 @@ export const prepareDataDevices = (
     configCrc32Data = [0, kpiConnectedVal]; // all configs set to not synced in this case
   }
 
-  if(Object.keys(deviceFWSorted).length != 0){
+  // if(Object.keys(deviceFWSorted).length != 0){
   chartDataDevices = {
     kpiConnected: kpiConnectedVal,
     kpiFreeStorage: kpiFreeStorage,
@@ -231,7 +231,7 @@ export const prepareDataDevices = (
     }
   };
 
-}
+// }
 
   return [
     chartDataDevices,

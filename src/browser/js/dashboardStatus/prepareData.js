@@ -61,7 +61,6 @@ export const prepareData = (
 
   // bar chart
   mf4ObjectsFiltered = mf4Objects.filter(e => e.lastModified >= periodStartNew);
-  mf4Objects.length = 0
   
   if (periodHours <= 1) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(

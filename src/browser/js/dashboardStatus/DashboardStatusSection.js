@@ -53,11 +53,11 @@ class DashboardStatusSection extends React.Component {
   }
 
   componentDidMount() {
-    if (Object.keys(this.props.serverConfig).length) {
-      this.props.listAllObjects(); // if dashboard is loaded after the serverConfig has been added to state
-    } else {
-      // in this case the listAllObjects will be called by the fetchServerConfig action
-    }
+    // if (Object.keys(this.props.serverConfig).length) {
+    //   this.props.listAllObjects(); // if dashboard is loaded after the serverConfig has been added to state
+    // } else {
+    //   // in this case the listAllObjects will be called by the fetchServerConfig action
+    // }
   }
 
   componentWillUnmount() {
@@ -122,8 +122,7 @@ class DashboardStatusSection extends React.Component {
 
       chartDataDevices = chartDataDevicesArray[0];
       chartDataDevicesReady = Object.values(chartDataDevicesArray[0])
-        .length;
-
+        .length
       }
 
       let chartDataArray = prepareData(

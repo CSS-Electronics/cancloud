@@ -13,38 +13,41 @@ export const SET_UPLOADED_SIZE_TOTAL =
 export const LOADED_FILES = "dashboardStatus/LOADED_FILES";
 export const LOADED_CONFIG = "dashboardStatus/LOADED_CONFIG";
 export const LOADED_DEVICE = "dashboardStatus/LOADED_DEVICE";
-export const CLEAR_DATA = "dashboardStatus/CLEAR_DATA"
+export const CLEAR_DATA = "dashboardStatus/CLEAR_DATA";
 
 const { crc32 } = require("crc");
-
 let crc32Val = "";
+
+const loggerRegex = new RegExp(/([0-9A-Fa-f]){8}/);
 const loggerConfigRegex = new RegExp(
   /^([0-9A-Fa-f]){8}\/config-[0-9]{2}.[0-9]{2}.json/,
   "g"
 );
 
-const loggerRegex = new RegExp(/([0-9A-Fa-f]){8}/);
+let periodStart = new Date(); // get current date & time
+let periodDaysMax = 30; // all objects before this period are excluded
+periodStart.setDate(periodStart.getDate() - periodDaysMax);
+
 
 export const listAllObjects = () => {
-
   return function(dispatch, getState) {
     // use serverConfig to customize the status dashboard output
     let config = getState().browser.serverConfig.status_dashboard;
 
-    let devicesDevicesConf = config && config.devices_device_info ? config.devices_device_info.split(" ") : []
-    let devicesFilesConf = config && config.devices_log_files ? config.devices_log_files.split(" ") : []
-    let displayFiles = config && (config.display_log_files != undefined) ? config.display_log_files : 1
-    
-
-    const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
+    let devicesDevicesConf =
+      config && config.devices_device_info
+        ? config.devices_device_info.split(" ")
+        : [];
+    let devicesFilesConf =
+      config && config.devices_log_files
+        ? config.devices_log_files.split(" ")
+        : [];
+    let displayFiles =
+      config && config.display_log_files != undefined
+        ? config.display_log_files
+        : 1;
 
     let deviceFileObjectsAry = [];
-    let configObjectsUniqueAry = [];
-    let mf4ObjectsAry = [];
-
-    let periodStart = new Date(); // get current date & time
-    let periodDaysMax = 30; // all objects before this period are excluded
-    periodStart.setDate(periodStart.getDate() - periodDaysMax);
 
     return web.ListBuckets().then(res => {
       let devices = res.buckets ? res.buckets.map(bucket => bucket.name) : [];
@@ -53,29 +56,28 @@ export const listAllObjects = () => {
       let devicesDevices = devicesDevicesConf.length
         ? devicesDevicesConf
         : devices;
-      let devicesFiles = (displayFiles && devicesFilesConf.length)
-        ? devicesFilesConf
-        : displayFiles
-        ? devices
-        : [];
+      let devicesFiles =
+        displayFiles && devicesFilesConf.length
+          ? devicesFilesConf
+          : displayFiles
+          ? devices
+          : [];
 
-      let iCount = 0;
       let iDeviceFileCount = 0;
-      let iConfigFileCount = 0;
 
       // if no devices for files, set loaded to true
-      if(devicesFiles.length == 0){
-        dispatch(loadedFiles(true))
+      if (devicesFiles.length == 0) {
+        dispatch(loadedFiles(true));
       }
 
       // if no devices for config/device.json, set loaded to true
-      if(devicesFiles.length == 0){
-        dispatch(loadedDevice(true))
-        dispatch(loadedConfig(true))
+      if (devicesFiles.length == 0) {
+        dispatch(loadedDevice(true));
+        dispatch(loadedConfig(true));
       }
 
       // get device file object data
-      if (devicesDevices.length && !getState().dashboardStatus.loadedDevice) {
+      if (!getState().dashboardStatus.loadedDevice) {
         devicesDevices.map(device => {
           web
             .getObjectStat({
@@ -94,6 +96,7 @@ export const listAllObjects = () => {
                 dispatch(setDeviceFileObjects(deviceFileObjectsAry));
                 dispatch(fetchDeviceFileContentAll(deviceFileObjectsAry));
                 dispatch(loadedDevice(true));
+                dispatch(listConfigFiles(devicesDevices, devicesFiles));
               }
             })
             .catch(err => {
@@ -102,134 +105,145 @@ export const listAllObjects = () => {
                 dispatch(setDeviceFileObjects(deviceFileObjectsAry));
                 dispatch(fetchDeviceFileContentAll(deviceFileObjectsAry));
                 dispatch(loadedDevice(true));
+                dispatch(listConfigFiles(devicesDevices, devicesFiles));
               }
             });
         });
-      }
-
-      // get config file object data
-      if (devicesDevices.length && !getState().dashboardStatus.loadedConfig) {
-
-
-        devicesDevices.map(device => {
-
-          web
-            .ListObjectsRecursive({
-              bucketName: "Home",
-              prefix: device + "/config-",
-              marker: ""
-            })
-            .then(res => {
-              
-              iConfigFileCount += 1;
-
-              let allObjects = [];
-              res.objects.forEach(e => {
-                if (e.lastModified > periodStart) {
-                  const name = e.name;
-                  const deviceId = e.name.split("/")[0];
-                  const lastModified = e.lastModified;
-                  allObjects.push({ name, deviceId, lastModified });
-                }
-              });
-
-              const configObjects = allObjects.filter(obj =>
-                obj.name.match(loggerConfigRegex)
-              );
-
-              let configObjectsGrouped = _.groupBy(configObjects, function(
-                object
-              ) {
-                return object.deviceId;
-              });
-
-              let configObjectsUnique = [];
-
-              Object.keys(configObjectsGrouped).map(function(key, index) {
-                configObjectsUnique[index] =
-                  configObjectsGrouped[key][
-                    configObjectsGrouped[key].length - 1
-                  ];
-              });
-
-              configObjectsUniqueAry = configObjectsUniqueAry.concat(
-                configObjectsUnique
-              );
-
-              if (iConfigFileCount == devicesDevices.length) {
-                dispatch(setConfigObjects(configObjectsUniqueAry));
-                dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
-                dispatch(loadedConfig(true));
-              }
-
-            })
-            .catch(err => {
-              iConfigFileCount += 1;
-
-              if (iConfigFileCount == devicesDevices.length) {
-                dispatch(setConfigObjects(configObjectsUniqueAry));
-                dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
-                dispatch(loadedConfig(true));
-              }
-            });
-
-        });
-
-
-      }
-
-
-      if (devicesFiles.length && !getState().dashboardStatus.loadedFiles) {
-        devicesFiles.map(device => {
-          web
-            .ListObjectsRecursive({
-              bucketName: "Home",
-              prefix: device,
-              marker: ""
-            })
-            .then(data => {
-              iCount += 1;
-
-              let dataObjects = [];
-              data.objects.forEach(e => {
-                if (e.lastModified > periodStart) {
-                  const name =
-                    e.name.substring(e.name.length - 3, e.name.length) == "mf4"
-                      ? ".mf4"
-                      : e.name;
-                  const deviceId = e.name.split("/")[0];
-                  const lastModified = e.lastModified;
-                  const size = e.size / 1000000;
-
-                  dataObjects.push({ name, deviceId, lastModified, size });
-                }
-              });
-
-              const mf4Objects = dataObjects.filter(
-                obj =>
-                  obj.name.substring(obj.name.length - 3, obj.name.length) ==
-                  "mf4"
-              );
-
-              mf4ObjectsAry = mf4ObjectsAry.concat(mf4Objects) 
-
-              if (iCount == devicesFiles.length) {
-                console.log("we get here?",mf4ObjectsAry)
-                dispatch(setObjectsData(mf4ObjectsAry));
-                dispatch(loadedFiles(true));
-              }
-            })
-            .catch(err => {
-              iCount += 1;
-
-              if (iCount == devicesFiles.length) {
-                dispatch(setObjectsData(mf4ObjectsAry));
-                dispatch(loadedFiles(true));
-              }
-            });
-        });
+      }else if(!getState().dashboardStatus.loadedConfig){
+        dispatch(listConfigFiles(devicesDevices, devicesFiles));
       }
     });
+  };
+};
+
+export const listConfigFiles = (devicesDevices, devicesFiles) => {
+  let iConfigFileCount = 0;
+  let configObjectsUniqueAry = [];
+
+  return function(dispatch, getState) {
+    if (!getState().dashboardStatus.loadedConfig) {
+      devicesDevices.map(device => {
+        web
+          .ListObjectsRecursive({
+            bucketName: "Home",
+            prefix: device + "/config-",
+            marker: ""
+          })
+          .then(res => {
+            iConfigFileCount += 1;
+
+            let allObjects = [];
+            res.objects.forEach(e => {
+              if (e.lastModified > periodStart) {
+                const name = e.name;
+                const deviceId = e.name.split("/")[0];
+                const lastModified = e.lastModified;
+                allObjects.push({ name, deviceId, lastModified });
+              }
+            });
+
+            const configObjects = allObjects.filter(obj =>
+              obj.name.match(loggerConfigRegex)
+            );
+
+            let configObjectsGrouped = _.groupBy(configObjects, function(
+              object
+            ) {
+              return object.deviceId;
+            });
+
+            let configObjectsUnique = [];
+
+            Object.keys(configObjectsGrouped).map(function(key, index) {
+              configObjectsUnique[index] =
+                configObjectsGrouped[key][configObjectsGrouped[key].length - 1];
+            });
+
+            configObjectsUniqueAry = configObjectsUniqueAry.concat(
+              configObjectsUnique
+            );
+
+            if (iConfigFileCount == devicesDevices.length) {
+              dispatch(setConfigObjects(configObjectsUniqueAry));
+              dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
+              dispatch(loadedConfig(true));
+              dispatch(listLogFiles(devicesFiles));
+            }
+          })
+          .catch(err => {
+            iConfigFileCount += 1;
+
+            if (iConfigFileCount == devicesDevices.length) {
+              dispatch(setConfigObjects(configObjectsUniqueAry));
+              dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
+              dispatch(loadedConfig(true));
+              dispatch(listLogFiles(devicesFiles));
+            }
+          });
+      });
+    }else if(!getState().dashboardStatus.loadedFiles){
+      dispatch(listLogFiles(devicesFiles));
+    }
+  };
+};
+
+
+export const listLogFiles = devicesFiles => {
+  let iCount = 0;
+  let mf4ObjectsAry = [];
+
+  return function(dispatch, getState) {
+    if (!getState().dashboardStatus.loadedFiles) {
+
+      devicesFiles.map(device => {
+        web
+          .ListObjectsRecursive({
+            bucketName: "Home",
+            prefix: device,
+            marker: ""
+          })
+          .then(data => {
+            iCount += 1;
+
+            let dataObjects = [];
+
+            data.objects.forEach(e => {
+              if (e.lastModified > periodStart) {
+                const name =
+                  e.name.substring(e.name.length - 3, e.name.length) == "mf4"
+                    ? ".mf4"
+                    : e.name;
+                const deviceId = e.name.split("/")[0];
+                const lastModified = e.lastModified;
+                const size = e.size / 1000000;
+                dataObjects.push({ name, deviceId, lastModified, size });
+              }
+            });
+
+            
+            dataObjects = dataObjects.filter(
+              obj =>
+                obj.name.substring(obj.name.length - 3, obj.name.length) ==
+                "mf4"
+            );
+
+            mf4ObjectsAry = mf4ObjectsAry.concat(dataObjects);
+
+            if (iCount == devicesFiles.length) {
+              dispatch(setObjectsData(mf4ObjectsAry));
+              dispatch(loadedFiles(true));
+            }
+          })
+          .catch(err => {
+            iCount += 1;
+
+            if (iCount == devicesFiles.length) {
+              dispatch(setObjectsData(mf4ObjectsAry));
+              dispatch(loadedFiles(true));
+            }
+          });
+      });
+    }
   };
 };
 

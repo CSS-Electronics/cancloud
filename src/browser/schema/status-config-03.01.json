@@ -21,6 +21,7 @@
     "widgets": [
       {
         "title": "Devices connected",
+		"dependency": "devices",
         "widget_type": "kpi",
         "dataset": "kpiConnected",
         "class_name": "col-sm-2",
@@ -29,7 +30,8 @@
 		"comment": "Devices with a heartbeat within the period"
       },
 	   {
-        "title": "Avg. free SD storage ",
+        "title": "Free SD storage",
+		"dependency": "devices",
         "widget_type": "kpi",
         "dataset": "kpiFreeStorage",
         "class_name": "col-sm-2",
@@ -39,6 +41,7 @@
       },
       {
         "title": "GB uploaded",
+		"dependency": "files",
         "widget_type": "kpi",
         "dataset": "kpiUploaded",
         "class_name": "col-sm-2",
@@ -48,6 +51,7 @@
       },
       {
         "title": "MB/device/day",
+		"dependency": "files",
         "widget_type": "kpi",
         "dataset": "kpiDataPerDeviceDay",
         "class_name": "col-sm-2",
@@ -57,6 +61,7 @@
       },
       {
         "title": "Files uploaded",
+		"dependency": "files",
         "widget_type": "kpi",
         "dataset": "kpiFiles",
         "class_name": "col-sm-2",
@@ -66,6 +71,7 @@
       },
       {
         "title": "MB/file",
+		"dependency": "files",
         "widget_type": "kpi",
         "dataset": "kpiAvgFileSize",
         "class_name": "col-sm-2",
@@ -75,6 +81,7 @@
       },
 	    {
         "title": "Device latest heartbeat",
+		"dependency": "devices",
         "widget_type": "pie",
         "dataset": "deviceStatus",
         "class_name": "col-sm-2",
@@ -84,6 +91,7 @@
       },
 	    {
         "title": "SD free storage (FW WIP)",
+		"dependency": "devices",
         "widget_type": "pie",
         "dataset": "deviceStorage",
         "class_name": "col-sm-2",
@@ -94,6 +102,7 @@
       },
 	    {
         "title": "Device config & FW",
+		"dependency": "devices",
         "widget_type": "pie",
         "dataset": "deviceConfigFW",
         "class_name": "col-sm-2",
@@ -105,6 +114,7 @@
 	  
       {
         "title": "Log file data uploaded per hour (MB)",
+		"dependency": "files",
         "widget_type": "bar",
         "dataset": "dataUploadTime",
         "class_name": "col-sm-6",
@@ -114,6 +124,7 @@
       },
 	   {
         "title": "Devices (sorted by heartbeat)",
+		"dependency": "devices",
         "widget_type": "table",
         "dataset": "deviceTable",
         "class_name": "col-sm-12",

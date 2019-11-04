@@ -5,6 +5,7 @@ import Moment from "moment";
 import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
+import * as browserActions from "../browser/actions"
 
 import {
   isValidUISchema,
@@ -319,9 +320,15 @@ export const fetchUISchemaFiles = configObjects => {
 };
 
 export const updateConfigFile = (content, object) => {
+  const { bucket, prefix } = pathSlice(history.location.pathname);
+
   return function(dispatch) {
     dispatch(setConfigContent(JSON.parse(content)));
     dispatch(setConfigContentPreChange(JSON.parse(content)));
+    if(prefix == "server"){
+      dispatch(browserActions.setServerConfigContent(JSON.parse(content)));
+    }
+
     return web
       .PutObject({
         objectName: object,

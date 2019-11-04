@@ -5,8 +5,10 @@ const DeviceTable = props => {
     deviceIdListDeltaSort,
     deviceFileContents,
     serverConfig,
-    mf4ObjectsFiltered
+    mf4ObjectsFiltered,
+    deviceCrc32Test
   } = props;
+
 
   const uploadedPerDevice = mf4ObjectsFiltered.reduce(
     (acc, { deviceId, size }) => {
@@ -35,7 +37,8 @@ const DeviceTable = props => {
       return o.lastModifiedDelta;
     })
   );
-  let serverConfigTest = serverConfig && serverConfig.devicemeta && serverConfig.devicemeta.devices;
+  let serverConfigTest =
+    serverConfig && serverConfig.devicemeta && serverConfig.devicemeta.devices;
 
   const tableData = deviceIdListDeltaSort.map(e => {
     const deviceFile = deviceFileContents.filter(
@@ -54,13 +57,19 @@ const DeviceTable = props => {
       ? Math.round((e.lastModifiedDelta / maxDelta) * 100) / 100
       : 0;
     const id = e.deviceId;
-    const meta = (deviceFile && deviceFile.log_meta) ? deviceFile.log_meta : "";
-    const fw_ver = (deviceFile && deviceFile.fw_ver) ? deviceFile.fw_ver : "";
+    const meta = deviceFile && deviceFile.log_meta ? deviceFile.log_meta : "";
+    const fw_ver = deviceFile && deviceFile.fw_ver ? deviceFile.fw_ver : "";
     const last_heartbeat = e.lastModifiedMin;
     const uploadedMb =
       maxUploaded && uploadedPerDevice[e.deviceId]
         ? ((uploadedPerDevice[e.deviceId] / maxUploaded) * 100) / 100
         : 0;
+    const config_sync =
+      deviceCrc32Test[0] &&
+      deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&
+      deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32
+        ? deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32
+        : false;
 
     return {
       id,
@@ -69,7 +78,8 @@ const DeviceTable = props => {
       last_heartbeat,
       time_since_heartbeat_min,
       uploadedMb,
-      fw_ver
+      fw_ver,
+      config_sync
     };
   });
 
@@ -80,8 +90,10 @@ const DeviceTable = props => {
     meta: "Config meta",
     name: "Server meta",
     fw_ver: "FW version",
-    uploadedMb: "MB uploaded"
+    uploadedMb: "MB uploaded",
+    config_sync: "Config synced"
   };
+
   const tableHeader = (
     <tr>
       {Object.keys(tableData[0]).map((e, index) => {
@@ -130,6 +142,15 @@ const DeviceTable = props => {
                     </span>
                   </li>
                 </ul>
+              ) : index == 7 ? (
+                <div>
+                  {" "}
+                  {v == true ? (
+                    <p className="blue-text"><i className="fa fa-check" /></p>
+                  ) : (
+                    <p className="red-text"><i className="fa fa-times" /></p>
+                  )}
+                </div>
               ) : (
                 v
               )}

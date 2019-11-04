@@ -1172,9 +1172,10 @@ export class Client {
     }
     // no need to escape maxKeys
     if (maxKeys) {
-      if (maxKeys >= 1000) {
-        maxKeys = 1000
-      }
+      // if (maxKeys >= 1000) {
+      //   maxKeys = 1000
+      // }
+      // maxKeys = 10000
       queries.push(`max-keys=${maxKeys}`)
     }
     queries.sort()
@@ -1235,7 +1236,7 @@ export class Client {
       }
       if (ended) return readStream.push(null)
       // if there are no objects to push do query for the next batch of objects
-      this.listObjectsQuery(bucketName, prefix, marker, delimiter, 1000)
+      this.listObjectsQuery(bucketName, prefix, marker, delimiter, 10000)
         .on('error', e => readStream.emit('error', e))
         .on('data', result => {
           if (result.isTruncated) {

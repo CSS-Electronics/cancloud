@@ -2,27 +2,51 @@ import * as dashboardStatusActions from "./actions";
 
 export default (
   state = {
-    objectsData: {},
+    mf4Objects: [],
     deviceFileContents: [],
     deviceFileObjects: [],
     configObjectsUnique: [],
     configFileContents: [],
     configFileCrc32: [],
-    loaded:false
+    loadedFiles:false,
+    loadedConfig:false,
+    loadedDevice:false
   },
   action
 ) => {
   switch (action.type) {
+    case dashboardStatusActions.CLEAR_DATA:
+        return {
+          mf4Objects: [],
+          deviceFileContents: [],
+          deviceFileObjects: [],
+          configObjectsUnique: [],
+          configFileContents: [],
+          configFileCrc32: [],
+          loadedFiles: false,
+          loadedConfig: false,
+          loadedDevice: false
+        };
     case dashboardStatusActions.SET_OBJECTS_DATA:
       return {
         ...state,
-        objectsData: action.objectsData
+        mf4Objects: action.mf4Objects
       };
-    case dashboardStatusActions.LOADED_ALL:
+    case dashboardStatusActions.LOADED_FILES:
         return {
           ...state,
-          loaded: action.loaded
+          loadedFiles: action.loadedFiles
         };
+        case dashboardStatusActions.LOADED_CONFIG:
+          return {
+            ...state,
+            loadedConfig: action.loadedConfig
+          };
+          case dashboardStatusActions.LOADED_DEVICE:
+            return {
+              ...state,
+              loadedDevice: action.loadedDevice
+            };
     case dashboardStatusActions.SET_CONFIG_OBJECTS:
       return {
         ...state,

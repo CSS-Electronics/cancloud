@@ -2,9 +2,9 @@ import React from "react";
 import { connect } from "react-redux";
 import * as dashboardStatusActions from "./actions";
 import * as browserActions from "../browser/actions";
+import * as alertActions from "../alert/actions";
 import { defaults } from "react-chartjs-2";
 import { Bar, Doughnut } from "react-chartjs-2";
-import Moment from "moment";
 import { prepareData, barOptionsFunc } from "./prepareData";
 import {
   prepareDataDevices,
@@ -23,6 +23,7 @@ let confDash = statusConfig.dashboard;
 let chDefaults = confDash.default_settings;
 let chColors = chDefaults.chart_colors.split(" ");
 let wgt = confDash.widgets;
+const deviceListRegex = new RegExp(/^(|([A-Za-z0-9]{8}( ?))+)$/);
 
 defaults.global.elements.line.borderWidth = chDefaults.line_border_width;
 defaults.global.elements.point.radius = chDefaults.point_radius;
@@ -30,7 +31,6 @@ defaults.global.defaultFontSize = resWide ? 12 : chDefaults.chart_font_size;
 defaults.global.legend.labels.boxWidth = chDefaults.legend_labels_box_width;
 defaults.global.legend.labels.padding = chDefaults.legend_labels_padding;
 defaults.global.animation.duration = 500;
-// defaults.global.animation.easing = "linear"
 
 let pieOptions = pieOptionsFunc();
 let pieMultiOptions = pieMultiOptionsFunc();
@@ -40,9 +40,13 @@ class DashboardStatusSection extends React.Component {
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleChangeDevices = this.handleChangeDevices.bind(this);
+    this.handleChangeFiles = this.handleChangeFiles.bind(this);
 
     this.state = {
-      periodHours: 24 * 7
+      periodHours: 24 * 7,
+      devicesDevicesInput: "",
+      devicesFilesInput: ""
     };
   }
 
@@ -52,12 +56,69 @@ class DashboardStatusSection extends React.Component {
     });
   }
 
+  handleChangeDevices(event) {
+    this.setState({
+      devicesDevicesInput: event.target.value
+    });
+  }
+
+  handleChangeFiles(event) {
+    this.setState({
+      devicesFilesInput: event.target.value
+    });
+  }
+
+  handleButtonClick(e) {
+    if (
+      this.state.devicesDevicesInput.match(deviceListRegex) &&
+      this.state.devicesFilesInput.match(deviceListRegex)
+    ) {
+      this.setState({}, () => {
+        this.props.clearData();
+        this.props.listAllObjects([
+          this.state.devicesDevicesInput,
+          this.state.devicesFilesInput
+        ]);
+      });
+    } else {
+      this.props.showAlert({
+        type: "info",
+        message:
+          "Invalid device list - enter valid device serial numbers separated by space (leave blank to load all devices)",
+        autoClear: true
+      });
+    }
+  }
+
   componentDidMount() {
-    // if (Object.keys(this.props.serverConfig).length) {
-    //   this.props.listAllObjects(); // if dashboard is loaded after the serverConfig has been added to state
-    // } else {
-    //   // in this case the listAllObjects will be called by the fetchServerConfig action
-    // }
+    let confDash = this.props.serverConfig.status_dashboard;
+
+    if (confDash) {
+      this.setState({
+        devicesDevicesInput: confDash.devices_device_info
+          ? confDash.devices_device_info
+          : "",
+        devicesFilesInput: confDash.devices_log_files
+          ? confDash.devices_log_files
+          : ""
+      });
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    let confDash = this.props.serverConfig.status_dashboard;
+    let confDashNext = nextProps.serverConfig.status_dashboard;
+
+    if (confDash == undefined && Object.keys(confDashNext).length) {
+      this.setState({
+        devicesDevicesInput: confDashNext.devices_device_info
+          ? confDashNext.devices_device_info
+          : "",
+        devicesFilesInput: confDashNext.devices_log_files
+          ? confDashNext.devices_log_files
+          : ""
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -77,12 +138,13 @@ class DashboardStatusSection extends React.Component {
       loadedConfig
     } = this.props;
 
+    const { periodHours, devicesDevicesInput, devicesFilesInput } = this.state;
 
-    const { periodHours } = this.state;
-    const loadedDeviceData = deviceFileObjects.length && deviceFileContents.length
+    const loadedDeviceData =
+      deviceFileObjects.length && deviceFileContents.length;
     let chartDataDevices = [];
-    let chartDataDevicesArray = []
-    let chartDataDevicesReady = 0
+    let chartDataDevicesArray = [];
+    let chartDataDevicesReady = 0;
     let chartData = [];
 
     if (!loadedDevice && !loadedConfig) {
@@ -94,7 +156,12 @@ class DashboardStatusSection extends React.Component {
       );
     }
 
-    if (loadedDevice && loadedConfig && loadedDevice && mf4Objects.length == 0 && deviceFileObjects.length == 0) {
+    if (
+      loadedDevice &&
+      loadedConfig &&
+      mf4Objects.length == 0 &&
+      deviceFileObjects.length == 0
+    ) {
       return (
         <div className="feb-container dashboard">
           <p className="loading-delay">No data to display</p>
@@ -103,19 +170,16 @@ class DashboardStatusSection extends React.Component {
     }
 
     if (loadedDevice && loadedConfig) {
-      
-      if(loadedDeviceData){
-      chartDataDevicesArray = prepareDataDevices(
-        periodHours,
-        deviceFileObjects,
-        deviceFileContents,
-        configFileCrc32
-      );
-    
+      if (loadedDeviceData) {
+        chartDataDevicesArray = prepareDataDevices(
+          periodHours,
+          deviceFileObjects,
+          deviceFileContents,
+          configFileCrc32
+        );
 
-      chartDataDevices = chartDataDevicesArray[0];
-      chartDataDevicesReady = Object.values(chartDataDevicesArray[0])
-        .length
+        chartDataDevices = chartDataDevicesArray[0];
+        chartDataDevicesReady = Object.values(chartDataDevicesArray[0]).length;
       }
 
       let chartDataArray = prepareData(
@@ -124,8 +188,6 @@ class DashboardStatusSection extends React.Component {
         mf4ObjectsMin,
         deviceFileObjects
       );
-
-
 
       chartData = chartDataArray[0];
 
@@ -137,53 +199,106 @@ class DashboardStatusSection extends React.Component {
       return (
         <div className="feb-container dashboard">
           <div className="period-hours-form">
-            <form onSubmit={this.handleSubmit}>
-              <label className="period-hours-selector">
+            <div className="dashboard-control-container">
+              <form onSubmit={this.handleSubmit}>
+                <label className="period-hours-selector">
+                  <input
+                    type="radio"
+                    name="radios"
+                    id="radio1"
+                    value={24 * 30}
+                    checked={this.state.periodHours == 24 * 30}
+                    onChange={this.handleChange}
+                    visibility="hidden"
+                  />
+                  <label htmlFor="radio1">&nbsp;monthly&nbsp;</label>
+                </label>
+                <label className="period-hours-selector">
+                  <input
+                    type="radio"
+                    name="radios"
+                    id="radio2"
+                    value={24 * 7}
+                    checked={this.state.periodHours == 24 * 7}
+                    onChange={this.handleChange}
+                  />
+                  <label htmlFor="radio2">&nbsp;weekly&nbsp;</label>
+                </label>
+                <label className="period-hours-selector">
+                  <input
+                    type="radio"
+                    name="radios"
+                    id="radio3"
+                    value={24}
+                    checked={this.state.periodHours == 24}
+                    onChange={this.handleChange}
+                  />
+                  <label htmlFor="radio3">&nbsp;daily&nbsp;</label>
+                </label>
+                <label className="period-hours-selector">
+                  <input
+                    type="radio"
+                    name="radios"
+                    id="radio4"
+                    value={1}
+                    checked={this.state.periodHours == 1}
+                    onChange={this.handleChange}
+                  />
+                  <label htmlFor="radio4">&nbsp;hourly&nbsp;</label>
+                </label>
+              </form>
+            </div>
+
+            <div className="dashboard-control-container">
+              <div
+                className="field-string"
+                style={{ float: "left", textAlign: "left" }}
+              >
+                <span className="devices-list">devices: </span>
                 <input
-                  type="radio"
-                  name="radios"
-                  id="radio1"
-                  value={24 * 30}
-                  checked={this.state.periodHours == 24 * 30}
-                  onChange={this.handleChange}
-                  visibility="hidden"
+                  className="form-control-devices"
+                  type="text"
+                  value={devicesDevicesInput}
+                  onChange={this.handleChangeDevices}
                 />
-                <label htmlFor="radio1">&nbsp;monthly&nbsp;</label>
-              </label>
-              <label className="period-hours-selector">
+                &nbsp;
+                <p className="field-description field-description-shift">
+                  The device-specific dashboard widgets (e.g. heartbeat metrics)
+                  are based on this list of devices (if blank, all devices are
+                  included). The default list of devices can be configured in
+                  the server JSON config.
+                </p>
+              </div>
+              <div
+                className="field-string"
+                style={{ float: "left", textAlign: "left" }}
+              >
+                &nbsp;
+                <span className="devices-list">log files: </span>
                 <input
-                  type="radio"
-                  name="radios"
-                  id="radio2"
-                  value={24 * 7}
-                  checked={this.state.periodHours == 24 * 7}
-                  onChange={this.handleChange}
+                  className="form-control-devices"
+                  type="text"
+                  value={devicesFilesInput}
+                  onChange={this.handleChangeFiles}
                 />
-                <label htmlFor="radio2">&nbsp;weekly&nbsp;</label>
-              </label>
-              <label className="period-hours-selector">
-                <input
-                  type="radio"
-                  name="radios"
-                  id="radio3"
-                  value={24}
-                  checked={this.state.periodHours == 24}
-                  onChange={this.handleChange}
-                />
-                <label htmlFor="radio3">&nbsp;daily&nbsp;</label>
-              </label>
-              <label className="period-hours-selector">
-                <input
-                  type="radio"
-                  name="radios"
-                  id="radio4"
-                  value={1}
-                  checked={this.state.periodHours == 1}
-                  onChange={this.handleChange}
-                />
-                <label htmlFor="radio4">&nbsp;hourly&nbsp;</label>
-              </label>
-            </form>
+                <p className="field-description field-description-shift">
+                  The log file specific dashboard widgets (e.g. size metrics)
+                  are based on this list of devices (if blank, all devices are
+                  included). The default list of devices can be configured in
+                  the server JSON config.
+                </p>
+              </div>
+              &nbsp; &nbsp;
+              <button
+                type="button"
+                onClick={this.handleButtonClick.bind(this)}
+                className="btn btn-small"
+              >
+                {" "}
+                update{" "}
+              </button>
+              &nbsp; &nbsp;
+            </div>
           </div>
 
           <div>
@@ -296,7 +411,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(dashboardStatusActions.setConfigObjects(configObjectsUnique)),
   setDeviceFileContent: deviceFileContents =>
     dispatch(dashboardStatusActions.deviceFileContent(deviceFileContents)),
-    setDeviceFileObjects: deviceFileObjects =>
+  setDeviceFileObjects: deviceFileObjects =>
     dispatch(dashboardStatusActions.setDeviceFileObjects(deviceFileObjects)),
   loadedFilesSet: loadedFiles =>
     dispatch(dashboardStatusActions.loadedFiles(loadedFiles)),
@@ -304,9 +419,9 @@ const mapDispatchToProps = dispatch => ({
     dispatch(dashboardStatusActions.loadedConfig(loadedConfig)),
   loadedDeviceSet: loadedDevice =>
     dispatch(dashboardStatusActions.loadedDevice(loadedDevice)),
-  fetchServerObjectList: () => dispatch(browserActions.fetchServerObjectList())
-  ,
-  clearData: () => dispatch(dashboardStatusActions.clearData())
+  fetchServerObjectList: () => dispatch(browserActions.fetchServerObjectList()),
+  clearData: () => dispatch(dashboardStatusActions.clearData()),
+  showAlert: alert => dispatch(alertActions.set(alert))
 });
 
 const mapStateToProps = state => {

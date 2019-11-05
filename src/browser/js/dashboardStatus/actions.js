@@ -17,7 +17,6 @@ export const LOADED_DEVICE = "dashboardStatus/LOADED_DEVICE";
 export const CLEAR_DATA = "dashboardStatus/CLEAR_DATA";
 var speedDate = require("speed-date");
 
-
 const { crc32 } = require("crc");
 let crc32Val = "";
 
@@ -34,8 +33,8 @@ periodStart.setDate(periodStart.getDate() - periodDaysMax);
 let lastHour = new Date();
 lastHour.setTime(lastHour.getTime() - 1 * 60 * 60 * 1000);
 
-
-export const listAllObjects = () => {
+export const listAllObjects = devicesAry => {
+   
   return function(dispatch, getState) {
     // use serverConfig to customize the status dashboard output
     let config = getState().browser.serverConfig.status_dashboard;
@@ -59,15 +58,22 @@ export const listAllObjects = () => {
       let devices = res.buckets ? res.buckets.map(bucket => bucket.name) : [];
       devices = devices.filter(e => e.match(loggerRegex));
 
-      let devicesDevices = devicesDevicesConf.length
+      // if user inputs custom device lists, use these to override 
+      let devicesDevicesInput = devicesAry ? (devicesAry[0].length ? devicesAry[0].split(" ") : devices) :  null;
+      let devicesFilesInput = devicesAry ? (devicesAry[1].length ? devicesAry[1].split(" ") : devices) : null;
+
+      let devicesDevices = devicesDevicesInput
+        ? devicesDevicesInput
+        : devicesDevicesConf.length
         ? devicesDevicesConf
         : devices;
-      let devicesFiles =
-        displayFiles && devicesFilesConf.length
-          ? devicesFilesConf
-          : displayFiles
-          ? devices
-          : [];
+      let devicesFiles = devicesFilesInput
+        ? devicesFilesInput
+        : displayFiles && devicesFilesConf.length
+        ? devicesFilesConf
+        : displayFiles
+        ? devices
+        : [];
 
       let iDeviceFileCount = 0;
 
@@ -77,7 +83,7 @@ export const listAllObjects = () => {
       }
 
       // if no devices for config/device.json, set loaded to true
-      if (devicesFiles.length == 0) {
+      if (devicesDevices.length == 0) {
         dispatch(loadedDevice(true));
         dispatch(loadedConfig(true));
       }
@@ -197,7 +203,7 @@ export const listLogFiles = devicesFiles => {
   let iCount = 0;
   let mf4ObjectsHourAry = [];
   let mf4ObjectsMinAry = [];
-  let dateFormats = ["YYYY-MM-DD HH", "YYYY-MM-DD HH:mm"]
+  let dateFormats = ["YYYY-MM-DD HH", "YYYY-MM-DD HH:mm"];
 
   return function(dispatch, getState) {
     if (!getState().dashboardStatus.loadedFiles) {
@@ -212,78 +218,78 @@ export const listLogFiles = devicesFiles => {
             iCount += 1;
 
             // aggregate data to hourly basis
-            dateFormats.map((format,index) => {
+            dateFormats.map((format, index) => {
+              let periodStartVar = index == 0 ? periodStart : lastHour;
+              let sizePerTime = {};
 
-              let periodStartVar = index == 0 ? periodStart : lastHour
-              let sizePerTime = {}
-
-              sizePerTime = data.objects.reduce((acc, { lastModified, size }) => {
-                 
+              sizePerTime = data.objects.reduce(
+                (acc, { lastModified, size }) => {
                   if (lastModified > periodStartVar) {
-                    const lastModH = speedDate.cached(
-                      format,
-                      lastModified
-                    );
+                    const lastModH = speedDate.cached(format, lastModified);
 
                     if (!acc) {
-                      acc = {}
+                      acc = {};
                     }
 
                     /// SOMETHING HAPPENS HERE THAT GOES WRONG
                     if (!acc[lastModH]) {
                       acc[lastModH] = 0;
                     }
-  
+
                     acc[lastModH] =
                       Math.round(parseFloat(acc[lastModH] + size) * 100) / 100;
                     return acc;
                   }
-                },{}
+                },
+                {}
               );
 
-              let countPerTime = data.objects.reduce((accCnt, { lastModified }) => {
-                if (lastModified > periodStartVar) {
-                  const lastModH = speedDate.cached(
-                    format,
-                    lastModified
-                  );
+              let countPerTime = data.objects.reduce(
+                (accCnt, { lastModified }) => {
+                  if (lastModified > periodStartVar) {
+                    const lastModH = speedDate.cached(format, lastModified);
 
-                  if (!accCnt) {
-                    accCnt = {}
+                    if (!accCnt) {
+                      accCnt = {};
+                    }
+
+                    if (!accCnt[lastModH]) {
+                      accCnt[lastModH] = 0;
+                    }
+
+                    accCnt[lastModH] = parseInt(accCnt[lastModH] + 1);
+                    return accCnt;
                   }
-  
-                  if (!accCnt[lastModH]) {
-                    accCnt[lastModH] = 0;
-                  }
-  
-                  accCnt[lastModH] = parseInt(accCnt[lastModH] + 1);
-                  return accCnt;
-                }
-              }, {});
-  
+                },
+                {}
+              );
+
               let dataPerTimeAry = [];
               if (sizePerTime) {
-                const periodStartVarFormat = speedDate(format, periodStartVar)
-                
+                const periodStartVarFormat = speedDate(format, periodStartVar);
+
                 Object.keys(sizePerTime).forEach(e => {
                   if (e > periodStartVarFormat) {
                     const deviceId = device;
                     const lastModified = e;
                     const size = sizePerTime[e] / 1000000;
                     const count = countPerTime[e];
-                    dataPerTimeAry.push({ deviceId, lastModified, size, count });
+                    dataPerTimeAry.push({
+                      deviceId,
+                      lastModified,
+                      size,
+                      count
+                    });
                   }
                 });
               }
 
-              if(index == 0){
-              mf4ObjectsHourAry = mf4ObjectsHourAry.concat(dataPerTimeAry);
-              }else{
+              if (index == 0) {
+                mf4ObjectsHourAry = mf4ObjectsHourAry.concat(dataPerTimeAry);
+              } else {
                 mf4ObjectsMinAry = mf4ObjectsMinAry.concat(dataPerTimeAry);
               }
-
-            })
-            
+            });
 
             if (iCount == devicesFiles.length) {
               dispatch(setObjectsData(mf4ObjectsHourAry));

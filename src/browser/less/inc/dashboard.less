@@ -1,3 +1,39 @@
+.form-control-devices {
+ font-size:80%;
+ border: 0;
+ border-bottom: 1px solid @input-border;
+ color: @text-color;
+ padding: 2px;
+ width: 80px;
+ border-radius: 5px;
+ background-color: rgba(255,255,255,0.5) !important;
+ box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15) !important;
+ text-align: right;
+
+}
+
+.btn-small{
+  padding-left:5px;
+  padding-right:5px;
+  padding-top: 0px;
+  padding-bottoM:0px;
+}
+
+.dashboard-control-container{
+  text-align:right;
+  float: right;
+
+  @media (max-width: @screen-sm-min) {
+    padding-bottom:5px;
+  }
+}
+
+.devices-list{
+  font-size:80%;
+  color: @text-color;
+}
+
+
 .dashboard {
   padding-top: 60px;
   padding-left:10px;
@@ -105,6 +141,8 @@
   padding-right: 10px;
   margin: 0px;
   text-align: right;
+  width:100%;
+  float:left;
 }
 
 .period-hours-selector {

@@ -3,6 +3,7 @@ import * as dashboardStatusActions from "./actions";
 export default (
   state = {
     mf4Objects: [],
+    mf4ObjectsMin:[],
     deviceFileContents: [],
     deviceFileObjects: [],
     configObjectsUnique: [],
@@ -18,6 +19,7 @@ export default (
     case dashboardStatusActions.CLEAR_DATA:
         return {
           mf4Objects: [],
+          mf4ObjectsMin:[],
           deviceFileContents: [],
           deviceFileObjects: [],
           configObjectsUnique: [],
@@ -32,6 +34,11 @@ export default (
         ...state,
         mf4Objects: action.mf4Objects
       };
+    case dashboardStatusActions.SET_OBJECTS_DATA_MIN:
+        return {
+          ...state,
+          mf4ObjectsMin: action.mf4ObjectsMin
+        };
     case dashboardStatusActions.LOADED_FILES:
         return {
           ...state,

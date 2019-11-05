@@ -67,6 +67,7 @@ class DashboardStatusSection extends React.Component {
   render() {
     const {
       mf4Objects,
+      mf4ObjectsMin,
       deviceFileContents,
       deviceFileObjects,
       configFileCrc32,
@@ -76,13 +77,6 @@ class DashboardStatusSection extends React.Component {
       loadedConfig
     } = this.props;
 
-    // console.log("==========================")
-    // console.log(loadedFiles)
-    // console.log(loadedConfig)
-    // console.log(loadedDevice)
-    // console.log(mf4Objects)
-    // console.log(deviceFileObjects)
-
 
     const { periodHours } = this.state;
     const loadedDeviceData = deviceFileObjects.length && deviceFileContents.length
@@ -90,7 +84,6 @@ class DashboardStatusSection extends React.Component {
     let chartDataDevicesArray = []
     let chartDataDevicesReady = 0
     let chartData = [];
-
 
     if (!loadedDevice && !loadedConfig) {
       return (
@@ -128,6 +121,7 @@ class DashboardStatusSection extends React.Component {
       let chartDataArray = prepareData(
         periodHours,
         mf4Objects,
+        mf4ObjectsMin,
         deviceFileObjects
       );
 
@@ -318,6 +312,7 @@ const mapDispatchToProps = dispatch => ({
 const mapStateToProps = state => {
   return {
     mf4Objects: state.dashboardStatus.mf4Objects,
+    mf4ObjectsMin: state.dashboardStatus.mf4ObjectsMin,
     deviceFileContents: state.dashboardStatus.deviceFileContents,
     deviceFileObjects: state.dashboardStatus.deviceFileObjects,
     configFileCrc32: state.dashboardStatus.configFileCrc32,

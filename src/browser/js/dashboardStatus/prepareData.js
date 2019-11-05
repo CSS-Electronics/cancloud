@@ -32,7 +32,7 @@ export const barOptionsFunc = periodHours => {
             unit:
               periodHours <= 1 ? "minute" : (periodHours <= 48 && periodHours > 1) ? "hour" : "day",
               displayFormats: {
-              minute: "MM/DD HH:mm",
+              minute: "HH:mm",
               hour: "MM/DD HH:mm",
               day: "MM/DD"
             }
@@ -46,6 +46,7 @@ export const barOptionsFunc = periodHours => {
 export const prepareData = (
   periodHours,
   mf4Objects,
+  mf4ObjectsMin,
   deviceFileObjects
 ) => {
 
@@ -54,30 +55,36 @@ export const prepareData = (
   let periodStartNew = new Date();
   periodStartNew.setTime(periodStartNew.getTime() - periodHours * 60 * 60 * 1000);
 
+  let periodStart = speedDate('YYYY-MM-DD HH',periodStartNew)
+  let periodEnd = speedDate('YYYY-MM-DD HH',periodEndNew)
+
+  let periodStartDay = speedDate('YYYY-MM-DD',periodStartNew)
+  let periodEndDay = speedDate('YYYY-MM-DD',periodEndNew)
+
+  let periodStartMin = speedDate('YYYY-MM-DD HH:mm',periodStartNew)
+  let periodEndMin = speedDate('YYYY-MM-DD HH:mm',periodEndNew)
+
   // DEVICE 
   deviceFileObjectsFiltered = deviceFileObjects.filter(
     e => e.lastModified >= periodStartNew
   );
 
   // bar chart
-  mf4ObjectsFiltered = mf4Objects.filter(e => e.lastModified >= periodStartNew);
-  
+  mf4ObjectsFiltered = periodHours == 1 ? mf4ObjectsMin : mf4Objects.filter(e => e.lastModified >= periodStart);
+
   if (periodHours <= 1) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
-        const lastModifiedMin = speedDate.cached('YYYY-MM-DD HH:mm',lastModified)  
-
-        if (!acc[lastModifiedMin]) {
-          acc[lastModifiedMin] = [];
+        if (!acc[lastModified]) {
+          acc[lastModified] = 0;
         }
-        if (!acc[speedDate.cached('YYYY-MM-DD HH:mm',periodEndNew)]) {
-          acc[speedDate.cached('YYYY-MM-DD HH:mm',periodEndNew)] = [];
+        if (!acc[periodEndMin]) {
+          acc[periodEndMin] = 0;
         }
-        if (!acc[speedDate.cached('YYYY-MM-DD HH:mm',periodStartNew)]) {
-          acc[speedDate.cached('YYYY-MM-DD HH:mm',periodStartNew)] = [];
+        if (!acc[periodStartMin]) {
+          acc[periodStartMin] = 0;
         }
-        acc[lastModifiedMin] =
-          Math.round(parseFloat(acc[lastModifiedMin] + size) * 100) / 100;
+        acc[lastModified] = Math.round(parseFloat(acc[lastModified] + size) * 100)/100
         return acc;
       },
       {}
@@ -87,19 +94,16 @@ export const prepareData = (
   if (periodHours > 1 && periodHours <= 24 * 7) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
-        const lastModifiedH = speedDate.cached('YYYY-MM-DD HH',lastModified);
-
-        if (!acc[lastModifiedH]) {
-          acc[lastModifiedH] = [];
+        if (!acc[lastModified]) {
+          acc[lastModified] = 0;
         }
-        if (!acc[speedDate.cached('YYYY-MM-DD HH',periodEndNew)]) {
-          acc[speedDate.cached('YYYY-MM-DD HH',periodEndNew)] = [];
+        if (!acc[periodEnd]) {
+          acc[periodEnd] = 0;
         }
-        if (!acc[speedDate.cached('YYYY-MM-DD HH',periodStartNew)]) {
-          acc[speedDate.cached('YYYY-MM-DD HH',periodStartNew)] = [];
+        if (!acc[periodStart]) {
+          acc[periodStart] = 0;
         }
-        acc[lastModifiedH] =
-          Math.round(parseFloat(acc[lastModifiedH] + size) * 100) / 100;
+        acc[lastModified] = Math.round(parseFloat(acc[lastModified] + size) * 100)/100
         return acc;
       },
       {}
@@ -109,16 +113,16 @@ export const prepareData = (
   if (periodHours > 24 * 7) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
-        const lastModifiedD = speedDate.cached('YYYY-MM-DD',lastModified)
+        const lastModifiedD = lastModified.substr(0,10)
 
         if (!acc[lastModifiedD]) {
           acc[lastModifiedD] = [];
         }
-        if (!acc[speedDate.cached('YYYY-MM-DD',periodEndNew)]) {
-          acc[speedDate.cached('YYYY-MM-DD',periodEndNew)] = [];
+        if (!acc[periodEndDay]) {
+          acc[periodEndDay] = [];
         }
-        if (!acc[speedDate.cached('YYYY-MM-DD',periodStartNew)]) {
-          acc[speedDate.cached('YYYY-MM-DD',periodStartNew)] = [];
+        if (!acc[periodStartDay]) {
+          acc[periodStartDay] = [];
         }
         acc[lastModifiedD] =
           Math.round(parseFloat(acc[lastModifiedD] + size) * 100) / 100;
@@ -140,13 +144,12 @@ export const prepareData = (
         (kpiUploadedVal / kpiConnectedVal / (periodHours / 24)) * 10000
       ) / 10
     : "";
-  const kpiFilesVal = mf4ObjectsFiltered.length ? Object.keys(mf4ObjectsFiltered).length : ""
-  
+  const kpiFilesVal = mf4ObjectsFiltered.length ? mf4ObjectsFiltered.reduce((a, b) => +a + +b.count, 0)  : ""
   const kpiAvgFileSize = (mf4ObjectsFiltered.length && kpiFilesVal) ? Math.round((kpiUploadedVal / kpiFilesVal) * 1000 * 10) / 10 : ""
 
   if (Object.values(uploadedPerTime).length == 0) {
-    let default_value = speedDate.cached('YYYY-MM-DD HH',periodEndNew)
-    uploadedPerTime = { default_value: 0 };
+    // let default_value = "2019-01-01 20" // speedDate('YYYY-MM-DD HH',periodEndNew)
+    uploadedPerTime = { [periodStart]: 0, [periodEnd]: 0 };
   }
 
   chartData = {

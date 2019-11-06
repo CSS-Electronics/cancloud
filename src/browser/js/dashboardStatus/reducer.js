@@ -11,7 +11,8 @@ export default (
     configFileCrc32: [],
     loadedFiles:false,
     loadedConfig:false,
-    loadedDevice:false
+    loadedDevice:false,
+    devicesFilesCount:0
   },
   action
 ) => {
@@ -27,12 +28,18 @@ export default (
           configFileCrc32: [],
           loadedFiles: false,
           loadedConfig: false,
-          loadedDevice: false
+          loadedDevice: false,
+          devicesFilesCount:0
         };
     case dashboardStatusActions.SET_OBJECTS_DATA:
       return {
         ...state,
         mf4Objects: action.mf4Objects
+      };
+    case dashboardStatusActions.SET_DEVICES_FILES_COUNT:
+      return {
+        ...state,
+        devicesFilesCount: action.devicesFilesCount
       };
     case dashboardStatusActions.SET_OBJECTS_DATA_MIN:
         return {

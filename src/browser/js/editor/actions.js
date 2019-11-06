@@ -367,6 +367,7 @@ export const fetchConfigContent = fileName => {
     if (fileName == "None") {
       dispatch(setConfigContent(null));
       dispatch(setConfigContentPreChange(null));
+      dispatch(setUpdatedFormData(null));
     } else {
       const { bucket, prefix } = pathSlice(history.location.pathname);
       const currentBucket = getCurrentBucket(getState());
@@ -385,10 +386,13 @@ export const fetchConfigContent = fileName => {
               .then(data => {
                 dispatch(setConfigContent(data));
                 dispatch(setConfigContentPreChange(data));
+                dispatch(setUpdatedFormData(data));
               })
               .catch(e => {
                 dispatch(setConfigContent(null));
                 dispatch(setConfigContentPreChange(null));
+                dispatch(setUpdatedFormData(null));
+
                 dispatch(
                   alertActions.set({
                     type: "danger",
@@ -414,6 +418,7 @@ export const fetchConfigContent = fileName => {
       } else if (prefix) {
         dispatch(setConfigContent(null));
         dispatch(setConfigContentPreChange(null));
+        dispatch(setUpdatedFormData(null));
       } else {
         dispatch(fetchPubliConfig(fileName));
       }
@@ -676,8 +681,11 @@ export const handleUploadedConfig = file => {
           ? file.name.split("_")[1]
           : file.name.split("_")[0];
         try {
-          dispatch(setConfigContent(JSON.parse(content)));
-          dispatch(setConfigContentPreChange(JSON.parse(content)));
+          const jsonContent = JSON.parse(content)
+          console.log(jsonContent)
+          dispatch(setConfigContent(jsonContent));
+          dispatch(setConfigContentPreChange(jsonContent));
+          // dispatch(setUpdatedFormData(jsonContent));
           dispatch(resetLocalConfigList());
           dispatch(setConfigFile([`${fileNameShort} (local)`]));
         } catch (error) {

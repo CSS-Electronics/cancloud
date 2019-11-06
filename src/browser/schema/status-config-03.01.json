@@ -113,7 +113,7 @@
       },
 	  
       {
-        "title": "Log file data uploaded per hour (MB)",
+        "title": "Log file data uploaded over time ",
 		"dependency": "files",
         "widget_type": "bar",
         "dataset": "dataUploadTime",

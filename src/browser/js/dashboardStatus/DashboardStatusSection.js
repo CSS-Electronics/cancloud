@@ -2,28 +2,32 @@ import React from "react";
 import { connect } from "react-redux";
 import * as dashboardStatusActions from "./actions";
 import * as browserActions from "../browser/actions";
-import * as alertActions from "../alert/actions";
 import { defaults } from "react-chartjs-2";
 import { Bar, Doughnut } from "react-chartjs-2";
-import { prepareData, barOptionsFunc } from "./prepareData";
+import ReactMultiSelectCheckboxes from "react-multiselect-checkboxes";
+import {
+  prepareData,
+  barOptionsFunc,
+  customCheckboxStyles,
+  devicesOptionsFn,
+  selectedListFn
+} from "./prepareData";
 import {
   prepareDataDevices,
   pieOptionsFunc,
   pieMultiOptionsFunc
 } from "./prepareDataDevices";
-
 import DeviceTable from "./DeviceTable";
+import PeriodMenu from "./PeriodMenu";
 
 // https://stackoverflow.com/questions/42394429/aws-sdk-s3-best-way-to-list-all-keys-with-listobjectsv2
 
-const statusConfig = require(`../../schema/status-config-03.01.json`);
 const resWide = window.innerWidth > 2000 ? 1 : 0;
-
-let confDash = statusConfig.dashboard;
-let chDefaults = confDash.default_settings;
-let chColors = chDefaults.chart_colors.split(" ");
-let wgt = confDash.widgets;
-const deviceListRegex = new RegExp(/^(|([A-Za-z0-9]{8}( ?))+)$/);
+const statusConfig = require(`../../schema/status-config-03.01.json`);
+const confDash = statusConfig.dashboard;
+const chDefaults = confDash.default_settings;
+const chColors = chDefaults.chart_colors.split(" ");
+const wgt = confDash.widgets;
 
 defaults.global.elements.line.borderWidth = chDefaults.line_border_width;
 defaults.global.elements.point.radius = chDefaults.point_radius;
@@ -31,9 +35,6 @@ defaults.global.defaultFontSize = resWide ? 12 : chDefaults.chart_font_size;
 defaults.global.legend.labels.boxWidth = chDefaults.legend_labels_box_width;
 defaults.global.legend.labels.padding = chDefaults.legend_labels_padding;
 defaults.global.animation.duration = 500;
-
-let pieOptions = pieOptionsFunc();
-let pieMultiOptions = pieMultiOptionsFunc();
 
 class DashboardStatusSection extends React.Component {
   constructor(props) {
@@ -45,8 +46,8 @@ class DashboardStatusSection extends React.Component {
 
     this.state = {
       periodHours: 24 * 7,
-      devicesDevicesInput: "",
-      devicesFilesInput: ""
+      devicesDevicesInput: [],
+      devicesFilesInput: []
     };
   }
 
@@ -57,67 +58,45 @@ class DashboardStatusSection extends React.Component {
   }
 
   handleChangeDevices(event) {
+    let selectedList = selectedListFn(event, this.props.deviceList);
+
     this.setState({
-      devicesDevicesInput: event.target.value
+      devicesDevicesInput: selectedList
     });
   }
 
   handleChangeFiles(event) {
+    let selectedList = selectedListFn(event, this.props.deviceList);
+
     this.setState({
-      devicesFilesInput: event.target.value
+      devicesFilesInput: selectedList
     });
   }
 
   handleButtonClick(e) {
-    if (
-      this.state.devicesDevicesInput.match(deviceListRegex) &&
-      this.state.devicesFilesInput.match(deviceListRegex)
-    ) {
-      this.setState({}, () => {
-        this.props.clearData();
-        this.props.listAllObjects([
-          this.state.devicesDevicesInput,
-          this.state.devicesFilesInput
-        ]);
-      });
-    } else {
-      this.props.showAlert({
-        type: "info",
-        message:
-          "Invalid device list - enter valid device serial numbers separated by space (leave blank to load all devices)",
-        autoClear: true
-      });
-    }
-  }
-
-  componentDidMount() {
-    let confDash = this.props.serverConfig.status_dashboard;
-
-    if (confDash) {
-      this.setState({
-        devicesDevicesInput: confDash.devices_device_info
-          ? confDash.devices_device_info
-          : "",
-        devicesFilesInput: confDash.devices_log_files
-          ? confDash.devices_log_files
-          : ""
-      });
-    }
+    this.setState({}, () => {
+      this.props.clearData();
+      this.props.listAllObjects([
+        this.state.devicesDevicesInput.map(e => e.value),
+        this.state.devicesFilesInput.map(e => e.value)
+      ]);
+    });
   }
 
   componentWillReceiveProps(nextProps) {
-    let confDash = this.props.serverConfig.status_dashboard;
-    let confDashNext = nextProps.serverConfig.status_dashboard;
+    if (this.props.deviceList != nextProps.deviceList) {
+      let deviceList = devicesOptionsFn(nextProps.deviceList);
+      deviceList = deviceList.splice(2, deviceList.length);
 
-    if (confDash == undefined && Object.keys(confDashNext).length) {
       this.setState({
-        devicesDevicesInput: confDashNext.devices_device_info
-          ? confDashNext.devices_device_info
-          : "",
-        devicesFilesInput: confDashNext.devices_log_files
-          ? confDashNext.devices_log_files
-          : ""
+        devicesDevicesInput: deviceList
       });
+
+      if (deviceList.length <= 3) {
+        this.setState({
+          devicesFilesInput: deviceList
+        });
+      }
     }
   }
 
@@ -135,10 +114,14 @@ class DashboardStatusSection extends React.Component {
       serverConfig,
       loadedFiles,
       loadedDevice,
-      loadedConfig
+      loadedConfig,
+      deviceList,
+      devicesFilesCount
     } = this.props;
 
     const { periodHours, devicesDevicesInput, devicesFilesInput } = this.state;
+
+    const devicesOptions = devicesOptionsFn(deviceList);
 
     const loadedDeviceData =
       deviceFileObjects.length && deviceFileContents.length;
@@ -152,19 +135,6 @@ class DashboardStatusSection extends React.Component {
         <div className="feb-container dashboard">
           <p className="loading-dots">Loading data</p>
           <p className="loading-delay">(this may take a while)</p>
-        </div>
-      );
-    }
-
-    if (
-      loadedDevice &&
-      loadedConfig &&
-      mf4Objects.length == 0 &&
-      deviceFileObjects.length == 0
-    ) {
-      return (
-        <div className="feb-container dashboard">
-          <p className="loading-delay">No data to display</p>
         </div>
       );
     }
@@ -186,7 +156,7 @@ class DashboardStatusSection extends React.Component {
         periodHours,
         mf4Objects,
         mf4ObjectsMin,
-        deviceFileObjects
+        devicesFilesCount
       );
 
       chartData = chartDataArray[0];
@@ -197,56 +167,14 @@ class DashboardStatusSection extends React.Component {
       );
 
       return (
-        <div className="feb-container dashboard">
-          <div className="period-hours-form">
-            <div className="dashboard-control-container">
-              <form onSubmit={this.handleSubmit}>
-                <label className="period-hours-selector">
-                  <input
-                    type="radio"
-                    name="radios"
-                    id="radio1"
-                    value={24 * 30}
-                    checked={this.state.periodHours == 24 * 30}
-                    onChange={this.handleChange}
-                    visibility="hidden"
-                  />
-                  <label htmlFor="radio1">&nbsp;monthly&nbsp;</label>
-                </label>
-                <label className="period-hours-selector">
-                  <input
-                    type="radio"
-                    name="radios"
-                    id="radio2"
-                    value={24 * 7}
-                    checked={this.state.periodHours == 24 * 7}
-                    onChange={this.handleChange}
-                  />
-                  <label htmlFor="radio2">&nbsp;weekly&nbsp;</label>
-                </label>
-                <label className="period-hours-selector">
-                  <input
-                    type="radio"
-                    name="radios"
-                    id="radio3"
-                    value={24}
-                    checked={this.state.periodHours == 24}
-                    onChange={this.handleChange}
-                  />
-                  <label htmlFor="radio3">&nbsp;daily&nbsp;</label>
-                </label>
-                <label className="period-hours-selector">
-                  <input
-                    type="radio"
-                    name="radios"
-                    id="radio4"
-                    value={1}
-                    checked={this.state.periodHours == 1}
-                    onChange={this.handleChange}
-                  />
-                  <label htmlFor="radio4">&nbsp;hourly&nbsp;</label>
-                </label>
-              </form>
+        <div>
+          <div className="dashboard-block" />
+          <div className="multi-check-form">
+            <div className="period-hours-form">
+              <PeriodMenu
+                periodHours={this.state.periodHours}
+                handleChange={this.handleChange}
+              />
             </div>
 
             <div className="dashboard-control-container">
@@ -254,38 +182,41 @@ class DashboardStatusSection extends React.Component {
                 className="field-string"
                 style={{ float: "left", textAlign: "left" }}
               >
-                <span className="devices-list">devices: </span>
-                <input
-                  className="form-control-devices"
-                  type="text"
-                  value={devicesDevicesInput}
-                  onChange={this.handleChangeDevices}
-                />
-                &nbsp;
+                <div className="check-box-container">
+                  <span className="devices-list">devices: </span> &nbsp;
+                </div>
+                <div className="check-box-container multi-select">
+                  <ReactMultiSelectCheckboxes
+                    value={devicesDevicesInput}
+                    options={devicesOptions}
+                    onChange={this.handleChangeDevices}
+                    styles={customCheckboxStyles}
+                  />
+                </div>
+                &nbsp; &nbsp;
                 <p className="field-description field-description-shift">
                   The device-specific dashboard widgets (e.g. heartbeat metrics)
-                  are based on this list of devices (if blank, all devices are
-                  included). The default list of devices can be configured in
-                  the server JSON config.
+                  are based on this list of devices. By default all devices are loaded (but metrics are only shown for those that have checked in within the period selected).
                 </p>
               </div>
               <div
                 className="field-string"
                 style={{ float: "left", textAlign: "left" }}
               >
-                &nbsp;
-                <span className="devices-list">log files: </span>
-                <input
-                  className="form-control-devices"
-                  type="text"
-                  value={devicesFilesInput}
-                  onChange={this.handleChangeFiles}
-                />
+                <div className="check-box-container">
+                  <span className="devices-list">log files: </span>&nbsp;
+                </div>{" "}
+                <div className="check-box-container multi-select">
+                  <ReactMultiSelectCheckboxes
+                    value={devicesFilesInput}
+                    options={devicesOptions}
+                    onChange={this.handleChangeFiles}
+                    styles={customCheckboxStyles}
+                  />
+                </div>
                 <p className="field-description field-description-shift">
                   The log file specific dashboard widgets (e.g. size metrics)
-                  are based on this list of devices (if blank, all devices are
-                  included). The default list of devices can be configured in
-                  the server JSON config.
+                  are based on this list of devices. By default, data for all devices will be loaded when the server has 3 or fewer devices connected. If more devices are connected, the log file specific metrics are not shown by default.
                 </p>
               </div>
               &nbsp; &nbsp;
@@ -301,98 +232,119 @@ class DashboardStatusSection extends React.Component {
             </div>
           </div>
 
-          <div>
-            {wgt.map((widget, i) => (
-              <div
-                key={"widget " + i}
-                className={
-                  "zero-padding " +
-                  (widget.class_name ? widget.class_name : "col-sm-4")
-                }
-              >
-                <div
-                  className="dashboard-widget"
-                  style={{
-                    height:
-                      widget.height +
-                      (widget.widget_type != "kpi" && resWide ? 100 : 0)
-                  }}
-                >
-                  <div className="field-string">
-                    <span className="widget-title">
-                      {widget.title ? widget.title : null}
-                    </span>
-                    {widget.comment ? (
-                      <p className="field-description field-description-shift">
-                        {widget.comment}
-                      </p>
-                    ) : null}
-                  </div>
-                  {(loadedFiles && widget.dependency == "files") ||
-                  (loadedConfig &&
-                    loadedDevice &&
-                    widget.dependency == "devices") ? (
-                    <div>
-                      {widget.widget_type == "kpi" ? (
-                        <div
-                          className="widget-kpi"
-                          style={{ color: chColors[0] }}
-                        >
-                          {widget.dependency == "files"
-                            ? chartData[widget.dataset]
-                            : chartDataDevices[widget.dataset]}
-                        </div>
-                      ) : null}
-
-                      {widget.widget_type == "pie" && chartDataDevicesReady ? (
-                        <Doughnut
-                          data={chartDataDevices[widget.dataset]}
-                          height={widget.height - 60 + (resWide ? 100 : 0)}
-                          options={
-                            widget.dataset == "deviceConfigFW"
-                              ? pieMultiOptions
-                              : pieOptions
-                          }
-                        />
-                      ) : null}
-
-                      {widget.widget_type == "bar" ? (
-                        <Bar
-                          data={
-                            widget.dependency == "files"
-                              ? chartData[widget.dataset]
-                              : chartDataDevices[widget.dataset]
-                          }
-                          height={widget.height - 60 + (resWide ? 100 : 0)}
-                          options={barOptions}
-                        />
-                      ) : null}
-
-                      {widget.widget_type == "table" &&
-                      deviceFileContents.length ? (
-                        <div
-                          style={{
-                            height: widget.height + (resWide ? 100 : 0)
-                          }}
-                        >
-                          <DeviceTable
-                            deviceIdListDeltaSort={chartDataDevicesArray[1]}
-                            deviceFileContents={deviceFileContents}
-                            configFileCrc32={configFileCrc32}
-                            serverConfig={serverConfig}
-                            mf4ObjectsFiltered={chartDataArray[2]}
-                            deviceCrc32Test={chartDataDevicesArray[2]}
-                          />
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <p className="loading-dots">Loading data</p>
-                  )}{" "}
-                  <div style={{ marginTop: 5 }}></div>
-                </div>
+          <div className="feb-container dashboard">
+            {mf4Objects.length == 0 && deviceFileObjects.length == 0 ? (
+              <div>
+                {" "}
+                <br />
+                <br />
+                <p className="loading-delay">No data to display</p>
               </div>
-            ))}
+            ) : (
+              <div>
+                {wgt.map((widget, i) => (
+                  <div
+                    key={"widget " + i}
+                    className={
+                      "zero-padding " +
+                      (widget.class_name ? widget.class_name : "col-sm-4")
+                    }
+                  >
+                    <div
+                      className="dashboard-widget"
+                      style={{
+                        height:
+                          widget.height +
+                          (widget.widget_type != "kpi" && resWide ? 100 : 0)
+                      }}
+                    >
+                      <div className="field-string">
+                        <span className="widget-title">
+                          {widget.title ? widget.title : null}
+                          {widget.dataset == "dataUploadTime" ? (
+                            periodHours == 24 * 30 ? (
+                              <span>(MB/day)</span>
+                            ) : periodHours == 24 * 7 || periodHours == 24 ? (
+                              <span>(MB/hour)</span>
+                            ) : (
+                              <span>(MB/minute)</span>
+                            )
+                          ) : null}
+                        </span>
+                        {widget.comment ? (
+                          <p className="field-description field-description-shift">
+                            {widget.comment}
+                          </p>
+                        ) : null}
+                      </div>
+                      {(loadedFiles && widget.dependency == "files") ||
+                      (loadedConfig &&
+                        loadedDevice &&
+                        widget.dependency == "devices") ? (
+                        <div>
+                          {widget.widget_type == "kpi" ? (
+                            <div
+                              className="widget-kpi"
+                              style={{ color: chColors[0] }}
+                            >
+                              {widget.dependency == "files"
+                                ? chartData[widget.dataset]
+                                : chartDataDevices[widget.dataset]}
+                            </div>
+                          ) : null}
+
+                          {widget.widget_type == "pie" &&
+                          chartDataDevicesReady ? (
+                            <Doughnut
+                              data={chartDataDevices[widget.dataset]}
+                              height={widget.height - 60 + (resWide ? 100 : 0)}
+                              options={
+                                widget.dataset == "deviceConfigFW"
+                                  ? pieMultiOptionsFunc()
+                                  : pieOptionsFunc()
+                              }
+                            />
+                          ) : null}
+
+                          {widget.widget_type == "bar" ? (
+                            <Bar
+                              data={
+                                widget.dependency == "files"
+                                  ? chartData[widget.dataset]
+                                  : chartDataDevices[widget.dataset]
+                              }
+                              height={widget.height - 60 + (resWide ? 100 : 0)}
+                              options={barOptions}
+                            />
+                          ) : null}
+
+                          {widget.widget_type == "table" &&
+                          deviceFileContents.length ? (
+                            <div
+                              style={{
+                                height: widget.height + (resWide ? 100 : 0)
+                              }}
+                            >
+                              <DeviceTable
+                                deviceIdListDeltaSort={chartDataDevicesArray[1]}
+                                deviceFileContents={deviceFileContents}
+                                configFileCrc32={configFileCrc32}
+                                serverConfig={serverConfig}
+                                mf4ObjectsFiltered={chartDataArray[2]}
+                                deviceCrc32Test={chartDataDevicesArray[2]}
+                              />
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p className="loading-dots">Loading data</p>
+                      )}{" "}
+                      <div style={{ marginTop: 5 }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       );
@@ -420,8 +372,7 @@ const mapDispatchToProps = dispatch => ({
   loadedDeviceSet: loadedDevice =>
     dispatch(dashboardStatusActions.loadedDevice(loadedDevice)),
   fetchServerObjectList: () => dispatch(browserActions.fetchServerObjectList()),
-  clearData: () => dispatch(dashboardStatusActions.clearData()),
-  showAlert: alert => dispatch(alertActions.set(alert))
+  clearData: () => dispatch(dashboardStatusActions.clearData())
 });
 
 const mapStateToProps = state => {
@@ -435,7 +386,9 @@ const mapStateToProps = state => {
     configFileContents: state.dashboardStatus.configFileContents,
     loadedFiles: state.dashboardStatus.loadedFiles,
     loadedDevice: state.dashboardStatus.loadedDevice,
-    loadedConfig: state.dashboardStatus.loadedConfig
+    loadedConfig: state.dashboardStatus.loadedConfig,
+    devicesFilesCount: state.dashboardStatus.devicesFilesCount,
+    deviceList: state.buckets.bucketsMeta
   };
 };
 

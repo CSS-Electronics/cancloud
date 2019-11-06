@@ -15,6 +15,8 @@ export const LOADED_FILES = "dashboardStatus/LOADED_FILES";
 export const LOADED_CONFIG = "dashboardStatus/LOADED_CONFIG";
 export const LOADED_DEVICE = "dashboardStatus/LOADED_DEVICE";
 export const CLEAR_DATA = "dashboardStatus/CLEAR_DATA";
+export const SET_DEVICES_FILES_COUNT = "dashboardStatus/SET_DEVICES_FILES_COUNT";
+
 var speedDate = require("speed-date");
 
 const { crc32 } = require("crc");
@@ -36,45 +38,17 @@ lastHour.setTime(lastHour.getTime() - 1 * 60 * 60 * 1000);
 export const listAllObjects = devicesAry => {
    
   return function(dispatch, getState) {
-    // use serverConfig to customize the status dashboard output
-    let config = getState().browser.serverConfig.status_dashboard;
-
-    let devicesDevicesConf =
-      config && config.devices_device_info
-        ? config.devices_device_info.split(" ")
-        : [];
-    let devicesFilesConf =
-      config && config.devices_log_files
-        ? config.devices_log_files.split(" ")
-        : [];
-    let displayFiles =
-      config && config.display_log_files != undefined
-        ? config.display_log_files
-        : 1;
 
     let deviceFileObjectsAry = [];
 
     return web.ListBuckets().then(res => {
       let devices = res.buckets ? res.buckets.map(bucket => bucket.name) : [];
       devices = devices.filter(e => e.match(loggerRegex));
+      const devicesFilesDefaultMax = 3
 
-      // if user inputs custom device lists, use these to override 
-      let devicesDevicesInput = devicesAry ? (devicesAry[0].length ? devicesAry[0].split(" ") : devices) :  null;
-      let devicesFilesInput = devicesAry ? (devicesAry[1].length ? devicesAry[1].split(" ") : devices) : null;
-
-      let devicesDevices = devicesDevicesInput
-        ? devicesDevicesInput
-        : devicesDevicesConf.length
-        ? devicesDevicesConf
-        : devices;
-      let devicesFiles = devicesFilesInput
-        ? devicesFilesInput
-        : displayFiles && devicesFilesConf.length
-        ? devicesFilesConf
-        : displayFiles
-        ? devices
-        : [];
-
+      // by default show all devices for the device info and none for the log file info (unless fewer than 3 devices)
+      let devicesDevices = devicesAry ? (devicesAry[0].length ? devicesAry[0] : []) : devices;
+      let devicesFiles = devicesAry ? (devicesAry[1].length ? devicesAry[1] : []) : devices.length <= devicesFilesDefaultMax ? devices : [];
       let iDeviceFileCount = 0;
 
       // if no devices for files, set loaded to true
@@ -88,6 +62,7 @@ export const listAllObjects = devicesAry => {
         dispatch(loadedConfig(true));
       }
 
+   
       // get device file object data
       if (!getState().dashboardStatus.loadedDevice) {
         devicesDevices.map(device => {
@@ -121,7 +96,7 @@ export const listAllObjects = devicesAry => {
               }
             });
         });
-      } else if (!getState().dashboardStatus.loadedConfig) {
+      } else if (!getState().dashboardStatus.loadedConfig || !getState().dashboardStatus.loadedFiles) {
         dispatch(listConfigFiles(devicesDevices, devicesFiles));
       }
     });
@@ -142,16 +117,15 @@ export const listConfigFiles = (devicesDevices, devicesFiles) => {
             marker: ""
           })
           .then(res => {
+
             iConfigFileCount += 1;
 
             let allObjects = [];
             res.objects.forEach(e => {
-              if (e.lastModified > periodStart) {
                 const name = e.name;
                 const deviceId = e.name.split("/")[0];
                 const lastModified = e.lastModified;
                 allObjects.push({ name, deviceId, lastModified });
-              }
             });
 
             const configObjects = allObjects.filter(obj =>
@@ -294,6 +268,7 @@ export const listLogFiles = devicesFiles => {
             if (iCount == devicesFiles.length) {
               dispatch(setObjectsData(mf4ObjectsHourAry));
               dispatch(setObjectsDataMin(mf4ObjectsMinAry));
+              dispatch(setDevicesFilesCount(devicesFiles.length))
               dispatch(loadedFiles(true));
             }
           });
@@ -317,6 +292,11 @@ export const clearData = () => ({
 export const setObjectsData = mf4Objects => ({
   type: SET_OBJECTS_DATA,
   mf4Objects
+});
+
+export const setDevicesFilesCount = devicesFilesCount => ({
+  type: SET_DEVICES_FILES_COUNT,
+  devicesFilesCount
 });
 
 export const setObjectsDataMin = mf4ObjectsMin => ({

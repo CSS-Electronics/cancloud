@@ -1,103 +1,119 @@
 .form-control-devices {
- font-size:80%;
- border: 0;
- border-bottom: 1px solid @input-border;
- color: @text-color;
- padding: 2px;
- width: 80px;
- border-radius: 5px;
- background-color: rgba(255,255,255,0.5) !important;
- box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15) !important;
- text-align: right;
-
+  font-size: 80%;
+  border: 0;
+  border-bottom: 1px solid @input-border;
+  color: @text-color;
+  padding: 2px;
+  width: 80px;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15) !important;
+  text-align: right;
 }
 
-.btn-small{
-  padding-left:5px;
-  padding-right:5px;
+.btn-small {
+  padding-left: 5px;
+  padding-right: 5px;
   padding-top: 0px;
-  padding-bottoM:0px;
+  padding-bottom: 0px;
 }
 
-.dashboard-control-container{
-  text-align:right;
+.dashboard-control-container {
+  text-align: right;
   float: right;
 
   @media (max-width: @screen-sm-min) {
-    padding-bottom:5px;
+    padding-bottom: 5px;
   }
 }
 
-.devices-list{
-  font-size:80%;
+.check-box-container {
+  float: left;
+  text-align: left;
+}
+
+.multi-select {
+  vertical-align: top;
+  margin-top: 4px;
+  padding-bottom: 16px;
+  height: 15px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.devices-list {
+  font-size: 80%;
   color: @text-color;
 }
 
-
+.dashboard-block {
+  height: 60px;
+}
 .dashboard {
-  padding-top: 60px;
-  padding-left:10px;
-  padding-right:10px;
+  @media (max-width: @screen-sm-min) {
+    padding-top: 0px;
+  }
+
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-.dashboard-widget{
- margin:5px;
- padding: 10px;
- background-color:white;
- border-radius:4px;
- border-color:#dbdbdb;
- border-style:solid;
- border-width:1px;
- overflow:hidden;
- text-overflow: ellipsis;
+.dashboard-widget {
+  margin: 5px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 4px;
+  border-color: #dbdbdb;
+  border-style: solid;
+  border-width: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.zero-padding{
-  padding-left:0px;
-  padding-right:0px;
+.zero-padding {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
-
-.loading-delay{
-  font-size:80%;
-  text-align:center;
+.loading-delay {
+  font-size: 80%;
+  text-align: center;
 }
 
-.loading-dots{
-  padding-top:10px;
-  font-size:80%;
-  text-align:center;
+.loading-dots {
+  padding-top: 10px;
+  font-size: 80%;
+  text-align: center;
 }
 .loading-dots:after {
-  content: ' .';
-  animation: dots 1s steps(5, end) infinite;}
+  content: " .";
+  animation: dots 1s steps(5, end) infinite;
+}
 
 @keyframes dots {
-  0%, 20% {
-    color: rgba(0,0,0,0);
-    text-shadow:
-      .25em 0 0 rgba(0,0,0,0),
-      .5em 0 0 rgba(0,0,0,0);}
-  40% {
-    color:@text-color;
-    text-shadow:
-      .25em 0 0 rgba(0,0,0,0),
-      .5em 0 0 rgba(0,0,0,0);}
-  60% {
-    text-shadow:
-      .25em 0 0 @text-color,
-      .5em 0 0 rgba(0,0,0,0);}
-  80%, 100% {
-    text-shadow:
-      .25em 0 0 @text-color,
-      .5em 0 0 @text-color;}
+  0%,
+  20% {
+    color: rgba(0, 0, 0, 0);
+    text-shadow: 0.25em 0 0 rgba(0, 0, 0, 0), 0.5em 0 0 rgba(0, 0, 0, 0);
   }
+  40% {
+    color: @text-color;
+    text-shadow: 0.25em 0 0 rgba(0, 0, 0, 0), 0.5em 0 0 rgba(0, 0, 0, 0);
+  }
+  60% {
+    text-shadow: 0.25em 0 0 @text-color, 0.5em 0 0 rgba(0, 0, 0, 0);
+  }
+  80%,
+  100% {
+    text-shadow: 0.25em 0 0 @text-color, 0.5em 0 0 @text-color;
+  }
+}
 
 .pie-icon:after {
   font-family: FontAwesome;
   content: "\f200";
-  font-style:normal;
-  margin-left:6px;
+  font-style: normal;
+  margin-left: 6px;
 }
 
 .chart {
@@ -110,7 +126,6 @@
   background-position: left top;
 
   li {
-    // position:relative;
     display: table-cell;
     vertical-align: bottom;
   }
@@ -137,12 +152,30 @@
   }
 }
 
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Opera and Firefox */
+}
+
 .period-hours-form {
   padding-right: 10px;
   margin: 0px;
   text-align: right;
-  width:100%;
-  float:left;
+  width: 100%;
+}
+
+.multi-check-form {
+  vertical-align: bottom;
+  padding-right: 10px;
+  margin: 0px;
+  text-align: right;
+  width: 100%;
+  float: left;
 }
 
 .period-hours-selector {
@@ -178,13 +211,17 @@
   height: 200px !important;
   word-wrap: break-word;
   overflow-y: auto;
-  // overflow-x:hidden;
   font-size: 80%;
   font-family: Consolas;
   background-color: white;
   border-style: solid;
   border-color: @body-bg;
   border-width: 1px;
+}
+
+.widget-container {
+  position: "absolute !important";
+  top: "100px !important";
 }
 
 .file-dropzone {

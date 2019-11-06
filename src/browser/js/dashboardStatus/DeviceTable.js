@@ -9,7 +9,6 @@ const DeviceTable = props => {
     deviceCrc32Test
   } = props;
 
-
   const uploadedPerDevice = mf4ObjectsFiltered.reduce(
     (acc, { deviceId, size }) => {
       if (!acc[deviceId]) {
@@ -63,7 +62,7 @@ const DeviceTable = props => {
     const uploadedMb =
       maxUploaded && uploadedPerDevice[e.deviceId]
         ? ((uploadedPerDevice[e.deviceId] / maxUploaded) * 100) / 100
-        : 0;
+        : NaN;
     const config_sync =
       deviceCrc32Test[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&

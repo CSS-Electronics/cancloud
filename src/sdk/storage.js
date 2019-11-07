@@ -1174,9 +1174,9 @@ export class Client {
     }
     // no need to escape maxKeys
     if (maxKeys) {
-      // if (maxKeys >= 1000) {
-      //   maxKeys = 1000
-      // }
+      if (maxKeys >= 1000) {
+        maxKeys = 1000
+      }
       // maxKeys = 10000
       queries.push(`max-keys=${maxKeys}`)
     }
@@ -1245,6 +1245,8 @@ export class Client {
         .on('data', result => {
           if (result.isTruncated) {
             marker = result.nextMarker
+            // marker = '00000001/00000071/00000050-F25D23AAF169FA80DB913CA59F48E9B8A5F94CC49AD8A49E8710177606AC1899.mf4'
+
           } else {
             ended = true
           }

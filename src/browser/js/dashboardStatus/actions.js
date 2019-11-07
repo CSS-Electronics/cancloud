@@ -319,6 +319,8 @@ export const listLogFiles = devicesFiles => {
 
   // ---------------------------------------------
   return function(dispatch, getState) {
+    console.log("We prepare the loop")
+
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
         web
@@ -330,6 +332,7 @@ export const listLogFiles = devicesFiles => {
           .then(data => {
             iCount += 1;
 
+            console.log("we start processing the data")
             // aggregate data to hourly basis
             dateFormats.map((format, index) => {
               let periodStartVar = index == 0 ? periodStart : lastHour;
@@ -403,10 +406,13 @@ export const listLogFiles = devicesFiles => {
               }
             });
 
+            dispatch(setDevicesFilesCount(iCount))
+
+            console.log("-- we finish processing the data")
+
             if (iCount == devicesFiles.length) {
               dispatch(setObjectsData(mf4ObjectsHourAry));
               dispatch(setObjectsDataMin(mf4ObjectsMinAry));
-              dispatch(setDevicesFilesCount(devicesFiles.length))
               dispatch(loadedFiles(true));
             }
           });

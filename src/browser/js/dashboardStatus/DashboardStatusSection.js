@@ -133,8 +133,7 @@ class DashboardStatusSection extends React.Component {
     if (!loadedDevice && !loadedConfig) {
       return (
         <div className="feb-container dashboard">
-          <p className="loading-dots">Loading data</p>
-          <p className="loading-delay">(this may take a while)</p>
+          <p className="loading-delay loading-dots">Loading data</p>
         </div>
       );
     }
@@ -337,7 +336,11 @@ class DashboardStatusSection extends React.Component {
                           ) : null}
                         </div>
                       ) : (
-                        <p className="loading-dots">Loading data</p>
+                        <div>
+                        <p className="loading-delay">
+                        <span className="loading-dots">Loading data</span><br/>
+                        ({devicesFilesCount}/{devicesFilesInput.length} devices)</p>
+                        </div>
                       )}{" "}
                       <div style={{ marginTop: 5 }}></div>
                     </div>

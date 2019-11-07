@@ -124,6 +124,7 @@ class S3Explorer {
    * @param {*} cb
    */
   listObjects(bucketName, prefix, marker, cb) {
+
     var stream;
     let updatedPrefix = bucketName + "/" + prefix;
     if ("Home" == bucketName) {
@@ -153,8 +154,13 @@ class S3Explorer {
     });
   }
 
+  
   // list bucket objects from S3 compatible storage
   listObjectsRecursive(bucketName, prefix, marker, cb) {
+    let periodStart = new Date(); // get current date & time
+    let periodDaysMax = 30; // all objects before this period are excluded
+    periodStart.setDate(periodStart.getDate() - periodDaysMax);
+    
     var stream;
     let objectNameWithPrefix = bucketName + "/" + prefix;
     if ("Home" == bucketName) {
@@ -169,11 +175,15 @@ class S3Explorer {
 
     let objectsArray = [];
     let iCount = 0;
-    stream.on("data", function(obj) {
-      if (obj.name || obj.prefix) {
-        obj["name"] = obj.prefix ? obj.prefix : obj.name;
-        objectsArray.push(obj);
-        iCount += 1
+    stream.on("data", function(obj) {    
+      if(obj.lastModified < periodStart){
+        // do nothing
+      }else{
+        if (obj.name || obj.prefix) {
+          obj["name"] = obj.prefix ? obj.prefix : obj.name;
+          objectsArray.push(obj);
+          iCount += 1
+        }
       }
     });
     stream.on("end", function() {
@@ -460,7 +470,6 @@ class S3Explorer {
     const s3SelectObject = this.AwsSdk.selectObjectContent(params);
     s3SelectObject
       .then(data => {
-        console.log("data",data)
         const records = _.map(
           _.filter(data.split("\n"), record => record),
           record => JSON.parse(record)

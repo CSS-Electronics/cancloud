@@ -15,7 +15,8 @@ export const LOADED_FILES = "dashboardStatus/LOADED_FILES";
 export const LOADED_CONFIG = "dashboardStatus/LOADED_CONFIG";
 export const LOADED_DEVICE = "dashboardStatus/LOADED_DEVICE";
 export const CLEAR_DATA = "dashboardStatus/CLEAR_DATA";
-export const SET_DEVICES_FILES_COUNT = "dashboardStatus/SET_DEVICES_FILES_COUNT";
+export const SET_DEVICES_FILES_COUNT =
+  "dashboardStatus/SET_DEVICES_FILES_COUNT";
 
 var speedDate = require("speed-date");
 
@@ -36,19 +37,27 @@ let lastHour = new Date();
 lastHour.setTime(lastHour.getTime() - 1 * 60 * 60 * 1000);
 
 export const listAllObjects = devicesAry => {
-   
   return function(dispatch, getState) {
-
     let deviceFileObjectsAry = [];
 
     return web.ListBuckets().then(res => {
       let devices = res.buckets ? res.buckets.map(bucket => bucket.name) : [];
       devices = devices.filter(e => e.match(loggerRegex));
-      const devicesFilesDefaultMax = 3
+      const devicesFilesDefaultMax = 3;
 
       // by default show all devices for the device info and none for the log file info (unless fewer than 3 devices)
-      let devicesDevices = devicesAry ? (devicesAry[0].length ? devicesAry[0] : []) : devices;
-      let devicesFiles = devicesAry ? (devicesAry[1].length ? devicesAry[1] : []) : devices.length <= devicesFilesDefaultMax ? devices : [];
+      let devicesDevices = devicesAry
+        ? devicesAry[0].length
+          ? devicesAry[0]
+          : []
+        : devices;
+      let devicesFiles = devicesAry
+        ? devicesAry[1].length
+          ? devicesAry[1]
+          : []
+        : devices.length <= devicesFilesDefaultMax
+        ? devices
+        : [];
       let iDeviceFileCount = 0;
 
       // if no devices for files, set loaded to true
@@ -62,7 +71,6 @@ export const listAllObjects = devicesAry => {
         dispatch(loadedConfig(true));
       }
 
-   
       // get device file object data
       if (!getState().dashboardStatus.loadedDevice) {
         devicesDevices.map(device => {
@@ -96,7 +104,10 @@ export const listAllObjects = devicesAry => {
               }
             });
         });
-      } else if (!getState().dashboardStatus.loadedConfig || !getState().dashboardStatus.loadedFiles) {
+      } else if (
+        !getState().dashboardStatus.loadedConfig ||
+        !getState().dashboardStatus.loadedFiles
+      ) {
         dispatch(listConfigFiles(devicesDevices, devicesFiles));
       }
     });
@@ -111,21 +122,20 @@ export const listConfigFiles = (devicesDevices, devicesFiles) => {
     if (!getState().dashboardStatus.loadedConfig) {
       devicesDevices.map(device => {
         web
-          .ListObjectsRecursive({
-            bucketName: "Home",
-            prefix: device + "/config-",
+          .ListObjects({
+            bucketName: device,
+            prefix: "config-",
             marker: ""
           })
           .then(res => {
-
             iConfigFileCount += 1;
 
             let allObjects = [];
             res.objects.forEach(e => {
-                const name = e.name;
-                const deviceId = e.name.split("/")[0];
-                const lastModified = e.lastModified;
-                allObjects.push({ name, deviceId, lastModified });
+              const deviceId = device;
+              const name = device + "/config-" + e.name;
+              const lastModified = e.lastModified;
+              allObjects.push({ name, deviceId, lastModified });
             });
 
             const configObjects = allObjects.filter(obj =>
@@ -179,6 +189,135 @@ export const listLogFiles = devicesFiles => {
   let mf4ObjectsMinAry = [];
   let dateFormats = ["YYYY-MM-DD HH", "YYYY-MM-DD HH:mm"];
 
+  // return function(dispatch, getState) {
+  //   if (!getState().dashboardStatus.loadedFiles) {
+  //     devicesFiles.map(device => {
+  //       web
+  //         .ListObjects({
+  //           bucketName: device,
+  //           prefix: "",
+  //           marker: ""
+  //         })
+  //         .then(res => {
+  //           let results = res.objects;
+  //           let prefixes = results
+  //             .filter(e => e.prefix)
+  //             .map(e => e.name.replace("/", ""))
+  //             .reverse();
+
+  //           prefixes.map(prefix => {
+  //             web
+  //               .ListObjectsRecursive({
+  //                 bucketName: "Home",
+  //                 prefix: device + "/" + prefix,
+  //                 marker: ""
+  //               })
+  //               .then(data => {
+                  
+  //                 iCount += 1;
+
+  //                 // aggregate data to hourly basis
+  //                 dateFormats.map((format, index) => {
+  //                   let periodStartVar = index == 0 ? periodStart : lastHour;
+  //                   let sizePerTime = {};
+
+  //                   sizePerTime = data.objects.reduce(
+  //                     (acc, { lastModified, size }) => {
+  //                       if (lastModified > periodStartVar) {
+  //                         const lastModH = speedDate.cached(
+  //                           format,
+  //                           lastModified
+  //                         );
+
+  //                         if (!acc) {
+  //                           acc = {};
+  //                         }
+
+  //                         if (!acc[lastModH]) {
+  //                           acc[lastModH] = 0;
+  //                         }
+
+  //                         acc[lastModH] =
+  //                           Math.round(parseFloat(acc[lastModH] + size) * 100) /
+  //                           100;
+  //                         return acc;
+  //                       }
+  //                     },
+  //                     {}
+  //                   );
+
+  //                   let countPerTime = data.objects.reduce(
+  //                     (accCnt, { lastModified }) => {
+  //                       if (lastModified > periodStartVar) {
+  //                         const lastModH = speedDate.cached(
+  //                           format,
+  //                           lastModified
+  //                         );
+
+  //                         if (!accCnt) {
+  //                           accCnt = {};
+  //                         }
+
+  //                         if (!accCnt[lastModH]) {
+  //                           accCnt[lastModH] = 0;
+  //                         }
+
+  //                         accCnt[lastModH] = parseInt(accCnt[lastModH] + 1);
+  //                         return accCnt;
+  //                       }
+  //                     },
+  //                     {}
+  //                   );
+
+  //                   let dataPerTimeAry = [];
+  //                   if (sizePerTime) {
+  //                     const periodStartVarFormat = speedDate(
+  //                       format,
+  //                       periodStartVar
+  //                     );
+
+  //                     Object.keys(sizePerTime).forEach(e => {
+  //                       if (e > periodStartVarFormat) {
+  //                         const deviceId = device;
+  //                         const lastModified = e;
+  //                         const size = sizePerTime[e] / 1000000;
+  //                         const count = countPerTime[e];
+  //                         dataPerTimeAry.push({
+  //                           deviceId,
+  //                           lastModified,
+  //                           size,
+  //                           count
+  //                         });
+  //                       }
+  //                     });
+  //                   }
+
+  //                   if (index == 0) {
+  //                     mf4ObjectsHourAry = mf4ObjectsHourAry.concat(
+  //                       dataPerTimeAry
+  //                     );
+  //                   } else {
+  //                     mf4ObjectsMinAry = mf4ObjectsMinAry.concat(
+  //                       dataPerTimeAry
+  //                     );
+  //                   }
+  //                 });
+
+  //                 if (iCount == devicesFiles.length) {
+  //                   dispatch(setObjectsData(mf4ObjectsHourAry));
+  //                   dispatch(setObjectsDataMin(mf4ObjectsMinAry));
+  //                   dispatch(setDevicesFilesCount(devicesFiles.length));
+  //                   dispatch(loadedFiles(true));
+  //                 }
+  //               });
+  //           });
+  //         });
+  //     });
+  //   }
+  // };
+
+
+  // ---------------------------------------------
   return function(dispatch, getState) {
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
@@ -205,7 +344,6 @@ export const listLogFiles = devicesFiles => {
                       acc = {};
                     }
 
-                    /// SOMETHING HAPPENS HERE THAT GOES WRONG
                     if (!acc[lastModH]) {
                       acc[lastModH] = 0;
                     }
@@ -283,6 +421,11 @@ export const listLogFiles = devicesFiles => {
       });
     }
   };
+
+
+
+
+
 };
 
 export const clearData = () => ({

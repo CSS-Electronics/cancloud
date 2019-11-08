@@ -183,41 +183,10 @@ class DashboardStatusSection extends React.Component {
             </div>
 
             <div className="dashboard-control-container">
+                         
               <div
                 className="field-string"
-                style={{ float: "left", textAlign: "left" }}
-              >
-                <div className="check-box-container">
-                  <span className="devices-list">devices: </span> &nbsp;
-                </div>
-                <div className="check-box-container multi-select">
-                  <ReactMultiSelectCheckboxes
-                    value={devicesDevicesInput}
-                    options={devicesOptions}
-                    onChange={this.handleChangeDevices}
-                    styles={customCheckboxStyles}
-                  />
-                </div>
-                &nbsp; &nbsp;
-                <p className="field-description field-description-shift">
-                  The device-specific dashboard widgets (e.g. heartbeat metrics)
-                  are based on this list of devices. By default all devices are loaded (but metrics are only shown for those that have checked in within the period selected).
-                </p>
-              <button
-                type="button"
-                id="devices-btn"
-                onClick={this.updateDevicesDevices.bind(this)}
-                className="btn btn-small"
-              >
-                {" "}
-                update{" "}
-              </button>
-              &nbsp; &nbsp;
-              </div>
-             
-              <div
-                className="field-string"
-                style={{ float: "left", textAlign: "left" }}
+                style={{ float: "right", textAlign: "left" }}
               >
                 <div className="check-box-container">
                   <span className="devices-list">log files: </span>&nbsp;
@@ -240,6 +209,38 @@ class DashboardStatusSection extends React.Component {
                 type="button"
                 id="files-btn"
                 onClick={this.updateDevicesFiles.bind(this)}
+                className="btn btn-small"
+              >
+                {" "}
+                update{" "}
+              </button>
+              &nbsp; &nbsp;
+              </div>
+
+              <div
+                className="field-string"
+                style={{ float: "right", textAlign: "left" }}
+              >
+                <div className="check-box-container">
+                  <span className="devices-list">devices: </span> &nbsp;
+                </div>
+                <div className="check-box-container multi-select">
+                  <ReactMultiSelectCheckboxes
+                    value={devicesDevicesInput}
+                    options={devicesOptions}
+                    onChange={this.handleChangeDevices}
+                    styles={customCheckboxStyles}
+                  />
+                </div>
+                &nbsp; &nbsp;
+                <p className="field-description field-description-shift">
+                  The device-specific dashboard widgets (e.g. heartbeat metrics)
+                  are based on this list of devices. By default all devices are loaded (but metrics are only shown for those that have checked in within the period selected).
+                </p>
+              <button
+                type="button"
+                id="devices-btn"
+                onClick={this.updateDevicesDevices.bind(this)}
                 className="btn btn-small"
               >
                 {" "}

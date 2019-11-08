@@ -73,13 +73,21 @@ class DashboardStatusSection extends React.Component {
     });
   }
 
-  handleButtonClick(e) {
+  updateDevicesDevices(e) {
     this.setState({}, () => {
-      this.props.clearData();
-      this.props.listAllObjects([
-        this.state.devicesDevicesInput.map(e => e.value),
+      this.props.clearDataDevices();
+      this.props.listAllObjects(
+        this.state.devicesDevicesInput.map(e => e.value)
+      );
+    });
+  }
+
+  updateDevicesFiles(e) {
+    this.setState({}, () => {
+      this.props.clearDataFiles();
+      this.props.listLogFiles(
         this.state.devicesFilesInput.map(e => e.value)
-      ]);
+      );
     });
   }
 
@@ -101,7 +109,8 @@ class DashboardStatusSection extends React.Component {
   }
 
   componentWillUnmount() {
-    this.props.clearData();
+    this.props.clearDataDevices();
+    this.props.clearDataFiles();
   }
 
   render() {
@@ -120,23 +129,32 @@ class DashboardStatusSection extends React.Component {
     } = this.props;
 
     const { periodHours, devicesDevicesInput, devicesFilesInput } = this.state;
-
     const devicesOptions = devicesOptionsFn(deviceList);
 
-    const loadedDeviceData =
-      deviceFileObjects.length && deviceFileContents.length;
+    const loadedDeviceData = (deviceFileObjects && deviceFileContents) ? 
+      deviceFileObjects.length && deviceFileContents.length : 0;
     let chartDataDevices = [];
     let chartDataDevicesArray = [];
     let chartDataDevicesReady = 0;
     let chartData = [];
+    let chartDataArray = []
+    let barOptions  = {}
 
-    if (!loadedDevice && !loadedConfig) {
-      return (
-        <div className="feb-container dashboard">
-          <p className="loading-delay loading-dots">Loading data</p>
-        </div>
-      );
-    }
+    if(loadedFiles){
+    chartDataArray = prepareData(
+      periodHours,
+      mf4Objects,
+      mf4ObjectsMin,
+      devicesFilesCount
+    );
+
+    chartData = chartDataArray[0];
+
+    barOptions = barOptionsFunc(
+      this.state.periodHours,
+      chartDataArray[1]
+    );
+  }
 
     if (loadedDevice && loadedConfig) {
       if (loadedDeviceData) {
@@ -150,20 +168,8 @@ class DashboardStatusSection extends React.Component {
         chartDataDevices = chartDataDevicesArray[0];
         chartDataDevicesReady = Object.values(chartDataDevicesArray[0]).length;
       }
+    }
 
-      let chartDataArray = prepareData(
-        periodHours,
-        mf4Objects,
-        mf4ObjectsMin,
-        devicesFilesCount
-      );
-
-      chartData = chartDataArray[0];
-
-      const barOptions = barOptionsFunc(
-        this.state.periodHours,
-        chartDataArray[1]
-      );
 
       return (
         <div>
@@ -197,7 +203,18 @@ class DashboardStatusSection extends React.Component {
                   The device-specific dashboard widgets (e.g. heartbeat metrics)
                   are based on this list of devices. By default all devices are loaded (but metrics are only shown for those that have checked in within the period selected).
                 </p>
+              <button
+                type="button"
+                id="devices-btn"
+                onClick={this.updateDevicesDevices.bind(this)}
+                className="btn btn-small"
+              >
+                {" "}
+                update{" "}
+              </button>
+              &nbsp; &nbsp;
               </div>
+             
               <div
                 className="field-string"
                 style={{ float: "left", textAlign: "left" }}
@@ -205,6 +222,7 @@ class DashboardStatusSection extends React.Component {
                 <div className="check-box-container">
                   <span className="devices-list">log files: </span>&nbsp;
                 </div>{" "}
+
                 <div className="check-box-container multi-select">
                   <ReactMultiSelectCheckboxes
                     value={devicesFilesInput}
@@ -217,17 +235,19 @@ class DashboardStatusSection extends React.Component {
                   The log file specific dashboard widgets (e.g. size metrics)
                   are based on this list of devices. By default, data for all devices will be loaded when the server has 3 or fewer devices connected. If more devices are connected, the log file specific metrics are not shown by default.
                 </p>
-              </div>
-              &nbsp; &nbsp;
+                &nbsp; &nbsp;
               <button
                 type="button"
-                onClick={this.handleButtonClick.bind(this)}
+                id="files-btn"
+                onClick={this.updateDevicesFiles.bind(this)}
                 className="btn btn-small"
               >
                 {" "}
                 update{" "}
               </button>
               &nbsp; &nbsp;
+              </div>
+             
             </div>
           </div>
 
@@ -329,18 +349,19 @@ class DashboardStatusSection extends React.Component {
                                 deviceFileContents={deviceFileContents}
                                 configFileCrc32={configFileCrc32}
                                 serverConfig={serverConfig}
-                                mf4ObjectsFiltered={chartDataArray[2]}
+                                mf4ObjectsFiltered={chartDataArray[2] ? chartDataArray[2] : []}
                                 deviceCrc32Test={chartDataDevicesArray[2]}
                               />
                             </div>
                           ) : null}
                         </div>
                       ) : (
+                        !loadedFiles ? (
                         <div>
                         <p className="loading-delay">
                         <span className="loading-dots">Loading data</span><br/>
                         ({devicesFilesCount}/{devicesFilesInput.length} devices)</p>
-                        </div>
+                        </div>) : null
                       )}{" "}
                       <div style={{ marginTop: 5 }}></div>
                     </div>
@@ -351,15 +372,14 @@ class DashboardStatusSection extends React.Component {
           </div>
         </div>
       );
-    } else {
-      return <div className="feb-container dashboard"></div>;
-    }
   }
 }
 
 const mapDispatchToProps = dispatch => ({
   listAllObjects: prefix =>
     dispatch(dashboardStatusActions.listAllObjects(prefix)),
+    listLogFiles: devicesFilesInput =>
+    dispatch(dashboardStatusActions.listLogFiles(devicesFilesInput)),
   setObjectsData: objectsData =>
     dispatch(dashboardStatusActions.setObjectsData(objectsData)),
   setConfigObjects: configObjectsUnique =>
@@ -375,7 +395,8 @@ const mapDispatchToProps = dispatch => ({
   loadedDeviceSet: loadedDevice =>
     dispatch(dashboardStatusActions.loadedDevice(loadedDevice)),
   fetchServerObjectList: () => dispatch(browserActions.fetchServerObjectList()),
-  clearData: () => dispatch(dashboardStatusActions.clearData())
+  clearDataDevices: () => dispatch(dashboardStatusActions.clearDataDevices()),
+  clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles())
 });
 
 const mapStateToProps = state => {

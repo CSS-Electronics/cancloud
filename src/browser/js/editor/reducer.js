@@ -18,6 +18,8 @@ export default (
   switch (action.type) {
     case actionsEditor.RESET_SCHEMA_FILES:
       return {
+        ...state,
+        formData: {},
         editorSchemaFiles: [],
         editorConfigFiles: [],
         editorUISchemaFiles: []

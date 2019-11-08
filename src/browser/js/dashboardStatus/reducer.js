@@ -3,34 +3,39 @@ import * as dashboardStatusActions from "./actions";
 export default (
   state = {
     mf4Objects: [],
-    mf4ObjectsMin:[],
+    mf4ObjectsMin: [],
     deviceFileContents: [],
     deviceFileObjects: [],
     configObjectsUnique: [],
     configFileContents: [],
     configFileCrc32: [],
-    loadedFiles:false,
-    loadedConfig:false,
-    loadedDevice:false,
-    devicesFilesCount:0
+    loadedFiles: false,
+    loadedConfig: false,
+    loadedDevice: false,
+    devicesFilesCount: 0
   },
   action
 ) => {
   switch (action.type) {
-    case dashboardStatusActions.CLEAR_DATA:
-        return {
-          mf4Objects: [],
-          mf4ObjectsMin:[],
-          deviceFileContents: [],
-          deviceFileObjects: [],
-          configObjectsUnique: [],
-          configFileContents: [],
-          configFileCrc32: [],
-          loadedFiles: false,
-          loadedConfig: false,
-          loadedDevice: false,
-          devicesFilesCount:0
-        };
+    case dashboardStatusActions.CLEAR_DATA_DEVICES:
+      return {
+        ...state,
+        deviceFileContents: [],
+        deviceFileObjects: [],
+        configObjectsUnique: [],
+        configFileContents: [],
+        configFileCrc32: [],
+        loadedConfig: false,
+        loadedDevice: false
+      };
+    case dashboardStatusActions.CLEAR_DATA_FILES:
+      return {
+        ...state,
+        mf4Objects: [],
+        mf4ObjectsMin: [],
+        loadedFiles: false,
+        devicesFilesCount: 0
+      };
     case dashboardStatusActions.SET_OBJECTS_DATA:
       return {
         ...state,
@@ -42,25 +47,25 @@ export default (
         devicesFilesCount: action.devicesFilesCount
       };
     case dashboardStatusActions.SET_OBJECTS_DATA_MIN:
-        return {
-          ...state,
-          mf4ObjectsMin: action.mf4ObjectsMin
-        };
+      return {
+        ...state,
+        mf4ObjectsMin: action.mf4ObjectsMin
+      };
     case dashboardStatusActions.LOADED_FILES:
-        return {
-          ...state,
-          loadedFiles: action.loadedFiles
-        };
-        case dashboardStatusActions.LOADED_CONFIG:
-          return {
-            ...state,
-            loadedConfig: action.loadedConfig
-          };
-          case dashboardStatusActions.LOADED_DEVICE:
-            return {
-              ...state,
-              loadedDevice: action.loadedDevice
-            };
+      return {
+        ...state,
+        loadedFiles: action.loadedFiles
+      };
+    case dashboardStatusActions.LOADED_CONFIG:
+      return {
+        ...state,
+        loadedConfig: action.loadedConfig
+      };
+    case dashboardStatusActions.LOADED_DEVICE:
+      return {
+        ...state,
+        loadedDevice: action.loadedDevice
+      };
     case dashboardStatusActions.SET_CONFIG_OBJECTS:
       return {
         ...state,

@@ -88,7 +88,7 @@ const DeviceTable = props => {
     id: "Device ID",
     meta: "Config meta",
     name: "Server meta",
-    fw_ver: "FW version",
+    fw_ver: "FW",
     uploadedMb: "MB uploaded",
     config_sync: "Config synced"
   };

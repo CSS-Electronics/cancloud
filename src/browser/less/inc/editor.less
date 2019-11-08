@@ -34,7 +34,6 @@
   }
 }
 
-
 .editor-schema-modal-hide {
   display: none;
 }
@@ -49,7 +48,7 @@
 }
 
 .blue-text {
-  color:@blue-css;
+  color: @blue-css;
 }
 
 .editor-schema-button {
@@ -267,6 +266,12 @@
   margin-top: -1px;
   -webkit-box-shadow: @dropdown-shadow;
   box-shadow: @dropdown-shadow;
+}
+
+@media (max-width: @screen-sm-max), (max-height: 500px) {
+  .field-description {
+    visibility: hidden !important;
+  }
 }
 
 @media (max-width: @screen-sm-max) {

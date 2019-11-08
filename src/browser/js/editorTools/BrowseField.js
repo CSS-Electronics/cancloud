@@ -84,8 +84,13 @@ class BrowseField extends React.Component {
     const { formData, schemaContent} = this.props;
 
     return (
+      <div>
       <div className="form-group pl0 field-string">
         <p className="reduced-margin">{this.props.headerText} </p>
+        <p className="field-description field-description-shift">
+          {this.props.comment}
+        </p>
+        </div><div>
         {formData? (  <div className="text-area-wrapper row no-gutters reduced-margin">
           <div className="file-dropzone">
             <Files
@@ -132,9 +137,7 @@ class BrowseField extends React.Component {
 
       
 
-        <p className="field-description field-description-shift">
-          {this.props.comment}
-        </p>
+
         <div style={{display:"none"}}>
           {JSON.stringify(mergedConfig,null,2)}
         <Form 
@@ -143,6 +146,7 @@ class BrowseField extends React.Component {
         formData={mergedConfig ? mergedConfig : {}}
         onSubmit={this.onSubmit} ref={(form) => {yourForm = form;}}/>
         </div>
+      </div>
       </div>
     );
   }

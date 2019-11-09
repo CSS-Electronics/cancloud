@@ -147,7 +147,7 @@ class LoadEditorFiles extends React.Component {
     }
 
     let uiLocal = nextProps.editorUISchemaFiles.filter(file => file.name.includes("(local)"));
-    let schemaLocal = nextProps.editorSchemaFiles.filter(file => file.name.includes("(local)"));
+    let schemaLocal = nextProps.editorSchemaFiles.filter(file => file.name.includes("(local)") || file.name.includes("CANedge"));
     let configLocal = nextProps.editorConfigFiles.filter(file => file.name.includes("(local)"));
 
     if (uiLocal.length) {
@@ -323,7 +323,7 @@ class LoadEditorFiles extends React.Component {
         editorSchemaFiles[0] && editorSchemaFiles[0].name
           ? editorSchemaFiles[0].name
           : selectedSchemaAdj;
-    }
+    } 
 
     if (testConfigLoaded === 0 && selectedConfigAdj.includes("(local)")) {
       selectedConfigAdj =

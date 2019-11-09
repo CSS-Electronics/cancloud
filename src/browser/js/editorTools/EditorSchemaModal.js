@@ -38,6 +38,7 @@ class EditorSchemaModal extends React.Component {
       selectedSchema,
       selectedConfig
     } = this.props;
+    
     return (
       <div className="tools-side-bar">
         <button type="button" className="close" onClick={this.closeModal}>

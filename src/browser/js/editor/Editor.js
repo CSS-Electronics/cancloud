@@ -20,7 +20,7 @@ import PartialConfigLoader from "../editorTools/PartialConfigLoader";
 
 class Editor extends React.Component {
   componentWillMount() {
-    const { selectBucket, resetFiles, publicConfigFiles } = this.props;
+    const { selectBucket, resetFiles, publicUiSchemaFilesSimple } = this.props;
     const { prefix } = pathSlice(history.location.pathname);
     resetFiles();
     selectBucket(prefix);
@@ -31,7 +31,7 @@ class Editor extends React.Component {
     ) {
       history.push("/login");
     } else if (!prefix) {
-      publicConfigFiles();
+      publicUiSchemaFilesSimple();
     }
   }
 
@@ -87,7 +87,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    publicConfigFiles: () => dispatch(actionsEditor.publicConfigFiles()),
+    publicUiSchemaFilesSimple: () => dispatch(actionsEditor.publicUiSchemaFilesSimple()),
     selectBucket: (bucket, prefix) =>
       dispatch(actionsBuckets.selectBucket(bucket, prefix)),
     resetFiles: () => dispatch(actionsEditor.resetFiles())

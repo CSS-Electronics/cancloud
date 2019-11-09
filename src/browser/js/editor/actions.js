@@ -38,6 +38,7 @@ export const SET_PREV_DEVICE_FILE_DEVICE = "editor/SET_PREV_DEVICE_FILE_DEVICE";
 export const SET_DEVICE_FILE_LAST_MODIFIED = "editor/SET_DEVICE_FILE_LAST_MODIFIED";
 
 const regexSchema = new RegExp(/^schema-\d{2}\.\d{2}\.json/, "g");
+const regexSchemaPublic = new RegExp(/^schema-\d{2}\.\d{2}\.json \| CANedge(1|2)$/,"g")
 const regexConfig = new RegExp(/^config-\d{2}\.\d{2}\.json/, "g");
 const regexUiSchema = new RegExp(/^uischema-\d{2}\.\d{2}\.json/, "g");
 const regexDeviceFile = new RegExp(/^device\.json/, "g");
@@ -56,6 +57,7 @@ const defaultConfig = defaultConfigs.config
   ? require(`../../schema/${defaultConfigs.config}`)
   : "";
 
+// assign the local schema files in the logged in CANcloud editor
 export const publicUiSchemaFiles = () => {
   return function(dispatch) {
     dispatch(setUISchemaFile([defaultConfigs.uischema]));
@@ -63,21 +65,61 @@ export const publicUiSchemaFiles = () => {
   };
 };
 
-export const publicConfigFiles = () => {
+// assign the local schema files in the online simple editor
+export const publicUiSchemaFilesSimple = () => {
   return function(dispatch) {
     const uischemaFile = defaultConfigs.uischema
       ? [defaultConfigs.uischema]
       : [];
+    
     const schemaFile = defaultConfigs.schema ? [defaultConfigs.schema] : [];
     const config = defaultConfigs.config ? [defaultConfigs.config] : [];
+  
     dispatch(setUISchemaFile(uischemaFile));
     dispatch(setSchemaFile(schemaFile));
     dispatch(setConfigFile(config));
     dispatch(setUISchemaContent(defaultUISchema));
     dispatch(setSchemaContent(defaultSchema));
     dispatch(setConfigContent(defaultConfig));
+   
   };
 };
+
+
+export const publicSchemaFiles = (selectedConfig) => {
+  return function(dispatch) {
+    dispatch(resetLocalSchemaList());
+
+    const schemaAry = [
+      "schema-00.09.json | CANedge2",
+      "schema-00.09.json | CANedge1",
+      "schema-00.08.json | CANedge2",
+      "schema-00.08.json | CANedge1",
+      "schema-00.07.json | CANedge2",
+      "schema-00.07.json | CANedge1",
+      "schema-00.06.json | CANedge2",
+      "schema-00.06.json | CANedge1",
+      "schema-00.05.json | CANedge2",
+      "schema-00.05.json | CANedge1"
+    ];
+
+    if(selectedConfig){
+    const schemaAryFiltered = schemaAry.filter(e =>
+      e.includes(selectedConfig.substr(7, 5))
+    );
+
+    const defaultSchema = schemaAryFiltered[0]
+    const schemaPublic = require(`../../schema/${defaultSchema.split(" | ")[1]}/${defaultSchema.split(" ")[0]}`)
+
+
+    dispatch(setSchemaFile(schemaAryFiltered));
+    dispatch(setSchemaContent(schemaPublic));
+
+  }
+  };
+};
+
+
 
 export const resetFiles = () => ({
   type: RESET_SCHEMA_FILES,
@@ -363,7 +405,9 @@ export const updateConfigFile = (content, object) => {
 
 export const fetchConfigContent = fileName => {
   return function(dispatch, getState) {
+    
     dispatch(resetLocalConfigList());
+
     if (fileName == "None") {
       dispatch(setConfigContent(null));
       dispatch(setConfigContentPreChange(null));
@@ -431,18 +475,25 @@ export const setUiSchemaSource = uiSchemaSource => ({
   uiSchemaSource
 });
 
+
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
     dispatch(resetLocalSchemaList());
-    switch (fileName) {
-      case "None":
+
+    if(getState().editor.editorConfigFiles[0] && getState().editor.editorConfigFiles[0].name && !prefix.length){
+      dispatch(publicSchemaFiles(getState().editor.editorConfigFiles[0].name))
+    }
+    switch (true) {
+      case fileName == "None":
         dispatch(setSchemaContent(null));
         break;
-      case defaultConfigs.schema:
-        dispatch(setSchemaContent(defaultSchema));
+      case fileName.match(regexSchemaPublic) != null:
+        const schemaPublic = require(`../../schema/${fileName.split(" | ")[1]}/${fileName.split(" ")[0]}`)
+        dispatch(setSchemaContent(schemaPublic));
         break;
       default:
-        const { bucket, prefix } = pathSlice(history.location.pathname);
         const currentBucket = getCurrentBucket(getState());
         const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
         if (prefix && fileName && fileName != "Upload") {
@@ -672,7 +723,15 @@ export const handleUploadedSchma = file => {
 };
 
 export const handleUploadedConfig = file => {
-  return function(dispatch) {
+  
+  return function(dispatch, getState) {
+
+    // load the matching schema files if a schema file is not already uploaded
+    const localLoaded = getState().editor.editorSchemaFiles[0] && getState().editor.editorSchemaFiles[0].name.includes("local")
+
+    if(file && file.name && file.name.length && !localLoaded){
+      dispatch(publicSchemaFiles(file.name))
+    }
     if (isValidConfig(file.name)) {
       let fileReader = new FileReader();
       fileReader.onloadend = e => {
@@ -682,7 +741,6 @@ export const handleUploadedConfig = file => {
           : file.name.split("_")[0];
         try {
           const jsonContent = JSON.parse(content)
-          console.log(jsonContent)
           dispatch(setConfigContent(jsonContent));
           dispatch(setConfigContentPreChange(jsonContent));
           // dispatch(setUpdatedFormData(jsonContent));

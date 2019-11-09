@@ -20,6 +20,7 @@ import { Dropdown } from "react-bootstrap";
 import * as browserActions from "./actions";
 import * as actionsBuckets from "../buckets/actions";
 import * as actionsEditor from "../editor/actions";
+import * as actionsEditorTools from "../editorTools/actions"
 import web from "../web";
 import history from "../history";
 
@@ -64,7 +65,11 @@ export class BrowserDropdown extends React.Component {
     this.props.selectBucket("Home");
     this.props.resetFiles();
     history.push("/configuration/");
-    this.props.publicConfigFiles();
+    this.props.publicUiSchemaFilesSimple();
+    if(this.props.editorSchemaSidebarOpen){
+      this.props.toggleEditorSchemaSideBar()
+    }
+
   }
 
   dashboard(e) {
@@ -111,7 +116,8 @@ export class BrowserDropdown extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    serverInfo: state.browser.serverInfo
+    serverInfo: state.browser.serverInfo,
+    editorSchemaSidebarOpen: state.editorTools.editorSchemaSidebarOpen
   };
 };
 
@@ -121,7 +127,8 @@ const mapDispatchToProps = dispatch => {
     selectBucket: (bucket, prefix) =>
       dispatch(actionsBuckets.selectBucket(bucket)),
     resetFiles: () => dispatch(actionsEditor.resetFiles()),
-    publicConfigFiles: () => dispatch(actionsEditor.publicConfigFiles()),
+    publicUiSchemaFilesSimple: () => dispatch(actionsEditor.publicUiSchemaFilesSimple()),
+    toggleEditorSchemaSideBar: () => dispatch(actionsEditorTools.toggleEditorSchemaSideBar()),
     userLogout: () => dispatch(actionsBuckets.userLogout())
   };
 };

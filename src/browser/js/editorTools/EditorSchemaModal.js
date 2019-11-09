@@ -17,12 +17,19 @@ class EditorSchemaModal extends React.Component {
   }
 
   componentDidMount() {
-    if (EDITOR.offline || !this.props.currentBucket) {
+    console.log("WE*RE MOUNTING")
+    if ((EDITOR.offline || !this.props.currentBucket) && !this.props.editorSchemaSidebarOpen) {
       this.setState({}, () => {
         this.props.toggleEditorSchemaSideBar();
       });
     }
   }
+
+  componentWillUnmount() {
+    this.props.resetFiles()
+  }
+
+
   render() {
     const {
       editorUISchemaFiles,
@@ -38,7 +45,9 @@ class EditorSchemaModal extends React.Component {
       selectedSchema,
       selectedConfig
     } = this.props;
-    
+
+    console.log("editorUISchemaFiles",editorUISchemaFiles)
+    console.log("selectedUISchema",selectedUISchema)
     return (
       <div className="tools-side-bar">
         <button type="button" className="close" onClick={this.closeModal}>
@@ -52,6 +61,7 @@ class EditorSchemaModal extends React.Component {
           selected={selectedUISchema}
           onChange={handleUiSchemaChange}
           handleUplodedFile={handleUplodedUISchema}
+          customBackground={true}
           comment="The UIschema affects the visual presentation of the editor. It does not impact the Configuration File - and it is not required."
         />
         <EditorDropdown
@@ -60,8 +70,9 @@ class EditorSchemaModal extends React.Component {
           selected={selectedSchema}
           onChange={handleSchemaChange}
           handleUplodedFile={handleUploadedSchema}
+          customBackground={true}
           comment="The Rule Schema serves as a guide for populating the Configuration File - and for automatically validating a Configuration File."
-        />
+        /><hr/>
         <EditorDropdown
           options={editorConfigFiles}
           name="Configuration File"
@@ -84,13 +95,15 @@ const mapDispatchToProps = dispatch => {
     handleUploadedSchema: file =>
       dispatch(actionsEditor.handleUploadedSchma(file)),
     handleUploadedConfig: file =>
-      dispatch(actionsEditor.handleUploadedConfig(file))
+      dispatch(actionsEditor.handleUploadedConfig(file)),
+      resetFiles: () => dispatch(actionsEditor.resetFiles())
   };
 };
 
 const mapStateToProps = state => {
   return {
-    currentBucket: state.buckets.currentBucket
+    currentBucket: state.buckets.currentBucket,
+    editorSchemaSidebarOpen: state.editorTools.editorSchemaSidebarOpen
   };
 };
 

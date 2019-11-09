@@ -71,17 +71,14 @@ export const publicUiSchemaFilesSimple = () => {
     const uischemaFile = defaultConfigs.uischema
       ? [defaultConfigs.uischema]
       : [];
-    
     const schemaFile = defaultConfigs.schema ? [defaultConfigs.schema] : [];
     const config = defaultConfigs.config ? [defaultConfigs.config] : [];
-  
     dispatch(setUISchemaFile(uischemaFile));
     dispatch(setSchemaFile(schemaFile));
     dispatch(setConfigFile(config));
     dispatch(setUISchemaContent(defaultUISchema));
     dispatch(setSchemaContent(defaultSchema));
     dispatch(setConfigContent(defaultConfig));
-   
   };
 };
 
@@ -114,6 +111,8 @@ export const publicSchemaFiles = (selectedConfig) => {
 
     dispatch(setSchemaFile(schemaAryFiltered));
     dispatch(setSchemaContent(schemaPublic));
+
+
 
   }
   };

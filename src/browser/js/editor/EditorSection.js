@@ -301,6 +301,8 @@ class LoadEditorFiles extends React.Component {
     let selectedSchemaAdj = this.state.selectedSchema;
     let selectedConfigAdj = this.state.selectedConfig;
 
+    console.log("selectedUISchemaAdj",selectedUISchemaAdj)
+
     const testUISchemaLoaded = editorUISchemaFiles.filter(file =>
       file.name.includes("(local)")
     ).length;
@@ -343,6 +345,9 @@ class LoadEditorFiles extends React.Component {
       : editorConfigFiles[0]
       ? editorConfigFiles[0].name.replace(".json", "")
       : "None";
+
+      console.log("selectedUISchemaAdj",selectedUISchemaAdj)
+
 
     return (
       <div className="fe-header config-editor">

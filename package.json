@@ -112,7 +112,7 @@
     "react-hoverintent": "0.0.10",
     "react-infinite-scroller": "^1.2.2",
     "react-json-view": "^1.19.1",
-    "react-jsonschema-form": "1.7.0",
+    "react-jsonschema-form": "^2.0.0-alpha.1",
     "react-jsonschema-form-pagination": "^0.3.12",
     "react-leaflet": "^2.4.0",
     "react-multiselect-checkboxes": "^0.1.1",

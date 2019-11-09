@@ -65,8 +65,9 @@ export class BrowserDropdown extends React.Component {
     this.props.selectBucket("Home");
     this.props.resetFiles();
     history.push("/configuration/");
+
     this.props.publicUiSchemaFilesSimple();
-    if(this.props.editorSchemaSidebarOpen){
+    if(!this.props.editorSchemaSidebarOpen){
       this.props.toggleEditorSchemaSideBar()
     }
 

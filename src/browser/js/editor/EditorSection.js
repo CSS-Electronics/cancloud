@@ -121,7 +121,7 @@ class LoadEditorFiles extends React.Component {
     this.setState({
       isLiveValidation: !this.state.isLiveValidation
     });
-    this.props.setConfigContentPreSubmit();    
+    this.props.setConfigContentPreSubmit();
   }
 
   enableDownload() {
@@ -129,6 +129,17 @@ class LoadEditorFiles extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    const prevPrefix = this.props.prefixCrnt;
+    const nextPrefix = nextProps.prefixCrnt;
+
+    if (prevPrefix != nextPrefix) {
+      this.setState({
+        selectedUISchema: "",
+        selectedSchema: "",
+        selectedConfig: ""
+      });
+    }
+
     if (
       nextProps.configContentPreChange != undefined &&
       crcBrowserSupport == 1
@@ -146,9 +157,15 @@ class LoadEditorFiles extends React.Component {
       this.props.setCrc32EditorPre(cfgCrc32EditorPre);
     }
 
-    let uiLocal = nextProps.editorUISchemaFiles.filter(file => file.name.includes("(local)"));
-    let schemaLocal = nextProps.editorSchemaFiles.filter(file => file.name.includes("(local)") || file.name.includes("CANedge"));
-    let configLocal = nextProps.editorConfigFiles.filter(file => file.name.includes("(local)"));
+    let uiLocal = nextProps.editorUISchemaFiles.filter(file =>
+      file.name.includes("(local)")
+    );
+    let schemaLocal = nextProps.editorSchemaFiles.filter(
+      file => file.name.includes("(local)")
+    );
+    let configLocal = nextProps.editorConfigFiles.filter(file =>
+      file.name.includes("(local)")
+    );
 
     if (uiLocal.length) {
       this.setState({
@@ -290,7 +307,8 @@ class LoadEditorFiles extends React.Component {
       configContent,
       uiContent,
       schemaContent,
-      editorSchemaSidebarOpen
+      editorSchemaSidebarOpen,
+      prefixCrnt
     } = this.props;
 
     let FormWithNav = schemaContent ? applyNav(Form, EditorNavs) : Form;
@@ -301,8 +319,7 @@ class LoadEditorFiles extends React.Component {
     let selectedSchemaAdj = this.state.selectedSchema;
     let selectedConfigAdj = this.state.selectedConfig;
 
-    console.log("selectedUISchemaAdj",selectedUISchemaAdj)
-
+    console.log("So what is the schema state?", this.state.selectedSchema)
     const testUISchemaLoaded = editorUISchemaFiles.filter(file =>
       file.name.includes("(local)")
     ).length;
@@ -325,7 +342,7 @@ class LoadEditorFiles extends React.Component {
         editorSchemaFiles[0] && editorSchemaFiles[0].name
           ? editorSchemaFiles[0].name
           : selectedSchemaAdj;
-    } 
+    }
 
     if (testConfigLoaded === 0 && selectedConfigAdj.includes("(local)")) {
       selectedConfigAdj =
@@ -345,9 +362,6 @@ class LoadEditorFiles extends React.Component {
       : editorConfigFiles[0]
       ? editorConfigFiles[0].name.replace(".json", "")
       : "None";
-
-      console.log("selectedUISchemaAdj",selectedUISchemaAdj)
-
 
     return (
       <div className="fe-header config-editor">
@@ -520,7 +534,8 @@ export class EditorSection extends React.Component {
       deviceFileContent,
       setUpdatedFormData,
       setConfigContentPreSubmit,
-      editorSchemaSidebarOpen
+      editorSchemaSidebarOpen,
+      prefixCrnt
     } = this.props;
 
     return (
@@ -547,6 +562,7 @@ export class EditorSection extends React.Component {
         setUpdatedFormData={setUpdatedFormData}
         setConfigContentPreSubmit={setConfigContentPreSubmit}
         editorSchemaSidebarOpen={editorSchemaSidebarOpen}
+        prefixCrnt={prefixCrnt}
       />
     );
   }

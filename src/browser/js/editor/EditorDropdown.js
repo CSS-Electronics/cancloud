@@ -54,8 +54,16 @@ class EditorDropDown extends React.Component {
     }
   };
 
+  componentWillMount(){
+    this.setState({
+      defaultOption: selectOptions(this.props.options)[0]
+    });
+  }
+
   render() {
+
     let { handleUplodedFile, options } = this.props;
+
     return (
       <div className="form-group pl0 field-string">
         <p>{this.props.name}</p>

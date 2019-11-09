@@ -17,7 +17,6 @@ class EditorSchemaModal extends React.Component {
   }
 
   componentDidMount() {
-    console.log("WE*RE MOUNTING")
     if ((EDITOR.offline || !this.props.currentBucket) && !this.props.editorSchemaSidebarOpen) {
       this.setState({}, () => {
         this.props.toggleEditorSchemaSideBar();
@@ -46,8 +45,6 @@ class EditorSchemaModal extends React.Component {
       selectedConfig
     } = this.props;
 
-    console.log("editorUISchemaFiles",editorUISchemaFiles)
-    console.log("selectedUISchema",selectedUISchema)
     return (
       <div className="tools-side-bar">
         <button type="button" className="close" onClick={this.closeModal}>

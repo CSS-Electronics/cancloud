@@ -67,7 +67,7 @@ export const publicUiSchemaFiles = () => {
 
 // assign the local schema files in the online simple editor
 export const publicUiSchemaFilesSimple = () => {
-  return function(dispatch) {
+  return function(dispatch,getState) {
     const uischemaFile = defaultConfigs.uischema
       ? [defaultConfigs.uischema]
       : [];

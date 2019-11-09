@@ -319,7 +319,6 @@ class LoadEditorFiles extends React.Component {
     let selectedSchemaAdj = this.state.selectedSchema;
     let selectedConfigAdj = this.state.selectedConfig;
 
-    console.log("So what is the schema state?", this.state.selectedSchema)
     const testUISchemaLoaded = editorUISchemaFiles.filter(file =>
       file.name.includes("(local)")
     ).length;

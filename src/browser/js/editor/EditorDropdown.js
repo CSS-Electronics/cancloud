@@ -31,7 +31,7 @@ class EditorDropDown extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.selected != "") {
+     if (nextProps.selected != "") {
       this.setState({
         defaultOption: {
           value: nextProps.selected,

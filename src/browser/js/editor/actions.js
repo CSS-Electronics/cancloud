@@ -29,6 +29,7 @@ export const SET_UI_SCHEMA_DATA = "editor/SET_UI_SCHEMA_DATA";
 export const SET_SCHEMA_DATA = "editor/SET_SCHEMA_DATA";
 export const SET_UPDATED_CONFIG = "editor/SET_UPDATED_CONFIG";
 export const RESET_SCHEMA_FILES = "editor/RESET_SCHEMA_FILES";
+export const RESET_UPLOADED_SCHEMA_LIST = "editor/RESET_UPLOADED_SCHEMA_LIST";
 export const SET_CONFIG_DATA_PRE_CHANGE = "editor/SET_CONFIG_DATA_PRE_CHANGE";
 export const SET_UPDATED_FORM_DATA = "editor/SET_UPDATED_FORM_DATA";
 export const SET_ACTIVE_NAV = "editor/SET_ACTIVE_NAV";
@@ -85,7 +86,8 @@ export const publicUiSchemaFilesSimple = () => {
 
 export const publicSchemaFiles = (selectedConfig) => {
   return function(dispatch) {
-    dispatch(resetLocalSchemaList());
+
+    dispatch(resetSchemaFiles());
 
     const schemaAry = [
       "schema-00.09.json | CANedge2",
@@ -107,7 +109,6 @@ export const publicSchemaFiles = (selectedConfig) => {
 
     const defaultSchema = schemaAryFiltered[0]
     const schemaPublic = require(`../../schema/${defaultSchema.split(" | ")[1]}/${defaultSchema.split(" ")[0]}`)
-
 
     dispatch(setSchemaFile(schemaAryFiltered));
     dispatch(setSchemaContent(schemaPublic));
@@ -477,13 +478,14 @@ export const setUiSchemaSource = uiSchemaSource => ({
 
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
-    const { bucket, prefix } = pathSlice(history.location.pathname);
 
-    dispatch(resetLocalSchemaList());
+    const uploadedTest = getState().editor.editorSchemaFiles.filter(file => file.name.includes("local"))[0]
 
-    if(getState().editor.editorConfigFiles[0] && getState().editor.editorConfigFiles[0].name && !prefix.length){
-      dispatch(publicSchemaFiles(getState().editor.editorConfigFiles[0].name))
+    if(uploadedTest != undefined){
+      dispatch(resetUploadedSchemaList());
     }
+
+    const { bucket, prefix } = pathSlice(history.location.pathname);
     switch (true) {
       case fileName == "None":
         dispatch(setSchemaContent(null));
@@ -725,10 +727,14 @@ export const handleUploadedConfig = file => {
   
   return function(dispatch, getState) {
 
+    // FIX FOR CASE WHERE SAME CONFIG IS LOADED - WHY DOES IT NOT RESET OPTIONS TO NULL, THEN UPDATE SELECTION TO DEFAULT?
+
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
     // load the matching schema files if a schema file is not already uploaded
     const localLoaded = getState().editor.editorSchemaFiles[0] && getState().editor.editorSchemaFiles[0].name.includes("local")
 
-    if(file && file.name && file.name.length && !localLoaded){
+    if(file && file.name && file.name.length && !localLoaded && !prefix){
       dispatch(publicSchemaFiles(file.name))
     }
     if (isValidConfig(file.name)) {
@@ -825,6 +831,10 @@ export const resetLocalUISchemaList = () => ({
 
 export const resetLocalSchemaList = () => ({
   type: RESET_LOCAL_SCHEMA_LIST
+});
+
+export const resetUploadedSchemaList = () => ({
+  type: RESET_UPLOADED_SCHEMA_LIST
 });
 
 export const resetLocalConfigList = () => ({

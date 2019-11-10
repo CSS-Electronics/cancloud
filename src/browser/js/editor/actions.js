@@ -6,7 +6,7 @@ import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
 import * as browserActions from "../browser/actions"
-
+import * as actionsEditorTools from "../editorTools/actions"
 import {
   isValidUISchema,
   isValidSchema,
@@ -90,10 +90,6 @@ export const publicSchemaFiles = (selectedConfig) => {
     dispatch(resetSchemaFiles());
 
     const schemaAry = [
-      "schema-00.09.json | CANedge2",
-      "schema-00.09.json | CANedge1",
-      "schema-00.08.json | CANedge2",
-      "schema-00.08.json | CANedge1",
       "schema-00.07.json | CANedge2",
       "schema-00.07.json | CANedge1",
       "schema-00.06.json | CANedge2",
@@ -108,12 +104,14 @@ export const publicSchemaFiles = (selectedConfig) => {
     );
 
     const defaultSchema = schemaAryFiltered[0]
+
+    if(defaultSchema){
     const schemaPublic = require(`../../schema/${defaultSchema.split(" | ")[1]}/${defaultSchema.split(" ")[0]}`)
 
     dispatch(setSchemaFile(schemaAryFiltered));
     dispatch(setSchemaContent(schemaPublic));
 
-
+  }
 
   }
   };
@@ -145,6 +143,7 @@ export const fetchSchemaFiles = prefix => {
         const deviceFileName = allObjects.filter(str =>
           str.match(regexDeviceFile)
         );
+
         const deviceFileObject = data.objects.filter(
           p => p.name === "device.json"
         )[0];
@@ -487,8 +486,11 @@ export const fetchSchemaContent = fileName => {
 
     const { bucket, prefix } = pathSlice(history.location.pathname);
     switch (true) {
-      case fileName == "None":
+      case fileName == "None" || fileName == undefined:
         dispatch(setSchemaContent(null));
+        if(!getState().editorTools.editorSchemaSidebarOpen){
+          dispatch(actionsEditorTools.toggleEditorSchemaSideBar())
+        }
         break;
       case fileName.match(regexSchemaPublic) != null:
         const schemaPublic = require(`../../schema/${fileName.split(" | ")[1]}/${fileName.split(" ")[0]}`)
@@ -724,11 +726,9 @@ export const handleUploadedSchma = file => {
 };
 
 export const handleUploadedConfig = file => {
+  console.log(file)
   
   return function(dispatch, getState) {
-
-    // FIX FOR CASE WHERE SAME CONFIG IS LOADED - WHY DOES IT NOT RESET OPTIONS TO NULL, THEN UPDATE SELECTION TO DEFAULT?
-
     const { bucket, prefix } = pathSlice(history.location.pathname);
 
     // load the matching schema files if a schema file is not already uploaded

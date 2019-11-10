@@ -94,8 +94,6 @@ export class DeviceMetaHeaderContainer extends Component {
     const device = bucket;
     let metaDevice = ""
 
-    console.log(bucket)
-
     if(serverConfig.devicemeta && serverConfig.devicemeta.devices){
       metaDevice = serverConfig.devicemeta.devices.filter(
         p => p.serialno === device

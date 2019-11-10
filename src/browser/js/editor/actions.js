@@ -5,8 +5,8 @@ import Moment from "moment";
 import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
-import * as browserActions from "../browser/actions"
-import * as actionsEditorTools from "../editorTools/actions"
+import * as browserActions from "../browser/actions";
+import * as actionsEditorTools from "../editorTools/actions";
 import {
   isValidUISchema,
   isValidSchema,
@@ -36,10 +36,14 @@ export const SET_ACTIVE_NAV = "editor/SET_ACTIVE_NAV";
 export const SET_UISCHEMA_SOURCE = "editor/SET_UISCHEMA_SOURCE";
 export const SET_DEVICE_FILE_DATA = "editor/SET_DEVICE_FILE_DATA";
 export const SET_PREV_DEVICE_FILE_DEVICE = "editor/SET_PREV_DEVICE_FILE_DEVICE";
-export const SET_DEVICE_FILE_LAST_MODIFIED = "editor/SET_DEVICE_FILE_LAST_MODIFIED";
+export const SET_DEVICE_FILE_LAST_MODIFIED =
+  "editor/SET_DEVICE_FILE_LAST_MODIFIED";
 
 const regexSchema = new RegExp(/^schema-\d{2}\.\d{2}\.json/, "g");
-const regexSchemaPublic = new RegExp(/^schema-\d{2}\.\d{2}\.json \| CANedge(1|2)$/,"g")
+const regexSchemaPublic = new RegExp(
+  /^schema-\d{2}\.\d{2}\.json \| CANedge(1|2)$/,
+  "g"
+);
 const regexConfig = new RegExp(/^config-\d{2}\.\d{2}\.json/, "g");
 const regexUiSchema = new RegExp(/^uischema-\d{2}\.\d{2}\.json/, "g");
 const regexDeviceFile = new RegExp(/^device\.json/, "g");
@@ -68,7 +72,7 @@ export const publicUiSchemaFiles = () => {
 
 // assign the local schema files in the online simple editor
 export const publicUiSchemaFilesSimple = () => {
-  return function(dispatch,getState) {
+  return function(dispatch, getState) {
     const uischemaFile = defaultConfigs.uischema
       ? [defaultConfigs.uischema]
       : [];
@@ -83,10 +87,8 @@ export const publicUiSchemaFilesSimple = () => {
   };
 };
 
-
-export const publicSchemaFiles = (selectedConfig) => {
+export const publicSchemaFiles = selectedConfig => {
   return function(dispatch) {
-
     dispatch(resetSchemaFiles());
 
     const schemaAry = [
@@ -98,26 +100,24 @@ export const publicSchemaFiles = (selectedConfig) => {
       "schema-00.05.json | CANedge1"
     ];
 
-    if(selectedConfig){
-    const schemaAryFiltered = schemaAry.filter(e =>
-      e.includes(selectedConfig.substr(7, 5))
-    );
+    if (selectedConfig) {
+      const schemaAryFiltered = schemaAry.filter(e =>
+        e.includes(selectedConfig.substr(7, 5))
+      );
 
-    const defaultSchema = schemaAryFiltered[0]
+      const defaultSchema = schemaAryFiltered[0];
 
-    if(defaultSchema){
-    const schemaPublic = require(`../../schema/${defaultSchema.split(" | ")[1]}/${defaultSchema.split(" ")[0]}`)
+      if (defaultSchema) {
+        const schemaPublic = require(`../../schema/${
+          defaultSchema.split(" | ")[1]
+        }/${defaultSchema.split(" ")[0]}`);
 
-    dispatch(setSchemaFile(schemaAryFiltered));
-    dispatch(setSchemaContent(schemaPublic));
-
-  }
-
-  }
+        dispatch(setSchemaFile(schemaAryFiltered));
+        dispatch(setSchemaContent(schemaPublic));
+      }
+    }
   };
 };
-
-
 
 export const resetFiles = () => ({
   type: RESET_SCHEMA_FILES,
@@ -366,7 +366,7 @@ export const updateConfigFile = (content, object) => {
   return function(dispatch) {
     dispatch(setConfigContent(JSON.parse(content)));
     dispatch(setConfigContentPreChange(JSON.parse(content)));
-    if(prefix == "server"){
+    if (prefix == "server") {
       dispatch(browserActions.setServerConfigContent(JSON.parse(content)));
     }
 
@@ -404,7 +404,6 @@ export const updateConfigFile = (content, object) => {
 
 export const fetchConfigContent = fileName => {
   return function(dispatch, getState) {
-    
     dispatch(resetLocalConfigList());
 
     if (fileName == "None") {
@@ -474,13 +473,13 @@ export const setUiSchemaSource = uiSchemaSource => ({
   uiSchemaSource
 });
 
-
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
+    const uploadedTest = getState().editor.editorSchemaFiles.filter(file =>
+      file.name.includes("local")
+    )[0];
 
-    const uploadedTest = getState().editor.editorSchemaFiles.filter(file => file.name.includes("local"))[0]
-
-    if(uploadedTest != undefined){
+    if (uploadedTest != undefined) {
       dispatch(resetUploadedSchemaList());
     }
 
@@ -488,12 +487,14 @@ export const fetchSchemaContent = fileName => {
     switch (true) {
       case fileName == "None" || fileName == undefined:
         dispatch(setSchemaContent(null));
-        if(!getState().editorTools.editorSchemaSidebarOpen){
-          dispatch(actionsEditorTools.toggleEditorSchemaSideBar())
+        if (!getState().editorTools.editorSchemaSidebarOpen) {
+          dispatch(actionsEditorTools.toggleEditorSchemaSideBar());
         }
         break;
       case fileName.match(regexSchemaPublic) != null:
-        const schemaPublic = require(`../../schema/${fileName.split(" | ")[1]}/${fileName.split(" ")[0]}`)
+        const schemaPublic = require(`../../schema/${
+          fileName.split(" | ")[1]
+        }/${fileName.split(" ")[0]}`);
         dispatch(setSchemaContent(schemaPublic));
         break;
       default:
@@ -665,9 +666,7 @@ export const handleUploadedUISchma = file => {
           dispatch(
             alertActions.set({
               type: "danger",
-              message: `Warning: UISchema ${
-                file.name
-              } is invalid and was not loaded`,
+              message: `Warning: UISchema ${file.name} is invalid and was not loaded`,
               autoClear: true
             })
           );
@@ -704,9 +703,7 @@ export const handleUploadedSchma = file => {
           dispatch(
             alertActions.set({
               type: "danger",
-              message: `Warning: Schema ${
-                file.name
-              } is invalid and was not loaded`,
+              message: `Warning: Schema ${file.name} is invalid and was not loaded`,
               autoClear: true
             })
           );
@@ -726,16 +723,18 @@ export const handleUploadedSchma = file => {
 };
 
 export const handleUploadedConfig = file => {
-  console.log(file)
-  
+  console.log(file);
+
   return function(dispatch, getState) {
     const { bucket, prefix } = pathSlice(history.location.pathname);
 
     // load the matching schema files if a schema file is not already uploaded
-    const localLoaded = getState().editor.editorSchemaFiles[0] && getState().editor.editorSchemaFiles[0].name.includes("local")
+    const localLoaded =
+      getState().editor.editorSchemaFiles[0] &&
+      getState().editor.editorSchemaFiles[0].name.includes("local");
 
-    if(file && file.name && file.name.length && !localLoaded && !prefix){
-      dispatch(publicSchemaFiles(file.name))
+    if (file && file.name && file.name.length && !localLoaded && !prefix) {
+      dispatch(publicSchemaFiles(file.name));
     }
     if (isValidConfig(file.name)) {
       let fileReader = new FileReader();
@@ -745,7 +744,7 @@ export const handleUploadedConfig = file => {
           ? file.name.split("_")[1]
           : file.name.split("_")[0];
         try {
-          const jsonContent = JSON.parse(content)
+          const jsonContent = JSON.parse(content);
           dispatch(setConfigContent(jsonContent));
           dispatch(setConfigContentPreChange(jsonContent));
           // dispatch(setUpdatedFormData(jsonContent));
@@ -755,9 +754,7 @@ export const handleUploadedConfig = file => {
           dispatch(
             alertActions.set({
               type: "danger",
-              message: `Warning: Config ${
-                file.name
-              } is invalid and was not loaded`,
+              message: `Warning: Config ${file.name} is invalid and was not loaded`,
               autoClear: true
             })
           );

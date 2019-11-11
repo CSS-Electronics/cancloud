@@ -94,18 +94,18 @@ export class BrowserDropdown extends React.Component {
             </li>
             <li>
               <a href="" onClick={this.dashboard.bind(this)}>
-                Status Dashboard <i className="pie-icon"/>
+                Status dashboard <i className="pie-icon"/>
               </a>
             </li>
             <li>
               <a href="" onClick={this.configureGeneral.bind(this)}>
-                Simple Editor <i className="fa fa-cog" />
+                Simple editor <i className="fa fa-cog" />
               </a>
             </li>
           
             <li>
               <a href="" id="logout" onClick={this.logout}>
-                Sign Out <i className="fa fa-sign-out" />
+                Sign out <i className="fa fa-sign-out" />
               </a>
             </li>
           </Dropdown.Menu>

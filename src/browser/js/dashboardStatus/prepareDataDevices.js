@@ -153,7 +153,6 @@ export const prepareDataDevices = (
   const kpiConnectedVal = deviceFileObjectsFiltered
     .map(item => item.deviceId)
     .filter((value, index, self) => self.indexOf(value) === index).length;
-  const kpiFreeStorage = "WIP";
   
   const deviceIdListDeltaSort = deviceIdListDelta
     .sort(function(a, b) {
@@ -189,7 +188,6 @@ export const prepareDataDevices = (
   // if(Object.keys(deviceFWSorted).length != 0){
   chartDataDevices = {
     kpiConnected: kpiConnectedVal,
-    kpiFreeStorage: kpiFreeStorage,
     deviceStatus: {
       datasets: [
         {
@@ -201,18 +199,6 @@ export const prepareDataDevices = (
         }
       ],
       labels: deviceStatusLabel
-    },
-    deviceStorage: {
-      datasets: [
-        {
-          data: [8, 2, 2, 1, 1, 1],
-          backgroundColor: "#ff9900 #f6b26b #f9cb9c #fce1c5 #ffebd7 #fff7ee".split(
-            " "
-          ),
-          label: "#devices"
-        }
-      ],
-      labels: ["90%+", "70%+", "50%+", "30%+", "10%+", "<10%"]
     },
     deviceConfigFW: {
       datasets: [

@@ -221,6 +221,8 @@ export const prepareData = (
     ? mf4ObjectsFiltered.reduce((a, b) => +a + +b.size, 0)
     : "";
 
+  const kpiFreeStorage = "WIP";
+
   const kpiUploadedVal = mf4ObjectsFiltered.length ? Math.round( (kpiUploadedValMB / 1000)*10)/10 : ""
   const kpiDataPerDeviceDayVal =
     mf4ObjectsFiltered.length && devicesFilesCount
@@ -241,9 +243,22 @@ export const prepareData = (
 
   chartData = {
     kpiUploaded: kpiUploadedVal,
+    kpiFreeStorage: kpiFreeStorage,
     kpiDataPerDeviceDay: kpiDataPerDeviceDayVal,
     kpiFiles: kpiFilesVal,
     kpiAvgFileSize: kpiAvgFileSize,
+    deviceStorage: {
+      datasets: [
+        {
+          data: [8, 2, 2, 1, 1, 1],
+          backgroundColor: "#ff9900 #f6b26b #f9cb9c #fce1c5 #ffebd7 #fff7ee".split(
+            " "
+          ),
+          label: "#devices"
+        }
+      ],
+      labels: ["90%+", "70%+", "50%+", "30%+", "10%+", "<10%"]
+    },
     dataUploadTime: {
       datasets: [
         {

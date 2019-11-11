@@ -31,7 +31,7 @@
       },
 	   {
         "title": "Free SD storage",
-		"dependency": "devices",
+		"dependency": "files",
         "widget_type": "kpi",
         "dataset": "kpiFreeStorage",
         "class_name": "col-sm-2",
@@ -90,17 +90,6 @@
 		"comment": "Overview of when the devices last checked-in to the server with a heartbeat"
       },
 	    {
-        "title": "SD free storage (FW WIP)",
-		"dependency": "devices",
-        "widget_type": "pie",
-        "dataset": "deviceStorage",
-        "class_name": "col-sm-2",
-        "aspect_ratio": 0,
-        "height": 210,
-        "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3",
-		"comment": "Free storage left on the SD card in % when the device last checked in"
-      },
-	    {
         "title": "Device config & FW",
 		"dependency": "devices",
         "widget_type": "pie",
@@ -111,7 +100,17 @@
         "colors": "#666666 #999999 #b7b7b7 #cccccc #d9d9d9",
 		"comment": "Overview of the FW version by device and whether the Configuration File on the device is identical to the server version"
       },
-	  
+	  {
+        "title": "SD free storage (FW WIP)",
+		"dependency": "files",
+        "widget_type": "pie",
+        "dataset": "deviceStorage",
+        "class_name": "col-sm-2",
+        "aspect_ratio": 0,
+        "height": 210,
+        "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3",
+		"comment": "Free storage left on the SD card in % when the device last checked in"
+      },
       {
         "title": "Log file data uploaded over time ",
 		"dependency": "files",

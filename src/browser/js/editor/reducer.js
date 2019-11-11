@@ -123,6 +123,13 @@ export default (
           file => file.name.split(".").slice(-1)[0] == "json"
         )
       };
+    case actionsEditor.RESET_UPLOADED_SCHEMA_LIST:
+        return {
+          ...state,
+          editorSchemaFiles: state.editorSchemaFiles.filter(
+            file => !file.name.includes("(local)")
+          )
+        };
     case actionsEditor.SET_CONFIG_DATA_PRE_CHANGE:
       return {
         ...state,

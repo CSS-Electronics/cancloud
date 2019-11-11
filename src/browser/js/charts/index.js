@@ -1,4 +1,7 @@
 // We can add multiple types of charts and export all from the chart component
-import LineChart from "./LineChart";
+import BaseChart from "./BaseChart";
+import BaseMap from "./BaseMap";
+import BaseTable from "./BaseTable";
 
-export { LineChart };
+
+export { BaseChart, BaseMap, BaseTable};

@@ -62,7 +62,7 @@ export const Bucket = ({ bucket, isActive, selectBucket, serverConfig }) => {
         {bucket}
         {deviceName}
       </a>
-      {loggerRegex.test(bucket) || serverRegex.test(bucket) ? (
+      {bucket.match(loggerRegex) || bucket.match(serverRegex) ? (
         <BucketDropdown bucket={bucket} selectBucket={selectBucket} />
       ) : null}
     </li>

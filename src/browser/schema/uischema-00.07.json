@@ -4,16 +4,28 @@
       "GENERAL",
       "LOG",
       "RTC",
-      "CONNECT",
       "2ND-PORT",
       "CAN CH1",
       "CAN CH2",
-      "SECURITY",
-      "DEBUG"
+      "LIN CH1",
+      "LIN CH2",
+      "CONNECT"
     ]
   },
   "general": {
     "nav": "GENERAL"
+  },
+  "log": {
+    "nav": "LOG",
+    "split_size": {
+      "ui:widget": "updown"
+    },
+    "split_time_period": {
+      "ui:widget": "updown"
+    },
+    "split_time_offset": {
+      "ui:widget": "updown"
+    }
   },
   "rtc": {
     "nav": "RTC",
@@ -43,8 +55,31 @@
       "classNames": "col-sm-4"
     }
   },
+  "secondaryport": {
+    "nav": "2ND-PORT",
+    "power_schedule": {
+      "items": {
+        "from": {
+          "classNames": "col-sm-6",
+          "ui:placeholder": "E.g. 00:00"
+        },
+        "to": {
+          "classNames": "col-sm-6",
+          "ui:placeholder": "E.g. 12:30"
+        }
+      }
+    }
+  },
   "can_1": {
     "nav": "CAN CH1",
+    "general": {
+      "rx_state": {
+        "classNames": "col-sm-6"
+      },
+      "tx_state": {
+        "classNames": "col-sm-6"
+      }
+    },
     "phy": {
       "mode": {},
       "fd_spec": {},
@@ -162,12 +197,79 @@
           "ui:title": " ",
           "classNames": "col-sm-1 smaller-margins",
           "ui:placeholder": "Name"
+        }
+      }
+    },
+    "heartbeat": {
+      "state": {
+        "classNames": "col-sm-3"
+      },
+      "id_format": {
+        "classNames": "col-sm-3"
+      },
+      "id": {
+        "classNames": "col-sm-3"
+      }
+    },
+    "control": {
+      "control_rx_state": {
+        "classNames": "col-sm-6"
+      },
+      "control_tx_state": {
+        "classNames": "col-sm-6"
+      },
+      "start": {
+        "id_format": {
+          "classNames": "col-sm-4"
+        },
+        "id": {
+          "classNames": "col-sm-4"
+        },
+        "id_mask": {
+          "classNames": "col-sm-4"
+        },
+        "data_mask": {
+          "classNames": "col-sm-4"
+        },
+        "data_high": {
+          "classNames": "col-sm-4"
+        },
+        "data_low": {
+          "classNames": "col-sm-4"
+        }
+      },
+      "stop": {
+        "id_format": {
+          "classNames": "col-sm-4"
+        },
+        "id": {
+          "classNames": "col-sm-4"
+        },
+        "id_mask": {
+          "classNames": "col-sm-4"
+        },
+        "data_mask": {
+          "classNames": "col-sm-4"
+        },
+        "data_high": {
+          "classNames": "col-sm-4"
+        },
+        "data_low": {
+          "classNames": "col-sm-4"
         }
       }
     }
   },
   "can_2": {
     "nav": "CAN CH2",
+    "general": {
+      "rx_state": {
+        "classNames": "col-sm-6"
+      },
+      "tx_state": {
+        "classNames": "col-sm-6"
+      }
+    },
     "phy": {
       "mode": {},
       "fd_spec": {},
@@ -287,11 +389,72 @@
           "ui:placeholder": "Name"
         }
       }
+    },
+    "heartbeat": {
+      "state": {
+        "classNames": "col-sm-3"
+      },
+      "id_format": {
+        "classNames": "col-sm-3"
+      },
+      "id": {
+        "classNames": "col-sm-3"
+      }
+    },
+    "control": {
+      "control_rx_state": {
+        "classNames": "col-sm-6"
+      },
+      "control_tx_state": {
+        "classNames": "col-sm-6"
+      },
+      "start": {
+        "id_format": {
+          "classNames": "col-sm-4"
+        },
+        "id": {
+          "classNames": "col-sm-4"
+        },
+        "id_mask": {
+          "classNames": "col-sm-4"
+        },
+        "data_mask": {
+          "classNames": "col-sm-4"
+        },
+        "data_high": {
+          "classNames": "col-sm-4"
+        },
+        "data_low": {
+          "classNames": "col-sm-4"
+        }
+      },
+      "stop": {
+        "id_format": {
+          "classNames": "col-sm-4"
+        },
+        "id": {
+          "classNames": "col-sm-4"
+        },
+        "id_mask": {
+          "classNames": "col-sm-4"
+        },
+        "data_mask": {
+          "classNames": "col-sm-4"
+        },
+        "data_high": {
+          "classNames": "col-sm-4"
+        },
+        "data_low": {
+          "classNames": "col-sm-4"
+        }
+      }
     }
   },
-  "secondaryport": {
-    "nav": "2ND-PORT",
-    "power": {}
+  "lin_1": {
+    "nav": "LIN CH1"
+  },
+  "lin_2": {
+    "nav": "LIN CH2"
   },
   "connect": {
     "nav": "CONNECT",
@@ -355,6 +518,7 @@
           "classNames": "col-sm-3"
         },
         "region": {
+          "ui:placeholder": "E.g. eu-central-1",
           "classNames": "col-sm-3"
         },
         "accesskey": {
@@ -367,18 +531,6 @@
           "classNames": "col-sm-4"
         }
       }
-    }
-  },
-  "log": {
-    "nav": "LOG",
-    "split_size": {
-      "ui:widget": "updown"
-    },
-    "split_time_period": {
-      "ui:widget": "updown"
-    },
-    "split_time_offset": {
-      "ui:widget": "updown"
     }
   },
   "devicemeta": {
@@ -418,13 +570,78 @@
       }
     }
   },
-  "security": {
-    "nav": "SECURITY"
-  },
-  "other": {
-    "nav": "OTHER",
-    "preview": {
-      "ui:widget": "updown"
+  "dashboard": {
+    "nav": "DASHBOARD",
+    "default_settings": {
+      "timestamp_header": {
+        "classNames": "col-sm-4"
+      },
+      "segment_header": {
+        "classNames": "col-sm-4"
+      },
+      "chart_colors": {
+        "classNames": "col-sm-4"
+      },
+      "line_border_width": {
+        "classNames": "col-sm-2"
+      },
+      "point_radius": {
+        "classNames": "col-sm-2"
+      },
+      "chart_font_size": {
+        "classNames": "col-sm-2"
+      },
+      "table_font_size": {
+        "classNames": "col-sm-2"
+      },
+      "legend_labels_box_width": {
+        "classNames": "col-sm-2"
+      },
+      "legend_labels_padding": {
+        "classNames": "col-sm-2"
+      }
+    },
+    "widgets": {
+      "items": {
+        "title": {
+          "classNames": "col-md-12"
+        },
+        "widget_type": {
+          "classNames": "col-md-3"
+        },
+        "data_file_name": {
+          "classNames": "col-md-3"
+        },
+        "parameters": {
+          "classNames": "col-md-3"
+        },
+        "segments": {
+          "classNames": "col-md-3"
+        },
+        "period_sec": {
+          "classNames": "col-md-4"
+        },
+        "start": {
+          "ui:placeholder:": "YYYY-MM-DD-HH:MM:SS",
+          "classNames": "col-md-4"
+        },
+        "end": {
+          "ui:placeholder:": "YYYY-MM-DD-HH:MM:SS",
+          "classNames": "col-md-4"
+        },
+        "class_name": {
+          "classNames": "col-md-3"
+        },
+        "aspect_ratio": {
+          "classNames": "col-md-3"
+        },
+        "height": {
+          "classNames": "col-md-3"
+        },
+        "colors": {
+          "classNames": "col-md-3"
+        }
+      }
     }
   }
 }

@@ -1,0 +1,136 @@
+{
+  "devicemeta": {
+    "display": 0,
+    "devices": [],
+    "other": {
+      "pending": {}
+    }
+  },
+  "dashboard": {
+    "default_settings": {
+      "timestamp_header": "timestamps",
+      "segment_header": "segments",
+      "chart_colors": "#3d85c6 #ff9900 #073763 #0b5394 #6fa8dc #9fc5e8 #e69138 #f6b26b #f9cb9c",
+      "line_border_width": 2,
+      "point_radius": 0,
+      "chart_font_size": 8,
+      "table_font_size": 11,
+      "legend_labels_box_width": 8,
+      "legend_labels_padding": 4
+    },
+    "widgets": [
+      {
+        "title": "Devices connected",
+		"dependency": "devices",
+        "widget_type": "kpi",
+        "dataset": "kpiConnected",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": "",
+		"comment": "Devices with a heartbeat within the period"
+      },
+	   {
+        "title": "Free SD storage",
+		"dependency": "files",
+        "widget_type": "kpi",
+        "dataset": "kpiFreeStorage",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": "",
+		"comment": "Average free SD capacity across devices as of their last heartbeats"
+      },
+      {
+        "title": "GB uploaded",
+		"dependency": "files",
+        "widget_type": "kpi",
+        "dataset": "kpiUploaded",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": "",
+		"comment": "Log file data uploaded in GB"
+      },
+      {
+        "title": "MB/device/day",
+		"dependency": "files",
+        "widget_type": "kpi",
+        "dataset": "kpiDataPerDeviceDay",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": "",
+		"comment": "MB uploaded per device per day"
+      },
+      {
+        "title": "Files uploaded",
+		"dependency": "files",
+        "widget_type": "kpi",
+        "dataset": "kpiFiles",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": "",
+		"comment": "Total number of log files uploaded"
+      },
+      {
+        "title": "MB/file",
+		"dependency": "files",
+        "widget_type": "kpi",
+        "dataset": "kpiAvgFileSize",
+        "class_name": "col-sm-2",
+        "height": 105,
+        "colors": "",
+		"comment": "Average size per uploaded file in MB"
+      },
+	    {
+        "title": "Device latest heartbeat",
+		"dependency": "devices",
+        "widget_type": "pie",
+        "dataset": "deviceStatus",
+        "class_name": "col-sm-2",
+        "height": 210,
+        "colors": "#3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff",
+		"comment": "Overview of when the devices last checked-in to the server with a heartbeat"
+      },
+	    {
+        "title": "Device config & FW",
+		"dependency": "devices",
+        "widget_type": "pie",
+        "dataset": "deviceConfigFW",
+        "class_name": "col-sm-2",
+        "aspect_ratio": 0,
+        "height": 210,
+        "colors": "#666666 #999999 #b7b7b7 #cccccc #d9d9d9",
+		"comment": "Overview of the FW version by device and whether the Configuration File on the device is identical to the server version"
+      },
+	  {
+        "title": "SD free storage (FW WIP)",
+		"dependency": "files",
+        "widget_type": "pie",
+        "dataset": "deviceStorage",
+        "class_name": "col-sm-2",
+        "aspect_ratio": 0,
+        "height": 210,
+        "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3",
+		"comment": "Free storage left on the SD card in % when the device last checked in"
+      },
+      {
+        "title": "Log file data uploaded over time ",
+		"dependency": "files",
+        "widget_type": "bar",
+        "dataset": "dataUploadTime",
+        "class_name": "col-sm-6",
+        "height": 210,
+        "colors": "",
+		"comment": "Total log file data uploaded per period across devices"
+      },
+	   {
+        "title": "Devices (sorted by heartbeat)",
+		"dependency": "devices",
+        "widget_type": "table",
+        "dataset": "deviceTable",
+        "class_name": "col-sm-12",
+        "height": 210,
+        "colors": "",
+		"comment": "Table showing device details, sorted by when the devices last checked into the server"
+      }
+    ]
+  }
+}

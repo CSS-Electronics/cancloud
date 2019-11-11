@@ -129,6 +129,24 @@ class LoadEditorFiles extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    const prevPrefix = this.props.prefixCrnt;
+    const nextPrefix = nextProps.prefixCrnt;
+
+    if (prevPrefix != nextPrefix) {
+      this.setState({
+        selectedUISchema: "",
+        selectedSchema: "",
+        selectedConfig: ""
+      });
+    }
+
+    // ensure that if there's a new schema file list, the selection returns to the default value
+    if (this.props.editorSchemaFiles != nextProps.editorSchemaFiles) {
+      this.setState({
+        selectedSchema: ""
+      });
+    }
+
     if (
       nextProps.configContentPreChange != undefined &&
       crcBrowserSupport == 1
@@ -146,35 +164,29 @@ class LoadEditorFiles extends React.Component {
       this.props.setCrc32EditorPre(cfgCrc32EditorPre);
     }
 
-    if (
-      nextProps.editorUISchemaFiles.filter(file =>
-        file.name.includes("(local)")
-      ).length
-    ) {
+    let uiLocal = nextProps.editorUISchemaFiles.filter(file =>
+      file.name.includes("(local)")
+    );
+    let schemaLocal = nextProps.editorSchemaFiles.filter(
+      file => file.name.includes("(local)")
+    );
+    let configLocal = nextProps.editorConfigFiles.filter(file =>
+      file.name.includes("(local)")
+    );
+
+    if (uiLocal.length) {
       this.setState({
-        selectedUISchema: nextProps.editorUISchemaFiles.filter(file =>
-          file.name.includes("(local)")
-        )[0].name
+        selectedUISchema: uiLocal[0].name
       });
     }
-    if (
-      nextProps.editorSchemaFiles.filter(file => file.name.includes("(local)"))
-        .length
-    ) {
+    if (schemaLocal.length) {
       this.setState({
-        selectedSchema: nextProps.editorSchemaFiles.filter(file =>
-          file.name.includes("(local)")
-        )[0].name
+        selectedSchema: schemaLocal[0].name
       });
     }
-    if (
-      nextProps.editorConfigFiles.filter(file => file.name.includes("(local)"))
-        .length
-    ) {
+    if (configLocal.length) {
       this.setState({
-        selectedConfig: nextProps.editorConfigFiles.filter(file =>
-          file.name.includes("(local)")
-        )[0].name
+        selectedConfig: configLocal[0].name
       });
     }
   }
@@ -302,7 +314,8 @@ class LoadEditorFiles extends React.Component {
       configContent,
       uiContent,
       schemaContent,
-      editorSchemaSidebarOpen
+      editorSchemaSidebarOpen,
+      prefixCrnt
     } = this.props;
 
     let FormWithNav = schemaContent ? applyNav(Form, EditorNavs) : Form;
@@ -334,7 +347,7 @@ class LoadEditorFiles extends React.Component {
       selectedSchemaAdj =
         editorSchemaFiles[0] && editorSchemaFiles[0].name
           ? editorSchemaFiles[0].name
-          : "";
+          : selectedSchemaAdj;
     }
 
     if (testConfigLoaded === 0 && selectedConfigAdj.includes("(local)")) {
@@ -349,6 +362,7 @@ class LoadEditorFiles extends React.Component {
       : editorSchemaFiles[0]
       ? editorSchemaFiles[0].name.replace(".json", "")
       : "None";
+
     let menuConfigName = selectedConfigAdj
       ? selectedConfigAdj.replace(".json", "")
       : editorConfigFiles[0]
@@ -383,7 +397,7 @@ class LoadEditorFiles extends React.Component {
           <br />
           {schemaContent ? (
             <FormWithNav
-              omitUnusedData={true}
+              omitExtraData={true}
               liveOmit={true}
               liveValidate={this.state.isLiveValidation}
               noHtml5Validate={true}
@@ -526,7 +540,8 @@ export class EditorSection extends React.Component {
       deviceFileContent,
       setUpdatedFormData,
       setConfigContentPreSubmit,
-      editorSchemaSidebarOpen
+      editorSchemaSidebarOpen,
+      prefixCrnt
     } = this.props;
 
     return (
@@ -553,6 +568,7 @@ export class EditorSection extends React.Component {
         setUpdatedFormData={setUpdatedFormData}
         setConfigContentPreSubmit={setConfigContentPreSubmit}
         editorSchemaSidebarOpen={editorSchemaSidebarOpen}
+        prefixCrnt={prefixCrnt}
       />
     );
   }

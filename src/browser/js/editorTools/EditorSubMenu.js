@@ -10,9 +10,14 @@ export class EditorSubMenuInput extends React.Component {
     super(props);
     this.toolsToggleCrcSideBar = this.toolsToggleCrcSideBar.bind(this);
     this.toolsToggleFilterSideBar = this.toolsToggleFilterSideBar.bind(this);
-    this.toolsToggleEncryptionSideBar = this.toolsToggleEncryptionSideBar.bind(this);
+    this.toolsToggleEncryptionSideBar = this.toolsToggleEncryptionSideBar.bind(
+      this
+    );
     this.toolsToggleSchemaSideBar = this.toolsToggleSchemaSideBar.bind(this);
     this.toolsToggleBitRateSideBar = this.toolsToggleBitRateSideBar.bind(this);
+    this.toolsTogglePartialConfigLoaderSideBar = this.toolsTogglePartialConfigLoaderSideBar.bind(
+      this
+    );
   }
 
   toolsToggleCrcSideBar() {
@@ -55,6 +60,14 @@ export class EditorSubMenuInput extends React.Component {
     this.props.setConfigContentPreSubmit();
   }
 
+  toolsTogglePartialConfigLoaderSideBar() {
+    if (this.props.partialConfigLoaderSidebarOpen == false) {
+      this.props.closeEditorToolsSideBars();
+    }
+    this.props.togglePartialConfigLoaderSideBar();
+    this.props.setConfigContentPreSubmit();
+  }
+
   render() {
     return (
       <div>
@@ -78,6 +91,11 @@ export class EditorSubMenuInput extends React.Component {
           className="fa fa-filter"
         />{" "}
         <EditorToolButton
+          onClick={this.toolsTogglePartialConfigLoaderSideBar}
+          comment="Partial config loader"
+          className="fa fa-plus"
+        />{" "}
+        <EditorToolButton
           onClick={this.toolsToggleBitRateSideBar}
           comment="Bit-time calculator"
           className="fa fa-calculator"
@@ -92,7 +110,7 @@ export class EditorSubMenuInput extends React.Component {
           </a>
           <p className="btn-field-description">Schema & config loader</p>
         </div>
-        </div>
+      </div>
     );
   }
 }
@@ -103,10 +121,12 @@ export class EditorSubMenu extends React.Component {
       toggleEncryptionSideBar,
       toggleBitRateSideBar,
       bitRateSidebarOpen,
+      partialConfigLoaderSidebarOpen,
       closeEditorToolsSideBars,
       toggleCrcSideBar,
       toggleEditorSchemaSideBar,
       toggleFilterSideBar,
+      togglePartialConfigLoaderSideBar,
       crcSidebarOpen,
       filterSidebarOpen,
       encryptionSidebarOpen,
@@ -120,9 +140,11 @@ export class EditorSubMenu extends React.Component {
         closeEditorToolsSideBars={closeEditorToolsSideBars}
         toggleBitRateSideBar={toggleBitRateSideBar}
         bitRateSidebarOpen={bitRateSidebarOpen}
+        partialConfigLoaderSidebarOpen={partialConfigLoaderSidebarOpen}
         toggleCrcSideBar={toggleCrcSideBar}
         toggleEditorSchemaSideBar={toggleEditorSchemaSideBar}
         toggleFilterSideBar={toggleFilterSideBar}
+        togglePartialConfigLoaderSideBar={togglePartialConfigLoaderSideBar}
         crcSidebarOpen={crcSidebarOpen}
         filterSidebarOpen={filterSidebarOpen}
         encryptionSidebarOpen={encryptionSidebarOpen}
@@ -141,7 +163,8 @@ const mapStateToProps = state => {
     crcSidebarOpen: state.editorTools.crcSidebarOpen,
     filterSidebarOpen: state.editorTools.filterSidebarOpen,
     bitRateSidebarOpen: state.editorTools.bitRateSidebarOpen,
-    editorSchemaSidebarOpen: state.editorTools.editorSchemaSidebarOpen
+    editorSchemaSidebarOpen: state.editorTools.editorSchemaSidebarOpen,
+    partialConfigLoaderSidebarOpen: state.editorTools.partialConfigLoaderSidebarOpen
   };
 };
 
@@ -156,6 +179,8 @@ const mapDispatchToProps = dispatch => {
       dispatch(actionsEditorTools.toggleEditorSchemaSideBar()),
     toggleBitRateSideBar: () =>
       dispatch(actionsEditorTools.toggleBitRateSideBar()),
+    togglePartialConfigLoaderSideBar: () =>
+      dispatch(actionsEditorTools.togglePartialConfigLoaderSideBar()),
     closeEditorToolsSideBars: () =>
       dispatch(actionsEditorTools.closeEditorToolsSideBars()),
     setConfigContentPreSubmit: () =>

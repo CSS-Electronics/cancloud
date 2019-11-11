@@ -105,7 +105,7 @@ export const addBucketMetaData = () => {
         }
 
         bucketsMeta[i] =
-          buckets[i] + " " + deviceName + deviceGroup + deviceSubgroup;
+          buckets[i] + " " + deviceName + (deviceGroup.length ? " | " : "") + deviceGroup + (deviceSubgroup.length ? " | " : "") + deviceSubgroup;
       }
 
       dispatch(setListMeta(bucketsMeta));

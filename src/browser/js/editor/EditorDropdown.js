@@ -3,6 +3,13 @@ import Select from "react-select";
 
 const defaultOptions = [{ name: "None" }, { name: "Upload" }];
 
+const customStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    backgroundColor: "#fcfcfc !important",
+  })
+};
+
 const selectOptions = Files => {
   Files = _.orderBy(Files, ["name"], ["desc"]);
   return [...Files, ...defaultOptions].map(File => ({
@@ -24,7 +31,7 @@ class EditorDropDown extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.selected != "") {
+     if (nextProps.selected != "") {
       this.setState({
         defaultOption: {
           value: nextProps.selected,
@@ -47,16 +54,25 @@ class EditorDropDown extends React.Component {
     }
   };
 
+  componentWillMount(){
+    this.setState({
+      defaultOption: selectOptions(this.props.options)[0]
+    });
+  }
+
   render() {
+
     let { handleUplodedFile, options } = this.props;
+
     return (
-      <div className="form-group pl0  field-string">
+      <div className="form-group pl0 field-string">
         <p>{this.props.name}</p>
         <Select
           value={this.state.defaultOption}
           options={selectOptions(options)}
           onChange={this.handleSelectChange}
           isSearchable={false}
+          styles={this.props.customBackground ? customStyles : {}}
         />
         <input
           type="file"

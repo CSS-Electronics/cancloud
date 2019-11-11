@@ -18,6 +18,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Dropdown } from "react-bootstrap";
 import ShareObjectModal from "./ShareObjectModal";
+import PreviewObjectModal from "./PreviewObjectModal";
 import DeleteObjectConfirmModal from "./DeleteObjectConfirmModal";
 import * as objectsActions from "./actions";
 import {
@@ -47,6 +48,11 @@ export class ObjectActions extends React.Component {
     const { object, deleteObject } = this.props;
     deleteObject(object.name);
   }
+  showPreview(e) {
+    e.preventDefault();
+    const { object, previewObject } = this.props;
+    previewObject(object);
+  }
   showDeleteConfirmModal(e) {
     e.preventDefault();
     this.setState({ showDeleteConfirmation: true });
@@ -57,11 +63,23 @@ export class ObjectActions extends React.Component {
     });
   }
   render() {
-    const { object, showShareObjectModal, shareObjectName } = this.props;
+    const {
+      object,
+      showShareObjectModal,
+      shareObjectName,
+      showPreviewObjectModal
+    } = this.props;
     return (
       <Dropdown id={`obj-actions-${object.name}`}>
         <Dropdown.Toggle noCaret className="fia-toggle" />
         <Dropdown.Menu>
+          <a
+            href=""
+            className="fiad-action"
+            onClick={this.showPreview.bind(this)}
+          >
+            <i className="fa fa-eye" />
+          </a>
           <a
             href=""
             className="fiad-action"
@@ -80,6 +98,8 @@ export class ObjectActions extends React.Component {
         {showShareObjectModal && shareObjectName === object.name && (
           <ShareObjectModal object={object} />
         )}
+        {showPreviewObjectModal && <PreviewObjectModal object={object} />}
+
         {this.state.showDeleteConfirmation && (
           <DeleteObjectConfirmModal
             deleteObject={this.deleteObject.bind(this)}
@@ -95,6 +115,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     object: ownProps.object,
     showShareObjectModal: state.objects.shareObject.show,
+    showPreviewObjectModal: state.objects.previewObject.show,
+    showPreviewObjectContent: state.objects.previewObject.content,
     shareObjectName: state.objects.shareObject.object
   };
 };
@@ -103,7 +125,8 @@ const mapDispatchToProps = dispatch => {
   return {
     shareObject: (object, days, hours, minutes) =>
       dispatch(objectsActions.shareObject(object, days, hours, minutes)),
-    deleteObject: object => dispatch(objectsActions.deleteObject(object))
+    deleteObject: object => dispatch(objectsActions.deleteObject(object)),
+    previewObject: object => dispatch(objectsActions.previewObject(object))
   };
 };
 

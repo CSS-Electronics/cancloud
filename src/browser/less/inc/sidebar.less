@@ -29,10 +29,16 @@
 	.version-text {
 		display: inline-block;
     text-align: left;
-    margin-left: 3.5em;
+		margin-left: 4.1em;
+		margin-top:-2px;
     width: 100%;
-    font-size: 13px;
+		font-size: 11px;
+		color:@sidebar-search;
   }
+
+	.ig-text::placeholder{
+		color: @sidebar-search;
+	}
 
 	a {
 		color: rgba(255, 255, 255, 0.58);
@@ -106,7 +112,7 @@
 		}
 
 		&.active {
-			background-color: #282e32;
+			background-color: rgba(0, 0, 0, 0.2);
 
 			& > a {
 				color: @white;

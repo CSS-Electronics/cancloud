@@ -41,8 +41,12 @@ export class MainContent extends Component {
         <MobileHeader />
         <Dropzone>
           <Header />
-          <div className={"meta-header"}>
-            {loggerRegex.test(bucket) ? <DeviceMetaHeaderContainer /> : <div />}
+          <div className="meta-header">
+            {bucket.match(loggerRegex) ? (
+              <DeviceMetaHeaderContainer />
+            ) : (
+              <div />
+            )}
           </div>
           <ObjectsSection />
         </Dropzone>

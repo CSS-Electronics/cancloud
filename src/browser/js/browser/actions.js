@@ -29,6 +29,7 @@ import fetch from "isomorphic-unfetch";
 import history from "../history";
 import * as alertActions from "../alert/actions";
 import * as bucketActions from "../buckets/actions";
+import * as dashboardStatusActions from "../dashboardStatus/actions";
 import { pathSlice } from "../utils";
 
 export const toggleSidebar = () => ({
@@ -118,9 +119,16 @@ export const setServerConfigModDate = serverConfigModDate => ({
 
 export const fetchServerConfigContent = fileObject => {
   return function(dispatch, getState) {
+
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
     if (fileObject === undefined) {
       // No configuration file
       dispatch(setServerConfigContent({}));
+
+      if(bucket == "status-dashboard"){
+        dispatch(dashboardStatusActions.listAllObjects())
+      }
       return;
     }
     const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
@@ -129,6 +137,7 @@ export const fetchServerConfigContent = fileObject => {
     const serverConfigModObject = fileObject.lastModified.toString();
 
     if (serverConfigModStore !== serverConfigModObject) {
+
       return web
         .PresignedGet({
           bucket: "server",
@@ -143,14 +152,13 @@ export const fetchServerConfigContent = fileObject => {
               dispatch(setServerConfigModDate(fileObject.lastModified));
 
               // Below ensures that the device image is loaded on the initial mount
-              const testRegex = loggerRegex.test(
-                getState().buckets.currentBucket
-              );
+              const testRegex = getState().buckets.currentBucket.match(loggerRegex) 
 
               const { bucket, prefix } = pathSlice(history.location.pathname);
 
+              let deviceList = data.devicemeta.devices ? data.devicemeta.devices : []
               if (testRegex) {
-                let imageName = data.devicemeta.devices.filter(
+                let imageName = deviceList.filter(
                   p => p.serialno === getState().buckets.currentBucket
                 )[0];
 
@@ -165,6 +173,10 @@ export const fetchServerConfigContent = fileObject => {
 
               // assign meta data to devices after the serverConfig has loaded
               dispatch(bucketActions.addBucketMetaData());
+
+              if(bucket == "status-dashboard"){
+                dispatch(dashboardStatusActions.listAllObjects())
+              }
             })
             .catch(e => {
               dispatch(
@@ -174,6 +186,9 @@ export const fetchServerConfigContent = fileObject => {
                   autoClear: false
                 })
               );
+              if(bucket == "status-dashboard"){
+                dispatch(dashboardStatusActions.listAllObjects())
+              }
             });
         })
         .catch(err => {
@@ -185,11 +200,18 @@ export const fetchServerConfigContent = fileObject => {
                 autoClear: false
               })
             );
+
+            if(bucket == "status-dashboard"){
+              dispatch(dashboardStatusActions.listAllObjects())
+            }
           } else {
             history.push("/login");
           }
         });
     } else {
+      if(bucket == "status-dashboard"){
+        dispatch(dashboardStatusActions.listAllObjects())
+      }
       // Do nothing
     }
   };

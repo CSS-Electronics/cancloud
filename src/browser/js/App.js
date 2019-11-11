@@ -21,6 +21,7 @@ const Browser = EDITOR.offline ? "" : require("./browser/Browser");
 const Login = EDITOR.offline ? "" : require("./browser/Login");
 import Editor from "./editor/Editor";
 const Dashboard = EDITOR.offline ? "" : require("./dashboard");
+const DashboardStatus = EDITOR.offline ? "" : require("./dashboardStatus");
 
 export const App = () => {
   if (EDITOR.offline) {
@@ -34,6 +35,7 @@ export const App = () => {
       <Switch>
         <Route path={"/login"} component={Login} />
         <Route path={"/dashboard"} component={Dashboard} />
+        <Route path={"/status-dashboard"} component={DashboardStatus} />
         <Route path={"/configuration/:device?"} component={Editor} />
         <Route path={"/:bucket?/*"} component={Browser} />
       </Switch>

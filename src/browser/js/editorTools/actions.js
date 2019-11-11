@@ -13,6 +13,7 @@ export const TOGGLE_FILTER_SIDEBAR = "editorTools/TOGGLE_FILTER_SIDEBAR";
 export const TOGGLE_DEVICE_FILE_TABLE = "editorTools/TOGGLE_DEVICE_FILE_TABLE";
 export const TOGGLE_CRC_SIDEBAR = "editorTools/TOGGLE_CRC_SIDEBAR";
 export const TOGGLE_BITRATE_SIDEBAR = "editorTools/TOGGLE_BITRATE_SIDEBAR";
+export const TOGGLE_PARTIAL_CONFIG_LOADER_SIDEBAR = "editorTools/TOGGLE_PARTIAL_CONFIG_LOADER_SIDEBAR";
 export const SET_CRC32_EDITOR_LIVE = "editorTools/SET_CRC32_EDITOR_LIVE";
 export const SET_CRC32_EDITOR_PRE = "editorTools/SET_CRC32_EDITOR_PRE";
 export const OPEN_DEVICE_FILE_TABLE = "editorTools/OPEN_DEVICE_FILE_TABLE";
@@ -28,6 +29,10 @@ export const toggleEditorSchemaSideBar = () => ({
 
 export const toggleBitRateSideBar = () => ({
   type: TOGGLE_BITRATE_SIDEBAR
+});
+
+export const togglePartialConfigLoaderSideBar = () => ({
+  type: TOGGLE_PARTIAL_CONFIG_LOADER_SIDEBAR
 });
 
 export const closeEditorToolsSideBars = () => ({

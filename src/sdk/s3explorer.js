@@ -34,7 +34,7 @@ class S3Explorer {
       this.bucketName = options.bucketName;
     }
 
-    this.AwsSdk = new AwsSdk(this.accessKey, this.secretKey);
+    this.AwsSdk = new AwsSdk(this.accessKey, this.secretKey, this.endPoint);
   }
 
   /**
@@ -124,6 +124,7 @@ class S3Explorer {
    * @param {*} cb
    */
   listObjects(bucketName, prefix, marker, cb) {
+
     var stream;
     let updatedPrefix = bucketName + "/" + prefix;
     if ("Home" == bucketName) {
@@ -153,8 +154,10 @@ class S3Explorer {
     });
   }
 
+  
   // list bucket objects from S3 compatible storage
   listObjectsRecursive(bucketName, prefix, marker, cb) {
+   
     var stream;
     let objectNameWithPrefix = bucketName + "/" + prefix;
     if ("Home" == bucketName) {
@@ -168,11 +171,16 @@ class S3Explorer {
     }
 
     let objectsArray = [];
-    stream.on("data", function(obj) {
+    let iCount = 0;
+
+    // look into optimizing this part
+    stream.on("data", function(obj) { 
       if (obj.name || obj.prefix) {
         obj["name"] = obj.prefix ? obj.prefix : obj.name;
         objectsArray.push(obj);
+        iCount += 1
       }
+
     });
     stream.on("end", function() {
       let response = StorageResponses.makeDefaultResponse(
@@ -436,7 +444,6 @@ class S3Explorer {
    */
 
   getWidgetQueryResult(dataFileName, sqlExpression, cb) {
-    console.log(sqlExpression);
     const params = {
       Bucket: this.bucketName,
       Key: dataFileName,
@@ -476,12 +483,55 @@ class S3Explorer {
           dataset,
           records
         });
+
         return cb(null, response);
       })
       .catch(err => {
         console.log("err", err);
+        console.log("Attempted SQL expression:", sqlExpression);
         return cb(err);
       });
+  }
+
+  /**
+   * @name: getPartialObject
+   * @description: Get object content based on the pre-defined range i.e 10kb
+   */
+
+  getPartialObject(bucketName, objectName, cb) {
+    let objectNameWithPrefix;
+    if ("Home" == bucketName) {
+      objectNameWithPrefix = objectName;
+    } else {
+      objectNameWithPrefix = bucketName + "/" + objectName;
+    }
+    let partialContent = "";
+    this.s3Client.getPartialObject(
+      this.bucketName,
+      objectNameWithPrefix,
+      0,
+      10000,
+      (err, stream) => {
+        if (err) {
+          console.log(err);
+          return cb(err);
+        }
+        stream.on("data", function(chunk) {
+          partialContent += chunk.toString();
+        });
+        stream.on("end", function() {
+          const response = StorageResponses.makeDefaultResponse(
+            "objContent",
+            partialContent
+          );
+          return cb(null, response);
+        });
+        stream.on("error", function(err) {
+          console.log(err);
+          return cb(err);
+        });
+      }
+    );
   }
 }
 
@@ -530,6 +580,10 @@ S3Explorer.prototype.getEndpointAndBucketName = promisify(
 
 S3Explorer.prototype.getWidgetQueryResult = promisify(
   S3Explorer.prototype.getWidgetQueryResult
+);
+
+S3Explorer.prototype.getPartialObject = promisify(
+  S3Explorer.prototype.getPartialObject
 );
 
 module.exports = S3Explorer;

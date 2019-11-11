@@ -1141,6 +1141,7 @@ export class Client {
 
   // list a batch of objects
   listObjectsQuery(bucketName, prefix, marker, delimiter, maxKeys) {
+    
     if (!isValidBucketName(bucketName)) {
       throw new errors.InvalidBucketNameError('Invalid bucket name: ' + bucketName)
     }
@@ -1157,6 +1158,7 @@ export class Client {
       throw new TypeError('maxKeys should be of type "number"')
     }
     var queries = []
+    
     // escape every value in query string, except maxKeys
     if (prefix) {
       prefix = uriEscape(prefix)
@@ -1175,8 +1177,11 @@ export class Client {
       if (maxKeys >= 1000) {
         maxKeys = 1000
       }
+      // maxKeys = 10000
       queries.push(`max-keys=${maxKeys}`)
     }
+
+
     queries.sort()
     var query = ''
     if (queries.length > 0) {
@@ -1235,11 +1240,12 @@ export class Client {
       }
       if (ended) return readStream.push(null)
       // if there are no objects to push do query for the next batch of objects
-      this.listObjectsQuery(bucketName, prefix, marker, delimiter, 1000)
+      this.listObjectsQuery(bucketName, prefix, marker, delimiter, 10000)
         .on('error', e => readStream.emit('error', e))
         .on('data', result => {
           if (result.isTruncated) {
             marker = result.nextMarker
+
           } else {
             ended = true
           }

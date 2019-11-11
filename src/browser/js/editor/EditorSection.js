@@ -397,7 +397,7 @@ class LoadEditorFiles extends React.Component {
           <br />
           {schemaContent ? (
             <FormWithNav
-              omitUnusedData={true}
+              omitExtraData={true}
               liveOmit={true}
               liveValidate={this.state.isLiveValidation}
               noHtml5Validate={true}

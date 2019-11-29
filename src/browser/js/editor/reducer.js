@@ -96,7 +96,7 @@ export default (
       return {
         ...state,
         editorUISchemaFiles: state.editorUISchemaFiles.filter(
-          file => file.name.split(".").slice(-1)[0] == "json"
+          file => !file.name.includes("(local)")
         )
       };
     case actionsEditor.RESET_CONFIG_LIST:

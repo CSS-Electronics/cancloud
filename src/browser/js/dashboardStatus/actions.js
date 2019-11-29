@@ -269,7 +269,7 @@ export const listLogFiles = devicesFilesInput => {
                   if (e > periodStartVarFormat) {
                     const deviceId = device;
                     const lastModified = e;
-                    const size = sizePerTime[e] / 1000000;
+                    const size = sizePerTime[e] / (1024*1024);
                     const count = countPerTime[e];
                     dataPerTimeAry.push({
                       deviceId,

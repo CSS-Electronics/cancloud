@@ -66,7 +66,7 @@ export class BrowserDropdown extends React.Component {
     this.props.resetFiles();
     history.push("/configuration/");
 
-    this.props.publicUiSchemaFilesSimple();
+    this.props.publicUiSchemaFiles();
     if(!this.props.editorSchemaSidebarOpen){
       this.props.toggleEditorSchemaSideBar()
     }
@@ -128,7 +128,7 @@ const mapDispatchToProps = dispatch => {
     selectBucket: (bucket, prefix) =>
       dispatch(actionsBuckets.selectBucket(bucket)),
     resetFiles: () => dispatch(actionsEditor.resetFiles()),
-    publicUiSchemaFilesSimple: () => dispatch(actionsEditor.publicUiSchemaFilesSimple()),
+    publicUiSchemaFiles: () => dispatch(actionsEditor.publicUiSchemaFiles()),
     toggleEditorSchemaSideBar: () => dispatch(actionsEditorTools.toggleEditorSchemaSideBar()),
     userLogout: () => dispatch(actionsBuckets.userLogout())
   };

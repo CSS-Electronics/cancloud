@@ -17,7 +17,7 @@ class EditorSchemaModal extends React.Component {
   }
 
   componentDidMount() {
-    if ((EDITOR.offline || !this.props.currentBucket) && !this.props.editorSchemaSidebarOpen) {
+    if (!this.props.editorSchemaSidebarOpen) {
       this.setState({}, () => {
         this.props.toggleEditorSchemaSideBar();
       });
@@ -54,12 +54,12 @@ class EditorSchemaModal extends React.Component {
 
         <EditorDropdown
           options={editorUISchemaFiles}
-          name="UIschema"
+          name="Presentation Mode"
           selected={selectedUISchema}
           onChange={handleUiSchemaChange}
           handleUplodedFile={handleUplodedUISchema}
           customBackground={true}
-          comment="The UIschema affects the visual presentation of the editor. It does not impact the Configuration File - and it is not required."
+          comment="The UIschema affects the visual presentation of the editor. It does not impact the Configuration File. It can also be used to hide e.g. advanced settings via a Simple variant - or show all settings via an Advanced variant. The default UIschema can be changed by uploading a UIschema to the server folder."
         />
         <EditorDropdown
           options={editorSchemaFiles}

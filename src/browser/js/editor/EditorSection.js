@@ -396,6 +396,8 @@ class LoadEditorFiles extends React.Component {
           <br />
           <br />
           {schemaContent ? (
+            <div>
+            <p className="editor-temporary-text">Note: You can now switch the editor between "simple" and "advanced" view via the UIschema to the right (see release notes on github)</p>
             <FormWithNav
               omitExtraData={true}
               liveOmit={true}
@@ -495,6 +497,7 @@ class LoadEditorFiles extends React.Component {
                 </div>
               </div>
             </FormWithNav>
+            </div>
           ) : (
             <div
               className={

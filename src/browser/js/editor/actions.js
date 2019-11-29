@@ -464,6 +464,8 @@ export const setUiSchemaSource = uiSchemaSource => ({
 
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
+    dispatch(setConfigContentPreSubmit())
+
     const uploadedTest = getState().editor.editorSchemaFiles.filter(file =>
       file.name.includes("local")
     )[0];
@@ -535,6 +537,7 @@ export const fetchSchemaContent = fileName => {
 
 export const fetchUISchemaContent = fileName => {
     return function(dispatch, getState) {
+    dispatch(setConfigContentPreSubmit());
     dispatch(resetLocalUISchemaList());
     switch (true) {
       case fileName == "None" || fileName == undefined:

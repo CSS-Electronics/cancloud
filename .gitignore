@@ -4,6 +4,6 @@ dist
 
 site
 
-simple
-
 .eslintrc.json
+
+simple/*

@@ -738,6 +738,7 @@ export const handleUploadedConfig = file => {
           dispatch(setConfigContent(jsonContent));
           dispatch(resetLocalConfigList());
           dispatch(setConfigFile([`${fileNameShort} (local)`]));
+          dispatch(setUpdatedFormData(jsonContent));
         } catch (error) {
           dispatch(
             alertActions.set({

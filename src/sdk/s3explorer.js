@@ -40,7 +40,7 @@ class S3Explorer {
   /**
    * @method: getSessionsObject
    * @param {@} cb
-   * @description: Saved session when Listobject API is working fine.
+   * @description: Saved session when ListObject API is working fine.
    */
 
   getSessionsObject(cb) {
@@ -69,10 +69,10 @@ class S3Explorer {
   }
 
   // list s3 compatible storage buckets
-  listBuckets(cb) {
-    var stream = this.s3Client.listObjects(this.bucketName, "", false);
+  listBuckets(marker, cb) {
+    marker = marker ? marker : "";
+    var stream = this.s3Client.listObjects(this.bucketName, "", marker, false);
     let objectsArray = [];
-    // objectsArray.push({prefix:`${this.bucketName}/`, size:0, name:'Home'})
     stream.on("data", function(obj) {
       if (obj.prefix) {
         obj["name"] = obj.prefix.substring(0, obj.prefix.length - 1);
@@ -124,13 +124,22 @@ class S3Explorer {
    * @param {*} cb
    */
   listObjects(bucketName, prefix, marker, cb) {
-
     var stream;
     let updatedPrefix = bucketName + "/" + prefix;
     if ("Home" == bucketName) {
-      stream = this.s3Client.listObjects(this.bucketName, prefix, false);
+      stream = this.s3Client.listObjects(
+        this.bucketName,
+        prefix,
+        marker,
+        false
+      );
     } else {
-      stream = this.s3Client.listObjects(this.bucketName, updatedPrefix, false);
+      stream = this.s3Client.listObjects(
+        this.bucketName,
+        updatedPrefix,
+        marker,
+        false
+      );
     }
 
     let objectsArray = [];
@@ -154,10 +163,8 @@ class S3Explorer {
     });
   }
 
-  
   // list bucket objects from S3 compatible storage
   listObjectsRecursive(bucketName, prefix, marker, cb) {
-   
     var stream;
     let objectNameWithPrefix = bucketName + "/" + prefix;
     if ("Home" == bucketName) {
@@ -174,13 +181,12 @@ class S3Explorer {
     let iCount = 0;
 
     // look into optimizing this part
-    stream.on("data", function(obj) { 
+    stream.on("data", function(obj) {
       if (obj.name || obj.prefix) {
         obj["name"] = obj.prefix ? obj.prefix : obj.name;
         objectsArray.push(obj);
-        iCount += 1
+        iCount += 1;
       }
-
     });
     stream.on("end", function() {
       let response = StorageResponses.makeDefaultResponse(
@@ -548,32 +554,43 @@ S3Explorer.prototype.listObjectsRecursive = promisify(
 );
 S3Explorer.prototype.storageInfo = promisify(S3Explorer.prototype.storageInfo);
 S3Explorer.prototype.makeBucket = promisify(S3Explorer.prototype.makeBucket);
+
 S3Explorer.prototype.deleteBucket = promisify(
   S3Explorer.prototype.deleteBucket
 );
+
 S3Explorer.prototype.removeObject = promisify(
   S3Explorer.prototype.removeObject
 );
+
 S3Explorer.prototype.listAllBucketPolicies = promisify(
   S3Explorer.prototype.listAllBucketPolicies
 );
+
 S3Explorer.prototype.putObject = promisify(S3Explorer.prototype.putObject);
+
 S3Explorer.prototype.fPutObject = promisify(S3Explorer.prototype.fPutObject);
+
 S3Explorer.prototype.presignedGet = promisify(
   S3Explorer.prototype.presignedGet
 );
+
 S3Explorer.prototype.presignedPutObject = promisify(
   S3Explorer.prototype.presignedPutObject
 );
+
 S3Explorer.prototype.createURLToken = promisify(
   S3Explorer.prototype.createURLToken
 );
+
 S3Explorer.prototype.presignedGetObj = promisify(
   S3Explorer.prototype.presignedGetObj
 );
+
 S3Explorer.prototype.getObjectStat = promisify(
   S3Explorer.prototype.getObjectStat
 );
+
 S3Explorer.prototype.getEndpointAndBucketName = promisify(
   S3Explorer.prototype.getEndpointAndBucketName
 );

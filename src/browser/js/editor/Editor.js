@@ -16,10 +16,11 @@ import CrcModal from "../editorTools/CrcModal";
 import DeviceFileModal from "../editorTools/DeviceFileModal";
 import FilterModal from "../editorTools/FilterModal";
 import BitRateModal from "../editorTools/BitRateModal";
+import PartialConfigLoader from "../editorTools/PartialConfigLoader";
 
 class Editor extends React.Component {
   componentWillMount() {
-    const { selectBucket, resetFiles, publicConfigFiles } = this.props;
+    const { selectBucket, resetFiles, publicUiSchemaFiles } = this.props;
     const { prefix } = pathSlice(history.location.pathname);
     resetFiles();
     selectBucket(prefix);
@@ -30,7 +31,7 @@ class Editor extends React.Component {
     ) {
       history.push("/login");
     } else if (!prefix) {
-      publicConfigFiles();
+      publicUiSchemaFiles();
     }
   }
 
@@ -41,7 +42,8 @@ class Editor extends React.Component {
       editorSchemaSidebarOpen,
       filterSidebarOpen,
       bitRateSidebarOpen,
-      deviceFileTableOpen
+      deviceFileTableOpen,
+      partialConfigLoaderSidebarOpen
     } = this.props;
     return (
       <div
@@ -52,7 +54,8 @@ class Editor extends React.Component {
             encryptionSidebarOpen ||
             crcSidebarOpen ||
             filterSidebarOpen ||
-            bitRateSidebarOpen
+            bitRateSidebarOpen ||
+            partialConfigLoaderSidebarOpen
         })}
       >
         {!EDITOR.offline && <SideBar />}
@@ -63,6 +66,8 @@ class Editor extends React.Component {
         {filterSidebarOpen ? <FilterModal /> : null}
         {bitRateSidebarOpen ? <BitRateModal /> : null}
         {deviceFileTableOpen ? <DeviceFileModal /> : null}
+        {partialConfigLoaderSidebarOpen ? <PartialConfigLoader /> : null}
+
       </div>
     );
   }
@@ -75,13 +80,14 @@ const mapStateToProps = state => {
     crcSidebarOpen: state.editorTools.crcSidebarOpen,
     filterSidebarOpen: state.editorTools.filterSidebarOpen,
     bitRateSidebarOpen: state.editorTools.bitRateSidebarOpen,
-    deviceFileTableOpen: state.editorTools.deviceFileTableOpen
+    deviceFileTableOpen: state.editorTools.deviceFileTableOpen,
+    partialConfigLoaderSidebarOpen: state.editorTools.partialConfigLoaderSidebarOpen
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    publicConfigFiles: () => dispatch(actionsEditor.publicConfigFiles()),
+    publicUiSchemaFiles: () => dispatch(actionsEditor.publicUiSchemaFiles()),
     selectBucket: (bucket, prefix) =>
       dispatch(actionsBuckets.selectBucket(bucket, prefix)),
     resetFiles: () => dispatch(actionsEditor.resetFiles())

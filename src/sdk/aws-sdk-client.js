@@ -1,10 +1,12 @@
 import AWS from "aws-sdk";
 
 class AwsSdk {
-  constructor(accessKeyId, secretAccessKey) {
+  constructor(accessKeyId, secretAccessKey, endpoint) {
     this.aws3 = new AWS.S3({
       accessKeyId,
-      secretAccessKey
+      secretAccessKey,
+      endpoint,
+      s3ForcePathStyle: true
     });
   }
 
@@ -20,11 +22,7 @@ class AwsSdk {
             if (event.Records) {
               result = result.concat(event.Records.Payload.toString());
             } else if (event.Stats) {
-              console.log(
-                `Processed ${event.Stats.Details.BytesProcessed} bytes`
-              );
             } else if (event.End) {
-              console.log("SelectObjectContent completed");
               resolve(result);
             }
           }

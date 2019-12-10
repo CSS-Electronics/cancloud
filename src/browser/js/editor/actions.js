@@ -1,11 +1,11 @@
 import fetch from "isomorphic-unfetch";
 import saveAs from "file-saver";
 import Moment from "moment";
-
 import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
-
+import * as browserActions from "../browser/actions";
+import * as actionsEditorTools from "../editorTools/actions";
 import {
   isValidUISchema,
   isValidSchema,
@@ -28,62 +28,94 @@ export const SET_UI_SCHEMA_DATA = "editor/SET_UI_SCHEMA_DATA";
 export const SET_SCHEMA_DATA = "editor/SET_SCHEMA_DATA";
 export const SET_UPDATED_CONFIG = "editor/SET_UPDATED_CONFIG";
 export const RESET_SCHEMA_FILES = "editor/RESET_SCHEMA_FILES";
+export const RESET_UPLOADED_SCHEMA_LIST = "editor/RESET_UPLOADED_SCHEMA_LIST";
 export const SET_CONFIG_DATA_PRE_CHANGE = "editor/SET_CONFIG_DATA_PRE_CHANGE";
 export const SET_UPDATED_FORM_DATA = "editor/SET_UPDATED_FORM_DATA";
 export const SET_ACTIVE_NAV = "editor/SET_ACTIVE_NAV";
 export const SET_UISCHEMA_SOURCE = "editor/SET_UISCHEMA_SOURCE";
 export const SET_DEVICE_FILE_DATA = "editor/SET_DEVICE_FILE_DATA";
 export const SET_PREV_DEVICE_FILE_DEVICE = "editor/SET_PREV_DEVICE_FILE_DEVICE";
-export const SET_DEVICE_FILE_LAST_MODIFIED = "editor/SET_DEVICE_FILE_LAST_MODIFIED";
+export const SET_DEVICE_FILE_LAST_MODIFIED =
+  "editor/SET_DEVICE_FILE_LAST_MODIFIED";
+
+// Note: These need to be updated with future firmware revisions
+const uiSchemaAry = [
+  "uischema-00.07.json | Simple",
+  "uischema-00.07.json | Advanced"
+];
+
+const schemaAry = [
+  "schema-00.07.json | CANedge2",
+  "schema-00.07.json | CANedge1",
+  "schema-00.06.json | CANedge2",
+  "schema-00.06.json | CANedge1",
+  "schema-00.05.json | CANedge2",
+  "schema-00.05.json | CANedge1"
+];
 
 const regexSchema = new RegExp(/^schema-\d{2}\.\d{2}\.json/, "g");
+const regexSchemaPublic = new RegExp(
+  /^schema-\d{2}\.\d{2}\.json \| CANedge(1|2)$/,
+  "g"
+);
+const regexUISchemaPublic = new RegExp(
+  /^uischema-\d{2}\.\d{2}\.json \| (Advanced|Simple)$/,
+  "g"
+);
 const regexConfig = new RegExp(/^config-\d{2}\.\d{2}\.json/, "g");
 const regexUiSchema = new RegExp(/^uischema-\d{2}\.\d{2}\.json/, "g");
 const regexDeviceFile = new RegExp(/^device\.json/, "g");
 
-const defaultSchemaList = "default-schemas.json";
-
-import defaultConfigs from "../../../../default-schemas.json";
-
-const defaultUISchema = defaultConfigs.uischema
-  ? require(`../../schema/${defaultConfigs.uischema}`)
-  : "";
-const defaultSchema = defaultConfigs.schema
-  ? require(`../../schema/${defaultConfigs.schema}`)
-  : "";
-const defaultConfig = defaultConfigs.config
-  ? require(`../../schema/${defaultConfigs.config}`)
-  : "";
-
+// load the Simple/Advanced default UIschema in the online & offline editor
 export const publicUiSchemaFiles = () => {
   return function(dispatch) {
-    dispatch(setUISchemaFile([defaultConfigs.uischema]));
-    dispatch(setUISchemaContent(defaultUISchema));
+    dispatch(loadUISchemaSimpleAdvanced())
   };
 };
 
-export const publicConfigFiles = () => {
+// load the relevant schema file when a user uploads a config file (based on revision)
+export const publicSchemaFiles = selectedConfig => {
   return function(dispatch) {
-    const uischemaFile = defaultConfigs.uischema
-      ? [defaultConfigs.uischema]
-      : [];
-    const schemaFile = defaultConfigs.schema ? [defaultConfigs.schema] : [];
-    const config = defaultConfigs.config ? [defaultConfigs.config] : [];
-    dispatch(setUISchemaFile(uischemaFile));
-    dispatch(setSchemaFile(schemaFile));
-    dispatch(setConfigFile(config));
-    dispatch(setUISchemaContent(defaultUISchema));
-    dispatch(setSchemaContent(defaultSchema));
-    dispatch(setConfigContent(defaultConfig));
+    dispatch(resetSchemaFiles());
+
+    if (selectedConfig) {
+      const schemaAryFiltered = schemaAry.filter(e =>
+        e.includes(selectedConfig.substr(7, 5))
+      );
+
+      const defaultSchema = schemaAryFiltered[0];
+
+      if (defaultSchema) {
+        const schemaPublic = require(`../../schema/${
+          defaultSchema.split(" | ")[1]
+        }/${defaultSchema.split(" ")[0]}`);
+
+        dispatch(setSchemaFile(schemaAryFiltered));
+        dispatch(setSchemaContent(schemaPublic));
+      }
+    }
   };
 };
 
-export const resetFiles = () => ({
-  type: RESET_SCHEMA_FILES,
-  reset: true
-});
+// load both a simple/advanced UIschema
+export const loadUISchemaSimpleAdvanced = () => {
+  return function(dispatch) {
+    dispatch(resetUISchemaList());
 
-// Below is triggered when clicking Configure - or refreshing the page
+      const defaultUiSchema = uiSchemaAry[0];
+
+        const defaultUiSchemaContent = require(`../../schema/${
+          defaultUiSchema.split(" | ")[1]
+        }/${defaultUiSchema.split(" ")[0]}`);
+
+        dispatch(setUISchemaFile(uiSchemaAry));
+        dispatch(setUISchemaContent(defaultUiSchemaContent));
+    
+  };
+};
+
+
+// Below is triggered when clicking Configure in the sidebar - or refreshing the page
 // It fetches the device specific object list and parses these to the UIschema fetcher below
 export const fetchSchemaFiles = prefix => {
   return function(dispatch) {
@@ -102,6 +134,7 @@ export const fetchSchemaFiles = prefix => {
         const deviceFileName = allObjects.filter(str =>
           str.match(regexDeviceFile)
         );
+
         const deviceFileObject = data.objects.filter(
           p => p.name === "device.json"
         )[0];
@@ -130,6 +163,7 @@ export const fetchSchemaFiles = prefix => {
   };
 };
 
+// below fetches content of device.json file
 export const fetchDeviceFileContent = (fileName, device) => {
   return function(dispatch, getState) {
     if (fileName == "") {
@@ -319,9 +353,15 @@ export const fetchUISchemaFiles = configObjects => {
 };
 
 export const updateConfigFile = (content, object) => {
+  const { bucket, prefix } = pathSlice(history.location.pathname);
+
   return function(dispatch) {
     dispatch(setConfigContent(JSON.parse(content)));
     dispatch(setConfigContentPreChange(JSON.parse(content)));
+    if (prefix == "server") {
+      dispatch(browserActions.setServerConfigContent(JSON.parse(content)));
+    }
+
     return web
       .PutObject({
         objectName: object,
@@ -357,9 +397,10 @@ export const updateConfigFile = (content, object) => {
 export const fetchConfigContent = fileName => {
   return function(dispatch, getState) {
     dispatch(resetLocalConfigList());
+
     if (fileName == "None") {
       dispatch(setConfigContent(null));
-      dispatch(setConfigContentPreChange(null));
+      dispatch(setUpdatedFormData(null));
     } else {
       const { bucket, prefix } = pathSlice(history.location.pathname);
       const currentBucket = getCurrentBucket(getState());
@@ -378,10 +419,13 @@ export const fetchConfigContent = fileName => {
               .then(data => {
                 dispatch(setConfigContent(data));
                 dispatch(setConfigContentPreChange(data));
+                dispatch(setUpdatedFormData(data));
               })
               .catch(e => {
                 dispatch(setConfigContent(null));
                 dispatch(setConfigContentPreChange(null));
+                dispatch(setUpdatedFormData(null));
+
                 dispatch(
                   alertActions.set({
                     type: "danger",
@@ -407,9 +451,8 @@ export const fetchConfigContent = fileName => {
       } else if (prefix) {
         dispatch(setConfigContent(null));
         dispatch(setConfigContentPreChange(null));
-      } else {
-        dispatch(fetchPubliConfig(fileName));
-      }
+        dispatch(setUpdatedFormData(null));
+      } 
     }
   };
 };
@@ -421,16 +464,31 @@ export const setUiSchemaSource = uiSchemaSource => ({
 
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
-    dispatch(resetLocalSchemaList());
-    switch (fileName) {
-      case "None":
+    dispatch(setConfigContentPreSubmit())
+
+    const uploadedTest = getState().editor.editorSchemaFiles.filter(file =>
+      file.name.includes("local")
+    )[0];
+
+    if (uploadedTest != undefined) {
+      dispatch(resetUploadedSchemaList());
+    }
+
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+    switch (true) {
+      case fileName == "None" || fileName == undefined:
         dispatch(setSchemaContent(null));
+        if (!getState().editorTools.editorSchemaSidebarOpen) {
+          dispatch(actionsEditorTools.toggleEditorSchemaSideBar());
+        }
         break;
-      case defaultConfigs.schema:
-        dispatch(setSchemaContent(defaultSchema));
+      case fileName.match(regexSchemaPublic) != null:
+        const schemaPublic = require(`../../schema/${
+          fileName.split(" | ")[1]
+        }/${fileName.split(" ")[0]}`);
+        dispatch(setSchemaContent(schemaPublic));
         break;
       default:
-        const { bucket, prefix } = pathSlice(history.location.pathname);
         const currentBucket = getCurrentBucket(getState());
         const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
         if (prefix && fileName && fileName != "Upload") {
@@ -472,23 +530,25 @@ export const fetchSchemaContent = fileName => {
             });
         } else if (prefix) {
           dispatch(setSchemaContent(null));
-        } else {
-          dispatch(fetchPublicSchema(fileName));
-        }
+        } 
     }
   };
 };
 
 export const fetchUISchemaContent = fileName => {
-  return function(dispatch, getState) {
+    return function(dispatch, getState) {
+    dispatch(setConfigContentPreSubmit());
     dispatch(resetLocalUISchemaList());
-    switch (fileName) {
-      case "None":
+    switch (true) {
+      case fileName == "None" || fileName == undefined:
         dispatch(setUISchemaContent(null));
         break;
-      case defaultConfigs.uischema:
-        dispatch(setUISchemaContent(defaultUISchema));
-        break;
+      case fileName.match(regexUISchemaPublic) != null:
+          const uiSchemaPublic = require(`../../schema/${
+            fileName.split(" | ")[1]
+          }/${fileName.split(" ")[0]}`);
+          dispatch(setUISchemaContent(uiSchemaPublic));
+          break;
       default:
         const { bucket, prefix } = pathSlice(history.location.pathname);
         const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
@@ -536,9 +596,7 @@ export const fetchUISchemaContent = fileName => {
             });
         } else if (getState().editor.uiSchemaSource == "server" && prefix) {
           dispatch(setUISchemaContent(null));
-        } else {
-          dispatch(fetchPublicUISchema(fileName));
-        }
+        } 
     }
   };
 };
@@ -599,9 +657,7 @@ export const handleUploadedUISchma = file => {
           dispatch(
             alertActions.set({
               type: "danger",
-              message: `Warning: UISchema ${
-                file.name
-              } is invalid and was not loaded`,
+              message: `Warning: UISchema ${file.name} is invalid and was not loaded`,
               autoClear: true
             })
           );
@@ -638,9 +694,7 @@ export const handleUploadedSchma = file => {
           dispatch(
             alertActions.set({
               type: "danger",
-              message: `Warning: Schema ${
-                file.name
-              } is invalid and was not loaded`,
+              message: `Warning: Schema ${file.name} is invalid and was not loaded`,
               autoClear: true
             })
           );
@@ -659,8 +713,19 @@ export const handleUploadedSchma = file => {
   };
 };
 
+// handle when the user uploads a configuration file
 export const handleUploadedConfig = file => {
-  return function(dispatch) {
+  return function(dispatch, getState) {
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
+    // load the matching schema files if a schema file is not already uploaded
+    const localLoaded =
+      getState().editor.editorSchemaFiles[0] &&
+      getState().editor.editorSchemaFiles[0].name.includes("local");
+
+    if (file && file.name && file.name.length && !localLoaded && !prefix) {
+      dispatch(publicSchemaFiles(file.name));
+    }
     if (isValidConfig(file.name)) {
       let fileReader = new FileReader();
       fileReader.onloadend = e => {
@@ -669,17 +734,15 @@ export const handleUploadedConfig = file => {
           ? file.name.split("_")[1]
           : file.name.split("_")[0];
         try {
-          dispatch(setConfigContent(JSON.parse(content)));
-          dispatch(setConfigContentPreChange(JSON.parse(content)));
+          const jsonContent = JSON.parse(content);
+          dispatch(setConfigContent(jsonContent));
           dispatch(resetLocalConfigList());
           dispatch(setConfigFile([`${fileNameShort} (local)`]));
         } catch (error) {
           dispatch(
             alertActions.set({
               type: "danger",
-              message: `Warning: Config ${
-                file.name
-              } is invalid and was not loaded`,
+              message: `Warning: Config ${file.name} is invalid and was not loaded`,
               autoClear: true
             })
           );
@@ -732,6 +795,24 @@ export const saveUpdatedConfiguration = (filename, content) => {
   };
 };
 
+export const setUpdatedFormData = formData => {
+  return {
+    type: SET_UPDATED_FORM_DATA,
+    formData
+  };
+};
+
+export const setConfigContentPreSubmit = () => {
+  return function(dispatch, getState) {
+    dispatch(setConfigContent(getState().editor.formData));
+  };
+};
+
+export const resetFiles = () => ({
+  type: RESET_SCHEMA_FILES,
+  reset: true
+});
+
 export const resetUISchemaList = () => ({
   type: RESET_UISCHEMA_LIST,
   UISchemaFiles: []
@@ -755,104 +836,10 @@ export const resetLocalSchemaList = () => ({
   type: RESET_LOCAL_SCHEMA_LIST
 });
 
+export const resetUploadedSchemaList = () => ({
+  type: RESET_UPLOADED_SCHEMA_LIST
+});
+
 export const resetLocalConfigList = () => ({
   type: RESET_LOCAL_CONFIG_LIST
 });
-
-export const fetchPublicSchema = file => {
-  return function(dispatch) {
-    fetch(`${window.location.href.split("#")[0]}${defaultSchemaList}`)
-      .then(r => r.json())
-      .then(fileData => {
-        if (fileData && fileData.endpoint) {
-          fetch(`${fileData.endpoint}${file}`)
-            .then(r => r.json())
-            .then(data => {
-              dispatch(setSchemaContent(data));
-            })
-            .catch(error => {
-              dispatch(
-                alertActions.set({
-                  type: "danger",
-                  message: error.message,
-                  autoClear: true
-                })
-              );
-            });
-        }
-      })
-      .catch(error => {
-        console.log("error:", "Unable to fetch public schema");
-      });
-  };
-};
-
-export const fetchPubliConfig = file => {
-  return function(dispatch) {
-    fetch(`${window.location.href.split("#")[0]}${defaultSchemaList}`)
-      .then(r => r.json())
-      .then(fileData => {
-        if (fileData && fileData.endpoint) {
-          fetch(`${fileData.endpoint}${file}`)
-            .then(r => r.json())
-            .then(data => {
-              dispatch(setConfigContent(data));
-              dispatch(setConfigContentPreChange(data));
-            })
-            .catch(error => {
-              dispatch(
-                alertActions.set({
-                  type: "danger",
-                  message: error.message,
-                  autoClear: true
-                })
-              );
-            });
-        }
-      })
-      .catch(error => {
-        console.log("error:", "Unable to fetch public schema");
-      });
-  };
-};
-
-export const fetchPublicUISchema = file => {
-  return function(dispatch) {
-    fetch(`${window.location.href.split("#")[0]}${defaultSchemaList}`)
-      .then(r => r.json())
-      .then(fileData => {
-        if (fileData && fileData.endpoint) {
-          fetch(`${fileData.endpoint}${file}`)
-            .then(r => r.json())
-            .then(data => {
-              dispatch(setUISchemaContent(data));
-            })
-            .catch(error => {
-              dispatch(
-                alertActions.set({
-                  type: "danger",
-                  message: error.message,
-                  autoClear: true
-                })
-              );
-            });
-        }
-      })
-      .catch(error => {
-        console.log("error:", "Unable to fetch public schema");
-      });
-  };
-};
-
-export const setUpdatedFormData = formData => {
-  return {
-    type: SET_UPDATED_FORM_DATA,
-    formData
-  };
-};
-
-export const setConfigContentPreSubmit = () => {
-  return function(dispatch, getState) {
-    dispatch(setConfigContent(getState().editor.formData));
-  };
-};

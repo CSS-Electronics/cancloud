@@ -20,6 +20,7 @@ import { Dropdown } from "react-bootstrap";
 import * as browserActions from "./actions";
 import * as actionsBuckets from "../buckets/actions";
 import * as actionsEditor from "../editor/actions";
+import * as actionsEditorTools from "../editorTools/actions"
 import web from "../web";
 import history from "../history";
 
@@ -64,12 +65,17 @@ export class BrowserDropdown extends React.Component {
     this.props.selectBucket("Home");
     this.props.resetFiles();
     history.push("/configuration/");
-    this.props.publicConfigFiles();
+
+    this.props.publicUiSchemaFiles();
+    if(!this.props.editorSchemaSidebarOpen){
+      this.props.toggleEditorSchemaSideBar()
+    }
+
   }
 
   dashboard(e) {
     e.preventDefault();
-    history.push("/dashboard/");
+    history.push("/status-dashboard/");
   }
 
   render() {
@@ -87,18 +93,19 @@ export class BrowserDropdown extends React.Component {
               </a>
             </li>
             <li>
-              <a href="" onClick={this.configureGeneral.bind(this)}>
-                Simple Editor <i className="fa fa-cog" />
+              <a href="" onClick={this.dashboard.bind(this)}>
+                Status dashboard <i className="pie-icon"/>
               </a>
             </li>
-            {/* <li>
-              <a href="" onClick={this.dashboard.bind(this)}>
-                Dashboard <i className="fa fa-tachometer" />
+            <li>
+              <a href="" onClick={this.configureGeneral.bind(this)}>
+                Simple editor <i className="fa fa-cog" />
               </a>
-            </li> */}
+            </li>
+          
             <li>
               <a href="" id="logout" onClick={this.logout}>
-                Sign Out <i className="fa fa-sign-out" />
+                Sign out <i className="fa fa-sign-out" />
               </a>
             </li>
           </Dropdown.Menu>
@@ -110,7 +117,8 @@ export class BrowserDropdown extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    serverInfo: state.browser.serverInfo
+    serverInfo: state.browser.serverInfo,
+    editorSchemaSidebarOpen: state.editorTools.editorSchemaSidebarOpen
   };
 };
 
@@ -120,7 +128,8 @@ const mapDispatchToProps = dispatch => {
     selectBucket: (bucket, prefix) =>
       dispatch(actionsBuckets.selectBucket(bucket)),
     resetFiles: () => dispatch(actionsEditor.resetFiles()),
-    publicConfigFiles: () => dispatch(actionsEditor.publicConfigFiles()),
+    publicUiSchemaFiles: () => dispatch(actionsEditor.publicUiSchemaFiles()),
+    toggleEditorSchemaSideBar: () => dispatch(actionsEditorTools.toggleEditorSchemaSideBar()),
     userLogout: () => dispatch(actionsBuckets.userLogout())
   };
 };

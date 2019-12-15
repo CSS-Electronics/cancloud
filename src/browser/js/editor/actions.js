@@ -357,7 +357,7 @@ export const updateConfigFile = (content, object) => {
 
   return function(dispatch) {
     dispatch(setConfigContent(JSON.parse(content)));
-    dispatch(setConfigContentPreChange(JSON.parse(content)));
+    dispatch(setConfigContentPreChange(content));
     if (prefix == "server") {
       dispatch(browserActions.setServerConfigContent(JSON.parse(content)));
     }
@@ -415,11 +415,11 @@ export const fetchConfigContent = fileName => {
           })
           .then(res => {
             fetch(res.url)
-              .then(r => r.json())
+              .then(r => r.text())
               .then(data => {
-                dispatch(setConfigContent(data));
+                dispatch(setConfigContent(JSON.parse(data)));
                 dispatch(setConfigContentPreChange(data));
-                dispatch(setUpdatedFormData(data));
+                dispatch(setUpdatedFormData(JSON.parse(data)));
               })
               .catch(e => {
                 dispatch(setConfigContent(null));

@@ -152,9 +152,7 @@ class LoadEditorFiles extends React.Component {
       crcBrowserSupport == 1
     ) {
       const { crc32 } = require("crc");
-      let cfgCrc32EditorPre = crc32(
-        JSON.stringify(nextProps.configContentPreChange, null, 2)
-      )
+      let cfgCrc32EditorPre = crc32(nextProps.configContentPreChange)
         .toString(16)
         .toUpperCase()
         .padStart(8, "0");

@@ -14,7 +14,7 @@ class EditorChangesComparison extends React.Component {
             matchWordsThreshold: 0.25,
             matchingMaxComparisons: 5000
           }}
-          past={JSON.stringify(this.props.past, null, 2)}
+          past={this.props.past}
           current={JSON.stringify(this.props.current, null, 2)}
         />
       </div>

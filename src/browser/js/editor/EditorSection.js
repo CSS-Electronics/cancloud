@@ -49,6 +49,8 @@ class LoadEditorFiles extends React.Component {
     this.handleCompareChanges = this.handleCompareChanges.bind(this);
     this.closeChangesModal = this.closeChangesModal.bind(this);
     this.handleError = this.handleError.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.escFunction = this.escFunction.bind(this);
 
     this.state = {
       uischema: "",
@@ -66,6 +68,12 @@ class LoadEditorFiles extends React.Component {
     };
 
     this.input = "";
+  }
+
+  escFunction(event) {
+    if (event.keyCode === 27) {
+      this.closeChangesModal();
+    }
   }
 
   handleUiSchemaChange(selection) {
@@ -128,6 +136,14 @@ class LoadEditorFiles extends React.Component {
     isDownloadConfig = true;
   }
 
+  componentDidMount() {
+    document.addEventListener("keydown", this.escFunction, false);
+  }
+
+  componentWillUnMount() {
+    document.removeEventListener("keydown", this.escFunction, false);
+  }
+
   componentWillReceiveProps(nextProps) {
     const prevPrefix = this.props.prefixCrnt;
     const nextPrefix = nextProps.prefixCrnt;
@@ -165,8 +181,8 @@ class LoadEditorFiles extends React.Component {
     let uiLocal = nextProps.editorUISchemaFiles.filter(file =>
       file.name.includes("(local)")
     );
-    let schemaLocal = nextProps.editorSchemaFiles.filter(
-      file => file.name.includes("(local)")
+    let schemaLocal = nextProps.editorSchemaFiles.filter(file =>
+      file.name.includes("(local)")
     );
     let configLocal = nextProps.editorConfigFiles.filter(file =>
       file.name.includes("(local)")
@@ -395,106 +411,105 @@ class LoadEditorFiles extends React.Component {
           <br />
           {schemaContent ? (
             <div>
-            <p className="editor-temporary-text">Note: You can now switch the editor between "simple" and "advanced" view via the UIschema to the right (see release notes on github)</p>
-            <FormWithNav
-              omitExtraData={true}
-              liveOmit={true}
-              liveValidate={this.state.isLiveValidation}
-              noHtml5Validate={true}
-              schema={schemaContent ? schemaContent : {}}
-              uiSchema={uiContent ? uiContent : {}}
-              formData={configContent ? configContent : {}}
-              onSubmit={this.onSubmit.bind(this)}
-              onChange={this.handleChange}
-              onError={this.handleError}
-              onNavChange={this.onNavChange.bind(this)}
-              ArrayFieldTemplate={EditorArrayFieldTemplate}
-              activeNav={activatedTab}
-            >
-              <div
-                className={
-                  this.state.isCompareChanges
-                    ? "show modal-custom-wrapper"
-                    : "hidden modal-custom-wrapper"
-                }
+              <FormWithNav
+                omitExtraData={true}
+                liveOmit={true}
+                liveValidate={this.state.isLiveValidation}
+                noHtml5Validate={true}
+                schema={schemaContent ? schemaContent : {}}
+                uiSchema={uiContent ? uiContent : {}}
+                formData={configContent ? configContent : {}}
+                onSubmit={this.onSubmit}
+                onChange={this.handleChange}
+                onError={this.handleError}
+                onNavChange={this.onNavChange.bind(this)}
+                ArrayFieldTemplate={EditorArrayFieldTemplate}
+                activeNav={activatedTab}
               >
                 <div
                   className={
                     this.state.isCompareChanges
-                      ? "show modal-custom"
-                      : "hidden modal-custom"
+                      ? "show modal-custom-wrapper"
+                      : "hidden modal-custom-wrapper"
                   }
                 >
-                  <div className="modal-custom-header">
-                    <button
-                      type="button"
-                      className="close"
-                      onClick={this.closeChangesModal}
-                    >
-                      <span style={{ color: "gray" }}>×</span>
-                    </button>
-                    <div className="">
-                      <h4> Review changes </h4>
-                      Left: Original configuration | Right: Updated
-                      configuration
-                    </div>
-                  </div>
-                  <div className="modal-custom-content">
-                    <EditorChangesComparison />
-                  </div>
-                  <div className="modal-custom-footer">
-                    <div className="fe-header">
+                  <div
+                    className={
+                      this.state.isCompareChanges
+                        ? "show modal-custom"
+                        : "hidden modal-custom"
+                    }
+                  >
+                    <div className="modal-custom-header">
                       <button
-                        type="submit"
-                        className="btn btn-primary"
-                        disabled={!prefix}
+                        type="button"
+                        className="close"
+                        onClick={this.closeChangesModal}
                       >
-                        {" "}
-                        Submit to S3{" "}
-                      </button>{" "}
-                      <button
-                        type="submit"
-                        onClick={this.enableDownload.bind(this)}
-                        className="btn btn-primary ml15"
-                      >
-                        {" "}
-                        Download to disk{" "}
+                        <span style={{ color: "gray" }}>×</span>
                       </button>
+                      <div className="">
+                        <h4> Review changes </h4>
+                        Left: Original configuration | Right: Updated
+                        configuration
+                      </div>
+                    </div>
+                    <div className="modal-custom-content">
+                      <EditorChangesComparison />
+                    </div>
+                    <div className="modal-custom-footer">
+                      <div className="fe-header">
+                        <button
+                          type="submit"
+                          className="btn btn-primary"
+                          disabled={!prefix}
+                        >
+                          {" "}
+                          Submit to S3{" "}
+                        </button>{" "}
+                        <button
+                          type="submit"
+                          onClick={this.enableDownload.bind(this)}
+                          className="btn btn-primary ml15"
+                        >
+                          {" "}
+                          Download to disk{" "}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div
-                className={
-                  "config-bar" +
-                  (EDITOR.offline
-                    ? " fe-sidebar-shift-offline"
-                    : " fe-sidebar-shift")
-                }
-              >
-                <div className="col-xs-1" style={{ minWidth: "120px" }}>
-                  <button type="submit" className="btn btn-primary">
+                <div
+                  className={
+                    "config-bar" +
+                    (EDITOR.offline
+                      ? " fe-sidebar-shift-offline"
+                      : " fe-sidebar-shift")
+                  }
+                >
+                  <div className="col-xs-1" style={{ minWidth: "120px" }}>
+                    <button type="submit" className="btn btn-primary">
+                      {" "}
+                      Review changes{" "}
+                    </button>
+                  </div>
+                  <div className="col-xs-7" style={{ float: "left" }}>
                     {" "}
-                    Review changes{" "}
-                  </button>
+                    <EditorToolButton
+                      onClick={this.handleValidationCheck}
+                      comment="Live validation"
+                      toggled={this.state.isLiveValidation}
+                      classNameAlt="fa fa-check-square"
+                      className="fa fa-square"
+                    />{" "}
+                    <EditorSubMenu
+                      menuSchemaName={menuSchemaName}
+                      menuConfigName={menuConfigName}
+                    />
+                  </div>
                 </div>
-                <div className="col-xs-7" style={{ float: "left" }}>
-                  {" "}
-                  <EditorToolButton
-                    onClick={this.handleValidationCheck}
-                    comment="Live validation"
-                    toggled={this.state.isLiveValidation}
-                    classNameAlt="fa fa-check-square"
-                    className="fa fa-square"
-                  />{" "}
-                  <EditorSubMenu
-                    menuSchemaName={menuSchemaName}
-                    menuConfigName={menuConfigName}
-                  />
-                </div>
-              </div>
-            </FormWithNav>
+              </FormWithNav>
             </div>
           ) : (
             <div
@@ -617,7 +632,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(EditorSection);
+export default connect(mapStateToProps, mapDispatchToProps)(EditorSection);

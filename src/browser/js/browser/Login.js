@@ -95,6 +95,13 @@ export class Login extends React.Component {
       message =
         "A http:// server cannot be accessed via a https:// browser frontend";
     }
+    if (
+      this.state.endPoint.substring(0, 5) != "http:" &&
+      this.state.endPoint.substring(0, 6) != "https:"
+    ) {
+      message =
+        "Please add http:// or https:// in front of your endpoint";
+    }
     if (this.state.bucketName === "") {
       message = "Bucket Name is required";
     }

@@ -9,6 +9,7 @@ export default (
     editorConfigFiles: [],
     editorUISchemaFiles: [],
     configContentPreChange: "",
+    configContentLocal: {},
     deviceFileContent: {},
     deviceFileLastModified: "",
     formData: {}
@@ -124,16 +125,26 @@ export default (
         )
       };
     case actionsEditor.RESET_UPLOADED_SCHEMA_LIST:
-        return {
-          ...state,
-          editorSchemaFiles: state.editorSchemaFiles.filter(
-            file => !file.name.includes("(local)")
-          )
-        };
+      return {
+        ...state,
+        editorSchemaFiles: state.editorSchemaFiles.filter(
+          file => !file.name.includes("(local)")
+        )
+      };
     case actionsEditor.SET_CONFIG_DATA_PRE_CHANGE:
       return {
         ...state,
         configContentPreChange: action.configContentPreChange
+      };
+    case actionsEditor.SET_CONFIG_DATA_LOCAL:
+      return {
+        ...state,
+        configContentLocal: action.configContentLocal
+      };
+    case actionsEditor.SET_CONFIG_NAME_PRE_CHANGE:
+      return {
+        ...state,
+        configNamePreChange: action.configNamePreChange
       };
     case actionsEditor.SET_UPDATED_FORM_DATA:
       return {

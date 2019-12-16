@@ -396,6 +396,16 @@
   padding-top: 20px;
 }
 
+.modal-review-changes-header {
+  height: 155px;
+  padding-left: 40px;
+  padding-top: 20px;
+
+  @media (max-width: @screen-sm-min) {
+  overflow-y:auto;
+}
+}
+
 .modal-custom-content {
   border-top: #ededed;
   border-bottom: #ededed;
@@ -406,16 +416,17 @@
   border-style: solid;
   position: absolute;
   width: 100%;
-  bottom: 100px;
-  top: 100px;
+  bottom: 70px;
+  top: 155px;
   overflow-y: auto;
 }
 
 .modal-custom-footer {
-  height: 100px;
+  height: 60px;
   position: absolute;
+  padding:40px;
   width: 100%;
-  bottom: 0;
+  bottom: 10px;
 }
 
 @legend-color : @text-color;

@@ -59,6 +59,8 @@ class LoadEditorFiles extends React.Component {
       selectedUISchema: "",
       selectedSchema: "",
       selectedConfig: "",
+      configReview: {},
+      revisedConfigFile: {},
       formData: {},
       changeFlag: true,
       isSubmitting: false,
@@ -107,7 +109,18 @@ class LoadEditorFiles extends React.Component {
         selectedConfig: selection
       },
       () => {
-        this.props.fetchConfigContent(this.state.config);
+        this.props.fetchConfigContent(this.state.config, "editor");
+      }
+    );
+  }
+
+  handleReviewConfigChange(selection) {
+    this.setState(
+      {
+        configReview: selection
+      },
+      () => {
+        this.props.fetchConfigContent(selection.value, "review");
       }
     );
   }
@@ -203,6 +216,27 @@ class LoadEditorFiles extends React.Component {
         selectedConfig: configLocal[0].name
       });
     }
+
+    // Get the initial value for the config review benchmark dropdown
+    if (
+      this.props.editorConfigFiles.length !=
+        nextProps.editorConfigFiles.length &&
+      nextProps.editorConfigFiles[0] &&
+      nextProps.editorConfigFiles[0].name
+    ) {
+      let configName = configLocal.length
+        ? configLocal[0].name
+        : nextProps.editorConfigFiles[0].name;
+
+      this.setState(
+        {
+          configReview: { name: configName, label: configName }
+        },
+        () => {
+          this.props.fetchConfigContent(configName, "review");
+        }
+      );
+    }
   }
 
   onSubmit({ formData }) {
@@ -263,7 +297,11 @@ class LoadEditorFiles extends React.Component {
 
         if (this.state.isCompareChanges === false) {
           this.setState({
-            isCompareChanges: true
+            isCompareChanges: true,
+            revisedConfigFile: {
+              name: revisedConfigFile,
+              label: revisedConfigFile
+            }
           });
           document.body.style.overflow = "hidden";
         } else {
@@ -440,42 +478,32 @@ class LoadEditorFiles extends React.Component {
                         : "hidden modal-custom"
                     }
                   >
-                    <div className="modal-custom-header">
-                      <button
-                        type="button"
-                        className="close"
-                        onClick={this.closeChangesModal}
-                      >
-                        <span style={{ color: "gray" }}>×</span>
-                      </button>
-                      <div className="">
-                        <h4> Review changes </h4>
-                        Left: Original configuration | Right: Updated
-                        configuration
-                      </div>
-                    </div>
-                    <div className="modal-custom-content">
-                      <EditorChangesComparison />
-                    </div>
+                    <EditorChangesComparison
+                      revisedConfigFile={this.state.revisedConfigFile}
+                      options={editorConfigFiles}
+                      selected={this.state.configReview}
+                      handleReviewConfigChange={this.handleReviewConfigChange.bind(
+                        this
+                      )}
+                      closeChangesModal={this.closeChangesModal}
+                    />
                     <div className="modal-custom-footer">
-                      <div className="fe-header">
-                        <button
-                          type="submit"
-                          className="btn btn-primary"
-                          disabled={!prefix}
-                        >
-                          {" "}
-                          Submit to S3{" "}
-                        </button>{" "}
-                        <button
-                          type="submit"
-                          onClick={this.enableDownload.bind(this)}
-                          className="btn btn-primary ml15"
-                        >
-                          {" "}
-                          Download to disk{" "}
-                        </button>
-                      </div>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={!prefix}
+                      >
+                        {" "}
+                        Submit to S3{" "}
+                      </button>{" "}
+                      <button
+                        type="submit"
+                        onClick={this.enableDownload.bind(this)}
+                        className="btn btn-primary ml15"
+                      >
+                        {" "}
+                        Download to disk{" "}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -610,8 +638,8 @@ const mapDispatchToProps = dispatch => {
   return {
     updateConfigFile: (content, object) =>
       dispatch(actionsEditor.updateConfigFile(content, object)),
-    fetchConfigContent: filename =>
-      dispatch(actionsEditor.fetchConfigContent(filename)),
+    fetchConfigContent: (filename, type) =>
+      dispatch(actionsEditor.fetchConfigContent(filename, type)),
     fetchSchemaContent: schema =>
       dispatch(actionsEditor.fetchSchemaContent(schema)),
     setConfigContent: content =>

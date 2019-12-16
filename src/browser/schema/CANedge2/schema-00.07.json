@@ -1431,6 +1431,7 @@
           "title": "Power schedule",
           "description": "The daily power schedule is defined by a number of power-on from/to intervals. Define no power-on intervals to keep always off. Define one interval with from/to both set to 00:00 to keep always on. Time format is HH:MM (1 minute resolution)",
           "type": "array",
+          "default": [],
           "maxItems": 5,
           "items": {
             "type": "object",

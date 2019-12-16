@@ -108,7 +108,7 @@ export class EditorSubMenuInput extends React.Component {
             &nbsp;&nbsp;{this.props.menuSchemaName} |{" "}
             {this.props.menuConfigName}
           </a>
-          <p className="btn-field-description">Schema & config loader</p>
+          <p className="btn-field-description field-description-shift">Schema & config loader</p>
         </div>
       </div>
     );

@@ -19,7 +19,7 @@ class EditorToolButton extends React.Component {
             <i className={this.props.className} />
           )}
         </button>
-        <p className="btn-field-description">{this.props.comment}</p>
+        <p className="btn-field-description field-description-shift">{this.props.comment}</p>
       </div>
     );
   }

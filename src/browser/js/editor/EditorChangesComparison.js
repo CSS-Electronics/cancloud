@@ -12,6 +12,8 @@ const selectOptions = Files => {
   }));
 };
 
+let pastCrc32 = "N/A";
+
 class EditorChangesComparison extends React.Component {
   render() {
     const {
@@ -21,8 +23,18 @@ class EditorChangesComparison extends React.Component {
       past,
       current,
       closeChangesModal,
-      revisedConfigFile
+      revisedConfigFile,
+      crcBrowserSupport,
+      crc32EditorLive
     } = this.props;
+
+    if (crcBrowserSupport == 1) {
+      const { crc32 } = require("crc");
+      pastCrc32 = crc32(past)
+        .toString(16)
+        .toUpperCase()
+        .padStart(8, "0");
+    }
 
     return (
       <div>
@@ -34,7 +46,10 @@ class EditorChangesComparison extends React.Component {
             <h4> Review changes </h4>
 
             <div className="col-sm-6 zero-padding">
-              <p>Left: Previous Configuration File</p>
+              <p>
+                Previous Configuration File{" "}
+                {pastCrc32 ? "[" + pastCrc32 + "]" : null}
+              </p>
               <div className="col-sm-8 form-group pl0 field-string">
                 <Select
                   value={selected}
@@ -50,7 +65,10 @@ class EditorChangesComparison extends React.Component {
               </div>
             </div>
             <div className="col-sm-6 zero-padding">
-              <p>Right: New Configuration File</p>
+              <p>
+                New Configuration File{" "}
+                {crc32EditorLive ? "[" + crc32EditorLive + "]" : null}{" "}
+              </p>
               <div className="col-sm-8 form-group pl0 field-string">
                 <Select
                   value={revisedConfigFile}
@@ -88,7 +106,8 @@ class EditorChangesComparison extends React.Component {
 function mapStateToProps(state) {
   return {
     past: state.editor.configContentPreChange,
-    current: state.editor.configContent
+    current: state.editor.configContent,
+    crc32EditorLive: state.editorTools.crc32EditorLive
   };
 }
 

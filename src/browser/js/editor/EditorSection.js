@@ -479,6 +479,8 @@ class LoadEditorFiles extends React.Component {
                     }
                   >
                     <EditorChangesComparison
+                      cfgCrc32EditorLive={this.props.cfgCrc32EditorLive}
+                      crcBrowserSupport={crcBrowserSupport}
                       revisedConfigFile={this.state.revisedConfigFile}
                       options={editorConfigFiles}
                       selected={this.state.configReview}

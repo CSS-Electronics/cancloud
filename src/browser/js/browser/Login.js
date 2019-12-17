@@ -36,12 +36,6 @@ export class Login extends React.Component {
     };
 
     // LIVE DEMO
-    // this.state = {
-    //   accessKey: "AKIAJFZBA5XS5LKJFQKQ",
-    //   secretKey: "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",
-    //   endPoint: "https://s3.amazonaws.com",
-    //   bucketName: "canedge-live-demo-2"
-    // };
 
   }
 

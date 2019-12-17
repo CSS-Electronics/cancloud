@@ -59,7 +59,7 @@ class LoadEditorFiles extends React.Component {
       selectedUISchema: "",
       selectedSchema: "",
       selectedConfig: "",
-      configReview: {},
+      configReview: {value: "None",label:"None"},
       revisedConfigFile: {},
       formData: {},
       changeFlag: true,
@@ -180,6 +180,7 @@ class LoadEditorFiles extends React.Component {
       nextProps.configContentPreChange != undefined &&
       crcBrowserSupport == 1
     ) {
+
       const { crc32 } = require("crc");
       let cfgCrc32EditorPre = crc32(nextProps.configContentPreChange)
         .toString(16)
@@ -218,6 +219,15 @@ class LoadEditorFiles extends React.Component {
     }
 
     // Get the initial value for the config review benchmark dropdown
+    if(nextProps.editorConfigFiles.length == 0){
+      this.setState(
+        {
+          configReview: { value: "None", label: "None" }
+        },
+        () => {
+          // this.props.fetchConfigContent(configName, "review");
+        }
+      );    }
     if (
       this.props.editorConfigFiles.length !=
         nextProps.editorConfigFiles.length &&
@@ -230,7 +240,7 @@ class LoadEditorFiles extends React.Component {
 
       this.setState(
         {
-          configReview: { name: configName, label: configName }
+          configReview: { value: configName, label: configName }
         },
         () => {
           this.props.fetchConfigContent(configName, "review");
@@ -299,7 +309,7 @@ class LoadEditorFiles extends React.Component {
           this.setState({
             isCompareChanges: true,
             revisedConfigFile: {
-              name: revisedConfigFile,
+              value: revisedConfigFile,
               label: revisedConfigFile
             }
           });
@@ -340,18 +350,6 @@ class LoadEditorFiles extends React.Component {
 
   handleChange = ({ formData }) => {
     this.props.setUpdatedFormData(formData);
-
-    if (crcBrowserSupport == 1) {
-      const { crc32 } = require("crc");
-      let cfgCrc32EditorLive = crc32(JSON.stringify(formData, null, 2))
-        .toString(16)
-        .toUpperCase()
-        .padStart(8, "0");
-      this.props.setCrc32EditorLive(cfgCrc32EditorLive);
-    } else {
-      let cfgCrc32EditorLive = `N/A`;
-      this.props.setCrc32EditorLive(cfgCrc32EditorLive);
-    }
   };
 
   onNavChange = nav => {
@@ -479,7 +477,6 @@ class LoadEditorFiles extends React.Component {
                     }
                   >
                     <EditorChangesComparison
-                      cfgCrc32EditorLive={this.props.cfgCrc32EditorLive}
                       crcBrowserSupport={crcBrowserSupport}
                       revisedConfigFile={this.state.revisedConfigFile}
                       options={editorConfigFiles}

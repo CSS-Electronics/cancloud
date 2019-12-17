@@ -13,6 +13,8 @@ const selectOptions = Files => {
 };
 
 let pastCrc32 = "N/A";
+let pastUnixCrc32 = "N/A";
+let unixWarning = null;
 
 class EditorChangesComparison extends React.Component {
   render() {
@@ -28,12 +30,28 @@ class EditorChangesComparison extends React.Component {
       crc32EditorLive
     } = this.props;
 
-    if (crcBrowserSupport == 1) {
+    // update past to exclude Windows style line endings:
+    let pastUnix = past ? past.replace(/\r\n/g, "\n") : ""; 
+
+    if (crcBrowserSupport == 1 && past) {
       const { crc32 } = require("crc");
       pastCrc32 = crc32(past)
         .toString(16)
         .toUpperCase()
         .padStart(8, "0");
+
+      pastUnixCrc32 = crc32(pastUnix)
+        .toString(16)
+        .toUpperCase()
+        .padStart(8, "0");
+    } else {
+      pastCrc32 = "N/A";
+      pastUnixCrc32 = "N/A";
+    }
+
+    if (pastUnixCrc32 != pastCrc32) {
+      unixWarning =
+        "Note: Windows line endings are converted to Unix";
     }
 
     return (
@@ -48,13 +66,21 @@ class EditorChangesComparison extends React.Component {
             <div className="col-sm-6 zero-padding">
               <p>
                 Previous Configuration File{" "}
-                {pastCrc32 ? "[" + pastCrc32 + "]" : null}
+                <span className="device-file-table">
+                  {pastCrc32 ? "[crc32: " + pastCrc32 + "]" : null}
+                </span>
               </p>
               <div className="col-sm-8 form-group pl0 field-string">
                 <Select
                   value={selected}
                   options={selectOptions(options)}
                   onChange={handleReviewConfigChange}
+                  isDisabled={
+                    selectOptions(options).length == 1 &&
+                    selectOptions(options)[0].value == "None"
+                      ? true
+                      : false
+                  }
                   isSearchable={false}
                 />
                 <p className="field-description">
@@ -67,7 +93,9 @@ class EditorChangesComparison extends React.Component {
             <div className="col-sm-6 zero-padding">
               <p>
                 New Configuration File{" "}
-                {crc32EditorLive ? "[" + crc32EditorLive + "]" : null}{" "}
+                <span className="device-file-table">
+                  {crc32EditorLive ? "[crc32 " + crc32EditorLive + "]" : null}
+                </span>
               </p>
               <div className="col-sm-8 form-group pl0 field-string">
                 <Select
@@ -80,6 +108,9 @@ class EditorChangesComparison extends React.Component {
                 <p className="field-description">
                   {"This will be the name of the new Configuration File"}
                 </p>
+                {unixWarning != null ? (
+                  <p className="unix-text">{unixWarning}</p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -93,7 +124,7 @@ class EditorChangesComparison extends React.Component {
                 matchWordsThreshold: 0.25,
                 matchingMaxComparisons: 5000
               }}
-              past={past}
+              past={pastUnix}
               current={JSON.stringify(current, null, 2)}
             />
           </div>

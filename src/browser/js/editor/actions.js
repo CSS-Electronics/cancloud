@@ -776,6 +776,7 @@ export const handleUploadedConfig = file => {
           dispatch(resetLocalConfigList());
           dispatch(setConfigFile([`${fileNameShort} (local)`]));
           dispatch(setUpdatedFormData(jsonContent));
+          dispatch(setConfigContentPreChange(content));
         } catch (error) {
           dispatch(
             alertActions.set({
@@ -834,6 +835,13 @@ export const saveUpdatedConfiguration = (filename, content) => {
 };
 
 export const setUpdatedFormData = formData => {
+  return function(dispatch) {
+    dispatch(setUpdatedFormDataValue(formData));
+    dispatch(actionsEditorTools.calcCrc32EditorLive());
+  };
+};
+
+export const setUpdatedFormDataValue = formData => {
   return {
     type: SET_UPDATED_FORM_DATA,
     formData

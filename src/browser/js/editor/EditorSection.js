@@ -172,6 +172,7 @@ class LoadEditorFiles extends React.Component {
     // ensure that if there's a new schema file list, the selection returns to the default value
     if (this.props.editorSchemaFiles != nextProps.editorSchemaFiles) {
       this.setState({
+        schema: "",
         selectedSchema: ""
       });
     }

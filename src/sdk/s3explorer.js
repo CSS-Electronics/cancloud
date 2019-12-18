@@ -168,11 +168,12 @@ class S3Explorer {
     var stream;
     let objectNameWithPrefix = bucketName + "/" + prefix;
     if ("Home" == bucketName) {
-      stream = this.s3Client.listObjects(this.bucketName, prefix, true);
+      stream = this.s3Client.listObjects(this.bucketName, prefix, marker, true);
     } else {
       stream = this.s3Client.listObjects(
         this.bucketName,
         objectNameWithPrefix,
+        marker,
         true
       );
     }

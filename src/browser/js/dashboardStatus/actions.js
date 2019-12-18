@@ -51,7 +51,7 @@ export const listAllObjects = devicesDevicesInput => {
           ? devicesDevicesInput
           : []
         : devices;
-    
+
       let iDeviceFileCount = 0;
 
       // if no devices for config/device.json, set loaded to true
@@ -152,8 +152,8 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
               dispatch(setConfigObjects(configObjectsUniqueAry));
               dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
               dispatch(loadedConfig(true));
-              if(devicesDevicesInput == undefined){
-                dispatch(listLogFiles())
+              if (devicesDevicesInput == undefined) {
+                dispatch(listLogFiles());
               }
             }
           })
@@ -164,15 +164,15 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
               dispatch(setConfigObjects(configObjectsUniqueAry));
               dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
               dispatch(loadedConfig(true));
-              if(devicesDevicesInput == undefined){
-                dispatch(listLogFiles())
+              if (devicesDevicesInput == undefined) {
+                dispatch(listLogFiles());
               }
             }
           });
       });
     } else if (!getState().dashboardStatus.loadedFiles) {
-      if(devicesDevicesInput == undefined){
-        dispatch(listLogFiles())
+      if (devicesDevicesInput == undefined) {
+        dispatch(listLogFiles());
       }
     }
   };
@@ -186,23 +186,23 @@ export const listLogFiles = devicesFilesInput => {
 
   return function(dispatch, getState) {
     let devices = getState().buckets.list ? getState().buckets.list : [];
-      devices = devices.filter(e => e.match(loggerRegex));
+    devices = devices.filter(e => e.match(loggerRegex));
 
-      const devicesFilesDefaultMax = 3;
+    const devicesFilesDefaultMax = 3;
 
-      // by default show all devices for the device info and none for the log file info (unless fewer than 3 devices)
-      let devicesFiles = devicesFilesInput
-        ? devicesFilesInput.length
-          ? devicesFilesInput
-          : []
-        : devices.length <= devicesFilesDefaultMax
-        ? devices
-        : [];
+    // by default show all devices for the device info and none for the log file info (unless fewer than 3 devices)
+    let devicesFiles = devicesFilesInput
+      ? devicesFilesInput.length
+        ? devicesFilesInput
+        : []
+      : devices.length <= devicesFilesDefaultMax
+      ? devices
+      : [];
 
-      // if no devices for files, set loaded to true
-      if (devicesFiles.length == 0) {
-        dispatch(loadedFiles(true));
-      }
+    // if no devices for files, set loaded to true
+    if (devicesFiles.length == 0) {
+      dispatch(loadedFiles(true));
+    }
 
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
@@ -269,7 +269,7 @@ export const listLogFiles = devicesFilesInput => {
                   if (e > periodStartVarFormat) {
                     const deviceId = device;
                     const lastModified = e;
-                    const size = sizePerTime[e] / (1024*1024);
+                    const size = sizePerTime[e] / (1024 * 1024);
                     const count = countPerTime[e];
                     dataPerTimeAry.push({
                       deviceId,
@@ -288,7 +288,7 @@ export const listLogFiles = devicesFilesInput => {
               }
             });
 
-            dispatch(setDevicesFilesCount(iCount))
+            dispatch(setDevicesFilesCount(iCount));
 
             if (iCount == devicesFiles.length) {
               dispatch(setObjectsData(mf4ObjectsHourAry));
@@ -307,11 +307,6 @@ export const listLogFiles = devicesFilesInput => {
       });
     }
   };
-
-
-
-
-
 };
 
 export const clearDataDevices = () => ({

@@ -1,6 +1,48 @@
 /*--------------------------
     Modal
 ----------------------------*/
+.modal-header-fixed{
+    color:@text-color !important;
+    height:80px;
+    padding-top:10px;
+}
+
+.modal-footer-fixed{
+    height: 70px;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    padding-left:35px;
+    padding-top:10px;
+}
+
+.modal-preview-body{
+    font-family: Consolas;
+    display: block;
+    word-wrap: break-word;
+    margin: 0em 0;
+    white-space: pre-wrap;
+    height: calc(100% - 150px);
+    border-top: #ededed;
+    border-bottom: #ededed;
+    border-right: @white;
+    border-left: @white;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-style: solid;
+}
+
+.preview-modal {
+    overflow-y:hidden;
+}
+
+.modal-content {
+    height: 80vh;
+    overflow-y: hidden;
+    padding:0px;
+}
+
+
 .modal {
     @media(min-width: @screen-sm-min) {
         text-align: center;

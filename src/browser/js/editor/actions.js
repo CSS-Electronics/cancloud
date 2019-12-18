@@ -37,6 +37,7 @@ export const SET_DEVICE_FILE_DATA = "editor/SET_DEVICE_FILE_DATA";
 export const SET_PREV_DEVICE_FILE_DEVICE = "editor/SET_PREV_DEVICE_FILE_DEVICE";
 export const SET_DEVICE_FILE_LAST_MODIFIED =
   "editor/SET_DEVICE_FILE_LAST_MODIFIED";
+export const SET_CONFIG_DATA_LOCAL = "SET_CONFIG_DATA_LOCAL";
 
 // Note: These need to be updated with future firmware revisions
 const uiSchemaAry = [
@@ -69,7 +70,7 @@ const regexDeviceFile = new RegExp(/^device\.json/, "g");
 // load the Simple/Advanced default UIschema in the online & offline editor
 export const publicUiSchemaFiles = () => {
   return function(dispatch) {
-    dispatch(loadUISchemaSimpleAdvanced())
+    dispatch(loadUISchemaSimpleAdvanced());
   };
 };
 
@@ -102,18 +103,16 @@ export const loadUISchemaSimpleAdvanced = () => {
   return function(dispatch) {
     dispatch(resetUISchemaList());
 
-      const defaultUiSchema = uiSchemaAry[0];
+    const defaultUiSchema = uiSchemaAry[0];
 
-        const defaultUiSchemaContent = require(`../../schema/${
-          defaultUiSchema.split(" | ")[1]
-        }/${defaultUiSchema.split(" ")[0]}`);
+    const defaultUiSchemaContent = require(`../../schema/${
+      defaultUiSchema.split(" | ")[1]
+    }/${defaultUiSchema.split(" ")[0]}`);
 
-        dispatch(setUISchemaFile(uiSchemaAry));
-        dispatch(setUISchemaContent(defaultUiSchemaContent));
-    
+    dispatch(setUISchemaFile(uiSchemaAry));
+    dispatch(setUISchemaContent(defaultUiSchemaContent));
   };
 };
-
 
 // Below is triggered when clicking Configure in the sidebar - or refreshing the page
 // It fetches the device specific object list and parses these to the UIschema fetcher below
@@ -331,7 +330,7 @@ export const fetchUISchemaFiles = configObjects => {
           .reverse();
 
         dispatch(setConfigFile(configSchema));
-        dispatch(fetchConfigContent(configSchema[0]));
+        dispatch(fetchConfigContent(configSchema[0], "editor"));
 
         dispatch(setSchemaFile(schemaFiles));
         dispatch(fetchSchemaContent(schemaFiles[0]));
@@ -357,7 +356,7 @@ export const updateConfigFile = (content, object) => {
 
   return function(dispatch) {
     dispatch(setConfigContent(JSON.parse(content)));
-    dispatch(setConfigContentPreChange(JSON.parse(content)));
+    dispatch(setConfigContentPreChange(content));
     if (prefix == "server") {
       dispatch(browserActions.setServerConfigContent(JSON.parse(content)));
     }
@@ -394,14 +393,27 @@ export const updateConfigFile = (content, object) => {
   };
 };
 
-export const fetchConfigContent = fileName => {
+export const fetchConfigContent = (fileName, type) => {
   return function(dispatch, getState) {
-    dispatch(resetLocalConfigList());
+    if (fileName.includes("(local)")) {
+      if (type == "review") {
+        dispatch(
+          setConfigContentPreChange(getState().editor.configContentLocal)
+        );
+      }
+      return;
+    }
+    if (type == "editor") {
+      dispatch(resetLocalConfigList());
+    }
 
-    if (fileName == "None") {
+    if (fileName == "None" && type == "editor") {
       dispatch(setConfigContent(null));
       dispatch(setUpdatedFormData(null));
-    } else {
+      dispatch(setConfigContentPreChange(""));
+    } else if (fileName == "None" && type == "review") {
+      dispatch(setConfigContentPreChange(""));
+    } else if (fileName != "None") {
       const { bucket, prefix } = pathSlice(history.location.pathname);
       const currentBucket = getCurrentBucket(getState());
       const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
@@ -415,16 +427,29 @@ export const fetchConfigContent = fileName => {
           })
           .then(res => {
             fetch(res.url)
-              .then(r => r.json())
+              .then(r => r.text())
               .then(data => {
-                dispatch(setConfigContent(data));
-                dispatch(setConfigContentPreChange(data));
-                dispatch(setUpdatedFormData(data));
+                if (type == "editor") {
+                  dispatch(setConfigContent(JSON.parse(data)));
+                  dispatch(setUpdatedFormData(JSON.parse(data)));
+
+                  dispatch(setConfigContentPreChange(data));
+                }
+
+                if (type == "review") {
+                  dispatch(setConfigContentPreChange(data));
+                }
               })
               .catch(e => {
-                dispatch(setConfigContent(null));
-                dispatch(setConfigContentPreChange(null));
-                dispatch(setUpdatedFormData(null));
+                if (type == "editor") {
+                  dispatch(setConfigContent(null));
+                  dispatch(setUpdatedFormData(null));
+                  dispatch(setConfigContentPreChange(null));
+                }
+
+                if (type == "review") {
+                  dispatch(setConfigContentPreChange(null));
+                }
 
                 dispatch(
                   alertActions.set({
@@ -449,10 +474,16 @@ export const fetchConfigContent = fileName => {
             }
           });
       } else if (prefix) {
-        dispatch(setConfigContent(null));
-        dispatch(setConfigContentPreChange(null));
-        dispatch(setUpdatedFormData(null));
-      } 
+        if (type == "editor") {
+          dispatch(setConfigContent(null));
+          dispatch(setUpdatedFormData(null));
+          dispatch(setConfigContentPreChange(null));
+        }
+
+        if (type == "review") {
+          dispatch(setConfigContentPreChange(null));
+        }
+      }
     }
   };
 };
@@ -464,7 +495,6 @@ export const setUiSchemaSource = uiSchemaSource => ({
 
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
-    dispatch(setConfigContentPreSubmit())
 
     const uploadedTest = getState().editor.editorSchemaFiles.filter(file =>
       file.name.includes("local")
@@ -530,13 +560,13 @@ export const fetchSchemaContent = fileName => {
             });
         } else if (prefix) {
           dispatch(setSchemaContent(null));
-        } 
+        }
     }
   };
 };
 
 export const fetchUISchemaContent = fileName => {
-    return function(dispatch, getState) {
+  return function(dispatch, getState) {
     dispatch(setConfigContentPreSubmit());
     dispatch(resetLocalUISchemaList());
     switch (true) {
@@ -544,11 +574,11 @@ export const fetchUISchemaContent = fileName => {
         dispatch(setUISchemaContent(null));
         break;
       case fileName.match(regexUISchemaPublic) != null:
-          const uiSchemaPublic = require(`../../schema/${
-            fileName.split(" | ")[1]
-          }/${fileName.split(" ")[0]}`);
-          dispatch(setUISchemaContent(uiSchemaPublic));
-          break;
+        const uiSchemaPublic = require(`../../schema/${
+          fileName.split(" | ")[1]
+        }/${fileName.split(" ")[0]}`);
+        dispatch(setUISchemaContent(uiSchemaPublic));
+        break;
       default:
         const { bucket, prefix } = pathSlice(history.location.pathname);
         const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
@@ -596,7 +626,7 @@ export const fetchUISchemaContent = fileName => {
             });
         } else if (getState().editor.uiSchemaSource == "server" && prefix) {
           dispatch(setUISchemaContent(null));
-        } 
+        }
     }
   };
 };
@@ -604,6 +634,11 @@ export const fetchUISchemaContent = fileName => {
 export const setConfigContentPreChange = configContentPreChange => ({
   type: SET_CONFIG_DATA_PRE_CHANGE,
   configContentPreChange
+});
+
+export const setConfigContentLocal = configContentLocal => ({
+  type: SET_CONFIG_DATA_LOCAL,
+  configContentLocal
 });
 
 export const setConfigContent = configContent => ({
@@ -735,10 +770,12 @@ export const handleUploadedConfig = file => {
           : file.name.split("_")[0];
         try {
           const jsonContent = JSON.parse(content);
+          dispatch(setConfigContentLocal(content));
           dispatch(setConfigContent(jsonContent));
           dispatch(resetLocalConfigList());
           dispatch(setConfigFile([`${fileNameShort} (local)`]));
           dispatch(setUpdatedFormData(jsonContent));
+          dispatch(setConfigContentPreChange(content));
         } catch (error) {
           dispatch(
             alertActions.set({
@@ -797,6 +834,13 @@ export const saveUpdatedConfiguration = (filename, content) => {
 };
 
 export const setUpdatedFormData = formData => {
+  return function(dispatch) {
+    dispatch(setUpdatedFormDataValue(formData));
+    dispatch(actionsEditorTools.calcCrc32EditorLive());
+  };
+};
+
+export const setUpdatedFormDataValue = formData => {
   return {
     type: SET_UPDATED_FORM_DATA,
     formData

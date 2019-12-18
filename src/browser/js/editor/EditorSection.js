@@ -16,6 +16,7 @@ import * as alertActions from "../alert/actions";
 import EditorChangesComparison from "./EditorChangesComparison";
 import classNames from "classnames";
 
+
 const { detect } = require("detect-browser");
 const browser = detect();
 
@@ -49,6 +50,8 @@ class LoadEditorFiles extends React.Component {
     this.handleCompareChanges = this.handleCompareChanges.bind(this);
     this.closeChangesModal = this.closeChangesModal.bind(this);
     this.handleError = this.handleError.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.escFunction = this.escFunction.bind(this);
 
     this.state = {
       uischema: "",
@@ -57,6 +60,8 @@ class LoadEditorFiles extends React.Component {
       selectedUISchema: "",
       selectedSchema: "",
       selectedConfig: "",
+      configReview: {value: "None",label:"None"},
+      revisedConfigFile: {},
       formData: {},
       changeFlag: true,
       isSubmitting: false,
@@ -66,6 +71,12 @@ class LoadEditorFiles extends React.Component {
     };
 
     this.input = "";
+  }
+
+  escFunction(event) {
+    if (event.keyCode === 27) {
+      this.closeChangesModal();
+    }
   }
 
   handleUiSchemaChange(selection) {
@@ -99,7 +110,18 @@ class LoadEditorFiles extends React.Component {
         selectedConfig: selection
       },
       () => {
-        this.props.fetchConfigContent(this.state.config);
+        this.props.fetchConfigContent(this.state.config, "editor");
+      }
+    );
+  }
+
+  handleReviewConfigChange(selection) {
+    this.setState(
+      {
+        configReview: selection
+      },
+      () => {
+        this.props.fetchConfigContent(selection.value, "review");
       }
     );
   }
@@ -128,6 +150,14 @@ class LoadEditorFiles extends React.Component {
     isDownloadConfig = true;
   }
 
+  componentDidMount() {
+    document.addEventListener("keydown", this.escFunction, false);
+  }
+
+  componentWillUnMount() {
+    document.removeEventListener("keydown", this.escFunction, false);
+  }
+
   componentWillReceiveProps(nextProps) {
     const prevPrefix = this.props.prefixCrnt;
     const nextPrefix = nextProps.prefixCrnt;
@@ -143,6 +173,7 @@ class LoadEditorFiles extends React.Component {
     // ensure that if there's a new schema file list, the selection returns to the default value
     if (this.props.editorSchemaFiles != nextProps.editorSchemaFiles) {
       this.setState({
+        schema: "",
         selectedSchema: ""
       });
     }
@@ -151,10 +182,9 @@ class LoadEditorFiles extends React.Component {
       nextProps.configContentPreChange != undefined &&
       crcBrowserSupport == 1
     ) {
+
       const { crc32 } = require("crc");
-      let cfgCrc32EditorPre = crc32(
-        JSON.stringify(nextProps.configContentPreChange, null, 2)
-      )
+      let cfgCrc32EditorPre = crc32(nextProps.configContentPreChange)
         .toString(16)
         .toUpperCase()
         .padStart(8, "0");
@@ -167,8 +197,8 @@ class LoadEditorFiles extends React.Component {
     let uiLocal = nextProps.editorUISchemaFiles.filter(file =>
       file.name.includes("(local)")
     );
-    let schemaLocal = nextProps.editorSchemaFiles.filter(
-      file => file.name.includes("(local)")
+    let schemaLocal = nextProps.editorSchemaFiles.filter(file =>
+      file.name.includes("(local)")
     );
     let configLocal = nextProps.editorConfigFiles.filter(file =>
       file.name.includes("(local)")
@@ -188,6 +218,36 @@ class LoadEditorFiles extends React.Component {
       this.setState({
         selectedConfig: configLocal[0].name
       });
+    }
+
+    // Get the initial value for the config review benchmark dropdown
+    if(nextProps.editorConfigFiles.length == 0){
+      this.setState(
+        {
+          configReview: { value: "None", label: "None" }
+        },
+        () => {
+          // this.props.fetchConfigContent(configName, "review");
+        }
+      );    }
+    if (
+      this.props.editorConfigFiles.length !=
+        nextProps.editorConfigFiles.length &&
+      nextProps.editorConfigFiles[0] &&
+      nextProps.editorConfigFiles[0].name
+    ) {
+      let configName = configLocal.length
+        ? configLocal[0].name
+        : nextProps.editorConfigFiles[0].name;
+
+      this.setState(
+        {
+          configReview: { value: configName, label: configName }
+        },
+        () => {
+          this.props.fetchConfigContent(configName, "review");
+        }
+      );
     }
   }
 
@@ -249,7 +309,11 @@ class LoadEditorFiles extends React.Component {
 
         if (this.state.isCompareChanges === false) {
           this.setState({
-            isCompareChanges: true
+            isCompareChanges: true,
+            revisedConfigFile: {
+              value: revisedConfigFile,
+              label: revisedConfigFile
+            }
           });
           document.body.style.overflow = "hidden";
         } else {
@@ -288,18 +352,6 @@ class LoadEditorFiles extends React.Component {
 
   handleChange = ({ formData }) => {
     this.props.setUpdatedFormData(formData);
-
-    if (crcBrowserSupport == 1) {
-      const { crc32 } = require("crc");
-      let cfgCrc32EditorLive = crc32(JSON.stringify(formData, null, 2))
-        .toString(16)
-        .toUpperCase()
-        .padStart(8, "0");
-      this.props.setCrc32EditorLive(cfgCrc32EditorLive);
-    } else {
-      let cfgCrc32EditorLive = `N/A`;
-      this.props.setCrc32EditorLive(cfgCrc32EditorLive);
-    }
   };
 
   onNavChange = nav => {
@@ -397,55 +449,46 @@ class LoadEditorFiles extends React.Component {
           <br />
           {schemaContent ? (
             <div>
-            <p className="editor-temporary-text">Note: You can now switch the editor between "simple" and "advanced" view via the UIschema to the right (see release notes on github)</p>
-            <FormWithNav
-              omitExtraData={true}
-              liveOmit={true}
-              liveValidate={this.state.isLiveValidation}
-              noHtml5Validate={true}
-              schema={schemaContent ? schemaContent : {}}
-              uiSchema={uiContent ? uiContent : {}}
-              formData={configContent ? configContent : {}}
-              onSubmit={this.onSubmit.bind(this)}
-              onChange={this.handleChange}
-              onError={this.handleError}
-              onNavChange={this.onNavChange.bind(this)}
-              ArrayFieldTemplate={EditorArrayFieldTemplate}
-              activeNav={activatedTab}
-            >
-              <div
-                className={
-                  this.state.isCompareChanges
-                    ? "show modal-custom-wrapper"
-                    : "hidden modal-custom-wrapper"
-                }
+              <FormWithNav
+                omitExtraData={true}
+                liveOmit={true}
+                liveValidate={this.state.isLiveValidation}
+                noHtml5Validate={true}
+                schema={schemaContent ? schemaContent : {}}
+                uiSchema={uiContent ? uiContent : {}}
+                formData={configContent ? configContent : {}}
+                onSubmit={this.onSubmit}
+                onChange={this.handleChange}
+                onError={this.handleError}
+                onNavChange={this.onNavChange.bind(this)}
+                ArrayFieldTemplate={EditorArrayFieldTemplate}
+                activeNav={activatedTab}
               >
                 <div
                   className={
                     this.state.isCompareChanges
-                      ? "show modal-custom"
-                      : "hidden modal-custom"
+                      ? "show modal-custom-wrapper"
+                      : "hidden modal-custom-wrapper"
                   }
                 >
-                  <div className="modal-custom-header">
-                    <button
-                      type="button"
-                      className="close"
-                      onClick={this.closeChangesModal}
-                    >
-                      <span style={{ color: "gray" }}>×</span>
-                    </button>
-                    <div className="">
-                      <h4> Review changes </h4>
-                      Left: Original configuration | Right: Updated
-                      configuration
-                    </div>
-                  </div>
-                  <div className="modal-custom-content">
-                    <EditorChangesComparison />
-                  </div>
-                  <div className="modal-custom-footer">
-                    <div className="fe-header">
+                  <div
+                    className={
+                      this.state.isCompareChanges
+                        ? "show modal-custom"
+                        : "hidden modal-custom"
+                    }
+                  >
+                    <EditorChangesComparison
+                      crcBrowserSupport={crcBrowserSupport}
+                      revisedConfigFile={this.state.revisedConfigFile}
+                      options={editorConfigFiles}
+                      selected={this.state.configReview}
+                      handleReviewConfigChange={this.handleReviewConfigChange.bind(
+                        this
+                      )}
+                      closeChangesModal={this.closeChangesModal}
+                    />
+                    <div className="modal-custom-footer">
                       <button
                         type="submit"
                         className="btn btn-primary"
@@ -465,38 +508,37 @@ class LoadEditorFiles extends React.Component {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div
-                className={
-                  "config-bar" +
-                  (EDITOR.offline
-                    ? " fe-sidebar-shift-offline"
-                    : " fe-sidebar-shift")
-                }
-              >
-                <div className="col-xs-1" style={{ minWidth: "120px" }}>
-                  <button type="submit" className="btn btn-primary">
+                <div
+                  className={
+                    "config-bar" +
+                    (EDITOR.offline
+                      ? " fe-sidebar-shift-offline"
+                      : " fe-sidebar-shift")
+                  }
+                >
+                  <div className="col-xs-1" style={{ minWidth: "120px" }}>
+                    <button type="submit" className="btn btn-primary">
+                      {" "}
+                      Review changes{" "}
+                    </button>
+                  </div>
+                  <div className="col-xs-7" style={{ float: "left" }}>
                     {" "}
-                    Review changes{" "}
-                  </button>
+                    <EditorToolButton
+                      onClick={this.handleValidationCheck}
+                      comment="Live validation"
+                      toggled={this.state.isLiveValidation}
+                      classNameAlt="fa fa-check-square"
+                      className="fa fa-square"
+                    />{" "}
+                    <EditorSubMenu
+                      menuSchemaName={menuSchemaName}
+                      menuConfigName={menuConfigName}
+                    />
+                  </div>
                 </div>
-                <div className="col-xs-7" style={{ float: "left" }}>
-                  {" "}
-                  <EditorToolButton
-                    onClick={this.handleValidationCheck}
-                    comment="Live validation"
-                    toggled={this.state.isLiveValidation}
-                    classNameAlt="fa fa-check-square"
-                    className="fa fa-square"
-                  />{" "}
-                  <EditorSubMenu
-                    menuSchemaName={menuSchemaName}
-                    menuConfigName={menuConfigName}
-                  />
-                </div>
-              </div>
-            </FormWithNav>
+              </FormWithNav>
             </div>
           ) : (
             <div
@@ -597,8 +639,8 @@ const mapDispatchToProps = dispatch => {
   return {
     updateConfigFile: (content, object) =>
       dispatch(actionsEditor.updateConfigFile(content, object)),
-    fetchConfigContent: filename =>
-      dispatch(actionsEditor.fetchConfigContent(filename)),
+    fetchConfigContent: (filename, type) =>
+      dispatch(actionsEditor.fetchConfigContent(filename, type)),
     fetchSchemaContent: schema =>
       dispatch(actionsEditor.fetchSchemaContent(schema)),
     setConfigContent: content =>
@@ -619,7 +661,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(EditorSection);
+export default connect(mapStateToProps, mapDispatchToProps)(EditorSection);

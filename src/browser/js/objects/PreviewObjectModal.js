@@ -30,15 +30,19 @@ const PreviewObjectModal = ({
     bsSize="large"
     className="preview-modal"
   >
-    <ModalHeader>Preview {object.name}</ModalHeader>
-    <ModalBody style={{ wordBreak: "break-word" }}>
-      {content.objContent}
-    </ModalBody>
-    <div className="modal-footer">
-      <button className="btn btn-link" onClick={hidePreviewObject}>
-        Cancel
+    <ModalHeader className="modal-header-fixed">
+      <button className="close" onClick={hidePreviewObject}>
+        ×
       </button>
-    </div>
+      <div>
+        <h4>Object preview</h4>
+        <p>Preview {object.name}</p>
+      </div>
+    </ModalHeader>
+    <ModalBody className="modal-content">
+      <pre className="modal-preview-body">{content.objContent}</pre>
+    </ModalBody>
+    <div className="modal-footer-fixed"></div>
   </Modal>
 );
 
@@ -55,7 +59,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PreviewObjectModal);
+export default connect(mapStateToProps, mapDispatchToProps)(PreviewObjectModal);

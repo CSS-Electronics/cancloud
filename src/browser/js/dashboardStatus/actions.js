@@ -407,11 +407,11 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
         })
         .then(res => {
           fetch(res.url)
-            .then(r => r.json())
+            .then(r => r.text())
             .then(data => {
-              configFileContents.push(data);
+              configFileContents.push(JSON.parse(data));
 
-              crc32Val = crc32(JSON.stringify(data, null, 2))
+              crc32Val = crc32(data)
                 .toString(16)
                 .toUpperCase()
                 .padStart(8, "0");

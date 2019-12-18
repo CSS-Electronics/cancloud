@@ -197,6 +197,57 @@
   box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15) !important;
 }
 
+.checkbox-white-space{
+  padding:0px;
+  top:-20px;
+  font-size: 80%;
+  font-family: Consolas;
+}
+
+.checkbox-design{
+  display: inline-flex;
+    cursor: pointer;
+    position: relative;
+}
+
+.checkbox-design > span {
+  padding: 0.25rem 0.25rem;
+}
+
+.checkbox-design > input {
+  height: 12px;
+  width: 12px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  border: 1px solid #8e8e8e;
+  border-radius: 2px;
+  background-color:white;
+  cursor: pointer;
+}
+
+.checkbox-design > input:checked {
+  border: 1px solid #8e8e8e;
+  background-color:white;
+}
+
+
+.checkbox-design > input:checked + span::before {
+  content: '\2713';
+  display: block;
+  text-align: center;
+  color: #8e8e8e;
+  position: absolute;
+  left: 0.2rem;
+  top: 0.2rem;
+}
+
+.checkbox-design > input:active {
+  border: 1px solid #8e8e8e;
+}
+
+
 .binary-text {
   font-family: Consolas;
   word-break: break-word;
@@ -215,6 +266,11 @@
   font-family: Consolas;
   word-break: break-word;
   font-size: 11px;
+}
+
+.unix-text{
+  font-size:60%;
+  font-family: Consolas;
 }
 
 .top-header {
@@ -338,8 +394,13 @@
   box-shadow: @dropdown-shadow;
 }
 
+.form-control:contains("NOTE:"){
+  background-color:blue !important;
+}
+
 .field-description-shift {
-  right: 340px;
+  margin-right: 340px;
+  bottom:35px;
 }
 
 .field-integer:hover .field-description {
@@ -349,7 +410,7 @@
   }
 }
 
-.field-integer:hover .btn-field-description {
+.field-integer:hover .btn-field-description { 
   @media (min-width: @screen-md-min) {
     visibility: visible;
     transition-delay: 0.3s;
@@ -396,6 +457,16 @@
   padding-top: 20px;
 }
 
+.modal-review-changes-header {
+  height: 160px;
+  padding-left: 40px;
+  padding-top: 20px;
+
+  @media (max-width: @screen-sm-min) {
+  overflow-y:auto;
+}
+}
+
 .modal-custom-content {
   border-top: #ededed;
   border-bottom: #ededed;
@@ -406,16 +477,17 @@
   border-style: solid;
   position: absolute;
   width: 100%;
-  bottom: 100px;
-  top: 100px;
+  bottom: 70px;
+  top: 160px;
   overflow-y: auto;
 }
 
 .modal-custom-footer {
-  height: 100px;
+  height: 60px;
   position: absolute;
+  padding:40px;
   width: 100%;
-  bottom: 0;
+  bottom: 10px;
 }
 
 @legend-color : @text-color;

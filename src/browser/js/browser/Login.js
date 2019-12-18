@@ -36,12 +36,6 @@ export class Login extends React.Component {
     };
 
     // LIVE DEMO
-    // this.state = {
-    //   accessKey: "AKIAJFZBA5XS5LKJFQKQ",
-    //   secretKey: "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",
-    //   endPoint: "https://s3.amazonaws.com",
-    //   bucketName: "canedge-live-demo-2"
-    // };
 
   }
 
@@ -94,6 +88,13 @@ export class Login extends React.Component {
     ) {
       message =
         "A http:// server cannot be accessed via a https:// browser frontend";
+    }
+    if (
+      this.state.endPoint.substring(0, 5) != "http:" &&
+      this.state.endPoint.substring(0, 6) != "https:"
+    ) {
+      message =
+        "Please add http:// or https:// in front of your endpoint";
     }
     if (this.state.bucketName === "") {
       message = "Bucket Name is required";

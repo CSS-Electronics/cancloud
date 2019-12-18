@@ -1211,7 +1211,7 @@ export class Client {
   //   * `obj.size` _number_: size of the object
   //   * `obj.etag` _string_: etag of the object
   //   * `obj.lastModified` _Date_: modified time stamp
-  listObjects(bucketName, prefix, recursive) {
+  listObjects(bucketName, prefix, marker, recursive) {
     if (prefix === undefined) prefix = ''
     if (recursive === undefined) recursive = false
     if (!isValidBucketName(bucketName)) {
@@ -1228,7 +1228,7 @@ export class Client {
     }
     // if recursive is false set delimiter to '/'
     var delimiter = recursive ? '' : '/'
-    var marker = ''
+    var marker = marker ? marker : ""
     var objects = []
     var ended = false
     var readStream = Stream.Readable({objectMode: true})

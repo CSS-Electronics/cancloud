@@ -495,7 +495,6 @@ export const setUiSchemaSource = uiSchemaSource => ({
 
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
-    dispatch(setConfigContentPreSubmit());
 
     const uploadedTest = getState().editor.editorSchemaFiles.filter(file =>
       file.name.includes("local")

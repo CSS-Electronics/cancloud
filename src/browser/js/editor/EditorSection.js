@@ -16,6 +16,7 @@ import * as alertActions from "../alert/actions";
 import EditorChangesComparison from "./EditorChangesComparison";
 import classNames from "classnames";
 
+
 const { detect } = require("detect-browser");
 const browser = detect();
 

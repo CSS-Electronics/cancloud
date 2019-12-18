@@ -13,10 +13,23 @@ const selectOptions = Files => {
 };
 
 let pastCrc32 = "N/A";
-let pastUnixCrc32 = "N/A";
-let unixWarning = null;
 
 class EditorChangesComparison extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.toggleCheckbox = this.toggleCheckbox.bind(this)
+    this.state = {
+      hideWhiteSpace: true
+    };
+  }
+
+  toggleCheckbox = () => {
+    this.setState({
+      hideWhiteSpace: !this.state.hideWhiteSpace
+    });
+  }
+  
   render() {
     const {
       options,
@@ -30,8 +43,7 @@ class EditorChangesComparison extends React.Component {
       crc32EditorLive
     } = this.props;
 
-    // update past to exclude Windows style line endings:
-    let pastUnix = past ? past.replace(/\r\n/g, "\n") : ""; 
+    let pastCleaned = past ? JSON.stringify(JSON.parse(past),null,2) : ""
 
     if (crcBrowserSupport == 1 && past) {
       const { crc32 } = require("crc");
@@ -39,19 +51,8 @@ class EditorChangesComparison extends React.Component {
         .toString(16)
         .toUpperCase()
         .padStart(8, "0");
-
-      pastUnixCrc32 = crc32(pastUnix)
-        .toString(16)
-        .toUpperCase()
-        .padStart(8, "0");
     } else {
       pastCrc32 = "N/A";
-      pastUnixCrc32 = "N/A";
-    }
-
-    if (pastUnixCrc32 != pastCrc32) {
-      unixWarning =
-        "Note: Windows line endings are converted to Unix";
     }
 
     return (
@@ -62,7 +63,7 @@ class EditorChangesComparison extends React.Component {
           </button>
           <div className="">
             <h4> Review changes </h4>
-
+        
             <div className="col-sm-6 zero-padding">
               <p>
                 Previous Configuration File{" "}
@@ -88,13 +89,22 @@ class EditorChangesComparison extends React.Component {
                     "This lets you select the benchmark (pre changes) Configuration File for comparison vs. the new updated Configuration File"
                   }
                 </p>
+                <div className="checkbox-white-space">
+                <label className="checkbox-design">
+            <input
+            label="Hide whitespace changes"
+            type="checkbox"
+            checked={this.state.hideWhiteSpace}
+            onChange={this.toggleCheckbox} /> <span>&nbsp;Hide whitespace changes</span>
+            </label>
+            </div>
               </div>
             </div>
             <div className="col-sm-6 zero-padding">
               <p>
                 New Configuration File{" "}
                 <span className="device-file-table">
-                  {crc32EditorLive ? "[crc32 " + crc32EditorLive + "]" : null}
+                  {crc32EditorLive ? "[crc32: " + crc32EditorLive + "]" : null}
                 </span>
               </p>
               <div className="col-sm-8 form-group pl0 field-string">
@@ -108,11 +118,10 @@ class EditorChangesComparison extends React.Component {
                 <p className="field-description">
                   {"This will be the name of the new Configuration File"}
                 </p>
-                {unixWarning != null ? (
-                  <p className="unix-text">{unixWarning}</p>
-                ) : null}
+               
               </div>
             </div>
+            
           </div>
         </div>
         <div className="modal-custom-content">
@@ -124,7 +133,7 @@ class EditorChangesComparison extends React.Component {
                 matchWordsThreshold: 0.25,
                 matchingMaxComparisons: 5000
               }}
-              past={pastUnix}
+              past={this.state.hideWhiteSpace ? pastCleaned : past}
               current={JSON.stringify(current, null, 2)}
             />
           </div>

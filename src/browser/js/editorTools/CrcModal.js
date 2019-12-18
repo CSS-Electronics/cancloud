@@ -54,15 +54,7 @@ class CrcModal extends React.Component {
           comment="This is the checksum (crc32) of the configuration file currently loaded in the device editor (pre changes). Typically this matches the Configuration File in your S3 server device folder. If so, you can check if this matches your device config crc32 to e.g. evaluate if an OTA update was performed successfully."
         />
         <br />
-        <OutputField
-          headerText="Editor config crc32 (live)"
-          id="crc32EditorLive"
-          alertMsg={this.props.showAlert}
-          masked={false}
-          rows="1"
-          value={this.props.crc32EditorLive}
-          comment="This is the live-calculated checksum (crc32) of the Configuration File displayed in the editor. This may differ from the pre changes editor config crc32 if you have e.g. made changes in the editor, but not yet submitted these to S3."
-        />
+
         {this.props.deviceFileContent &&
         this.props.deviceFileContent["cfg_crc32"] &&
         this.props.deviceFileContent["cfg_crc32"] == this.props.crc32EditorPre ? (
@@ -79,7 +71,6 @@ class CrcModal extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    crc32EditorLive: state.editorTools.crc32EditorLive,
     crc32EditorPre: state.editorTools.crc32EditorPre,
     deviceFileContent: state.editor.deviceFileContent,
     configContent: state.editor.configContent,

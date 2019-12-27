@@ -36,7 +36,6 @@ export class Login extends React.Component {
     };
 
     // LIVE DEMO
-
   }
 
   configureGeneral(e) {

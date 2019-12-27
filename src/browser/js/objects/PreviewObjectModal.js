@@ -39,7 +39,7 @@ const PreviewObjectModal = ({
         <p>Preview {object.name}</p>
       </div>
     </ModalHeader>
-    <ModalBody className="modal-content">
+    <ModalBody className="modal-content-custom">
       <pre className="modal-preview-body">{content.objContent}</pre>
     </ModalBody>
     <div className="modal-footer-fixed"></div>

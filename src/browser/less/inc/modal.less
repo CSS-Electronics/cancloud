@@ -8,7 +8,7 @@
 }
 
 .modal-footer-fixed{
-    height: 70px;
+    height: 20px;
     position: absolute;
     width: 100%;
     bottom: 0;
@@ -22,7 +22,7 @@
     word-wrap: break-word;
     margin: 0em 0;
     white-space: pre-wrap;
-    height: calc(100% - 150px);
+    height: calc(100% - 100px);
     border-top: #ededed;
     border-bottom: #ededed;
     border-right: @white;
@@ -37,6 +37,12 @@
 }
 
 .modal-content {
+    // height: 80vh;
+    overflow-y: hidden;
+    padding:0px;
+}
+
+.modal-content-custom {
     height: 80vh;
     overflow-y: hidden;
     padding:0px;

@@ -35,7 +35,7 @@ export default class JSONrpc {
       options.params = {};
     }
 
-    let s3Explorer = new S3Explorer(options.params, token);
+    const s3Explorer = new S3Explorer(options.params, token);
 
     let result;
 
@@ -44,7 +44,7 @@ export default class JSONrpc {
         result = s3Explorer.getSessionsObject();
         break;
       case "ListBuckets":
-        result = s3Explorer.listBuckets();
+        result = s3Explorer.listBuckets(options.params.marker);
         break;
       case "StorageInfo":
         result = s3Explorer.storageInfo();

@@ -36,7 +36,7 @@ class DeviceFileModal extends React.Component {
                 )}
               </div>
             </ModalHeader>
-            <ModalBody className="modal-content">
+            <ModalBody className="modal-content-custom">
               <pre className="modal-preview-body">
                 <DeviceTable />
               </pre>

@@ -333,7 +333,7 @@ export const fetchUISchemaFiles = configObjects => {
         dispatch(fetchConfigContent(configSchema[0], "editor"));
 
         dispatch(setSchemaFile(schemaFiles));
-        dispatch(fetchSchemaContent(schemaFiles[0]));
+        dispatch(fetchSchemaContent(schemaFiles[0])); 
       })
       .catch(err => {
         if (web.LoggedIn()) {
@@ -395,7 +395,7 @@ export const updateConfigFile = (content, object) => {
 
 export const fetchConfigContent = (fileName, type) => {
   return function(dispatch, getState) {
-    if (fileName.includes("(local)")) {
+    if (fileName && fileName.includes("(local)")) {
       if (type == "review") {
         dispatch(
           setConfigContentPreChange(getState().editor.configContentLocal)

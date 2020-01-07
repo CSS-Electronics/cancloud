@@ -20,9 +20,7 @@ import {
 import DeviceTable from "./DeviceTable";
 import PeriodMenu from "./PeriodMenu";
 
-// https://stackoverflow.com/questions/42394429/aws-sdk-s3-best-way-to-list-all-keys-with-listobjectsv2
-
-const resWide = window.innerWidth > 2000 ? 1 : 0;
+const resWide = window.innerWidth > 2000 ? 2 : window.innerWidth > 1800 ? 1 : 0;
 const statusConfig = require(`../../schema/status-config-03.01.json`);
 const confDash = statusConfig.dashboard;
 const chDefaults = confDash.default_settings;
@@ -371,12 +369,8 @@ class DashboardStatusSection extends React.Component {
 
                         {widget.widget_type == "table" &&
                         deviceFileContents.length ? (
-                          <div
-                            style={{
-                              height: widget.height + (resWide ? 100 : 0)
-                            }}
-                          >
-                            <DeviceTable
+                          
+                          <DeviceTable
                               deviceIdListDeltaSort={chartDataDevicesArray[1]}
                               deviceFileContents={deviceFileContents}
                               configFileCrc32={configFileCrc32}
@@ -385,8 +379,15 @@ class DashboardStatusSection extends React.Component {
                                 chartDataArray[2] ? chartDataArray[2] : []
                               }
                               deviceCrc32Test={chartDataDevicesArray[2]}
+                              height={widget.height - 50 + (resWide ? 100 : 0)}
                             />
-                          </div>
+                          // <div
+                          //   style={{
+                          //     height: widget.height + (resWide ? 100 : 0)
+                          //   }}
+                          // >
+                            
+                          // </div>
                         ) : null}
                       </div>
                     ) : !loadedFiles ? (

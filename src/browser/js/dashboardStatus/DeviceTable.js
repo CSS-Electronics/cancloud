@@ -6,7 +6,8 @@ const DeviceTable = props => {
     deviceFileContents,
     serverConfig,
     mf4ObjectsFiltered,
-    deviceCrc32Test
+    deviceCrc32Test,
+    height
   } = props;
 
   const uploadedPerDevice = mf4ObjectsFiltered.reduce(
@@ -145,9 +146,9 @@ const DeviceTable = props => {
                 <div>
                   {" "}
                   {v == true ? (
-                    <p className="blue-text"><i className="fa fa-check" /></p>
+                    <p className="blue-text zero-bottom-margin"><i className="fa fa-check" /></p>
                   ) : (
-                    <p className="red-text"><i className="fa fa-times" /></p>
+                    <p className="red-text zero-bottom-margin"><i className="fa fa-times" /></p>
                   )}
                 </div>
               ) : (
@@ -161,10 +162,10 @@ const DeviceTable = props => {
   });
 
   return (
-    <div className="widget-table" style={{ fontSize: "80%", height: 160 }}>
+    <div className="widget-table" style={{ fontSize: "80%", height: height }}>
       <table className="table">
         <thead>{tableHeader}</thead>
-        <tbody className="widget-table-table">{tableValues}</tbody>
+        <tbody>{tableValues}</tbody>
       </table>
     </div>
   );

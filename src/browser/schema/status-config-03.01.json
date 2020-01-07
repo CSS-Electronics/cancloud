@@ -127,7 +127,7 @@
         "widget_type": "table",
         "dataset": "deviceTable",
         "class_name": "col-sm-12",
-        "height": 210,
+        "height": 250,
         "colors": "",
 		"comment": "Table showing device details, sorted by when the devices last checked into the server"
       }

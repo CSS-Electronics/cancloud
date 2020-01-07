@@ -69,7 +69,18 @@ Note the following:
 - For some S3 servers (e.g. AWS), you may need to change the CORS config - see the [getting started docs](https://canlogger.csselectronics.com/canedge-getting-started/s3-server/)  
 
 ---
+### Versioning
+The CANcloud versioning is inspired by the semantic versioning system.
 
+Each version is assigned three two digit numbers: `MAJOR`, `MINOR`, `PATCH`:
+
+- `MAJOR`: Incompatible changes (e.g. requires new browser settings)
+- `MINOR`: New backwards-compatible functionality (e.g. new features)
+- `PATCH`: Backwards-compatible bug fixes (e.g. minor patches)
+
+Example: `version 03.05.01`
+
+---
 ### Contribution & support 
 Feature suggestions, pull requests or questions are welcome!
 

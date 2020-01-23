@@ -381,13 +381,6 @@ class DashboardStatusSection extends React.Component {
                               deviceCrc32Test={chartDataDevicesArray[2]}
                               height={widget.height - 50 + (resWide ? 100 : 0)}
                             />
-                          // <div
-                          //   style={{
-                          //     height: widget.height + (resWide ? 100 : 0)
-                          //   }}
-                          // >
-                            
-                          // </div>
                         ) : null}
                       </div>
                     ) : !loadedFiles ? (

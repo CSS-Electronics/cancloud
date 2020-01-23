@@ -54,8 +54,9 @@ const DeviceTable = props => {
       : "";
 
     const time_since_heartbeat_min = maxDelta
-      ? Math.round((e.lastModifiedDelta / maxDelta) * 100) / 100
+      ? Math.round((e.lastModifiedDelta) * 100) / 100
       : 0;
+
     const id = e.deviceId;
     const meta = deviceFile && deviceFile.log_meta ? deviceFile.log_meta : "";
     const fw_ver = deviceFile && deviceFile.fw_ver ? deviceFile.fw_ver : "";
@@ -117,13 +118,13 @@ const DeviceTable = props => {
                   <li>
                     <span
                       style={{
-                        width: v ? v * 100 : 0,
+                        width: v ? v/maxDelta * 100 : 0,
                         height: "100%",
                         backgroundColor: "#3d85c6",
-                        color: v > 0.2 ? "white" : "#8e8e8e"
+                        color: (v/maxDelta) > 0.2 ? "white" : "#8e8e8e"
                       }}
                     >
-                      &nbsp;{Math.round(v * maxDelta)}
+                      &nbsp;{Math.round(v)}
                     </span>
                   </li>
                 </ul>

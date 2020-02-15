@@ -136,7 +136,8 @@ export default class JSONrpc {
       case "GetPartialObject":
         result = s3Explorer.getPartialObject(
           options.params.bucketName,
-          options.params.objectName
+          options.params.objectName,
+          options.params.byteLength
         );
         break;
       default:

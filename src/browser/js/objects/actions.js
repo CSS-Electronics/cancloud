@@ -425,11 +425,11 @@ export const previewObject = object => {
     const currentBucket = getCurrentBucket(getState());
     const currentPrefix = getCurrentPrefix(getState());
     const objectName = `${currentPrefix}${object.name}`;
-    console.log("Preview object", objectName);
     return web
       .GetPartialObject({
         bucketName: currentBucket,
-        objectName: objectName
+        objectName: objectName,
+        byteLength: 10000
       })
       .then(objContent => {
         dispatch(showPreviewObject(object, objContent));

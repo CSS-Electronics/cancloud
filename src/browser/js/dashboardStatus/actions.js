@@ -220,6 +220,9 @@ export const listLogFiles = devicesFilesInput => {
           .then(data => {
             iCount += 1;
 
+            // extract the last uploaded log file for each device
+            let lastFile = data.objects[data.objects.length -1]
+
             // Aggregate the loaded data information to either hourly or minute basis by mapping across dateFormats
             // First, data is aggregated to hourly basis for the full period since periodStart
             // After this, it is aggregated to minute basis for the lastHour 
@@ -300,6 +303,7 @@ export const listLogFiles = devicesFilesInput => {
 
             dispatch(setDevicesFilesCount(iCount));
 
+            // when all devices are processed, dispatch the full data and set loadedFiles to true to display the data
             if (iCount == devicesFiles.length) {
               dispatch(setObjectsData(mf4ObjectsHourAry));
               dispatch(setObjectsDataMin(mf4ObjectsMinAry));

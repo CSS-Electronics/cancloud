@@ -74,7 +74,10 @@ export const listAllObjects = devicesDevicesInput => {
               const deviceId = device;
               const lastModified = res.metaInfo.lastModified;
 
-              deviceFileObjectsAry.push({ deviceId, lastModified });
+              deviceFileObjectsAry.push({
+                deviceId,
+                lastModified
+              });
 
               if (iDeviceFileCount == devicesDevices.length) {
                 dispatch(setDeviceFileObjects(deviceFileObjectsAry));
@@ -124,7 +127,11 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
               const deviceId = device;
               const name = device + "/config-" + e.name;
               const lastModified = e.lastModified;
-              allObjects.push({ name, deviceId, lastModified });
+              allObjects.push({
+                name,
+                deviceId,
+                lastModified
+              });
             });
 
             const configObjects = allObjects.filter(obj =>
@@ -187,14 +194,11 @@ export const listLogFiles = devicesFilesInput => {
   return function(dispatch, getState) {
     let devices = getState().buckets.list ? getState().buckets.list : [];
     devices = devices.filter(e => e.match(loggerRegex));
+    const devicesFilesDefaultMax = 5;
 
-    const devicesFilesDefaultMax = 3;
-
-    // by default show all devices for the device info and none for the log file info (unless fewer than 3 devices)
+    // if the user selects specific devices (devicesFilesInput) show these. If no selection, show up to X devices by default
     let devicesFiles = devicesFilesInput
-      ? devicesFilesInput.length
-        ? devicesFilesInput
-        : []
+      ? devicesFilesInput
       : devices.length <= devicesFilesDefaultMax
       ? devices
       : [];
@@ -204,6 +208,7 @@ export const listLogFiles = devicesFilesInput => {
       dispatch(loadedFiles(true));
     }
 
+    // load all log files recursively for each device in devicesFiles
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
         web
@@ -215,11 +220,14 @@ export const listLogFiles = devicesFilesInput => {
           .then(data => {
             iCount += 1;
 
-            // aggregate data to hourly basis
+            // Aggregate the loaded data information to either hourly or minute basis by mapping across dateFormats
+            // First, data is aggregated to hourly basis for the full period since periodStart
+            // After this, it is aggregated to minute basis for the lastHour 
             dateFormats.map((format, index) => {
               let periodStartVar = index == 0 ? periodStart : lastHour;
               let sizePerTime = {};
 
+              // aggregate log file size
               sizePerTime = data.objects.reduce(
                 (acc, { lastModified, size }) => {
                   if (lastModified > periodStartVar) {
@@ -241,6 +249,7 @@ export const listLogFiles = devicesFilesInput => {
                 {}
               );
 
+              // aggregate log file count
               let countPerTime = data.objects.reduce(
                 (accCnt, { lastModified }) => {
                   if (lastModified > periodStartVar) {
@@ -261,6 +270,7 @@ export const listLogFiles = devicesFilesInput => {
                 {}
               );
 
+              // combine device log file data into an object structure for combining with data from other devices
               let dataPerTimeAry = [];
               if (sizePerTime) {
                 const periodStartVarFormat = speedDate(format, periodStartVar);
@@ -296,14 +306,6 @@ export const listLogFiles = devicesFilesInput => {
               dispatch(loadedFiles(true));
             }
           });
-        // .catch(err => {
-        //   iCount += 1;
-
-        //   if (iCount == devicesFiles.length) {
-        //     dispatch(setObjectsData(mf4ObjectsAry));
-        //     dispatch(loadedFiles(true));
-        //   }
-        // });
       });
     }
   };
@@ -457,3 +459,29 @@ export const setDeviceFileObjects = deviceFileObjects => ({
   type: SET_DEVICE_FILE_OBJECT,
   deviceFileObjects
 });
+
+// get first part of object
+export const previewObject = object => {
+  return function(dispatch, getState) {
+    const currentBucket = getCurrentBucket(getState());
+    const currentPrefix = getCurrentPrefix(getState());
+    const objectName = `${currentPrefix}${object.name}`;
+    return web
+      .GetPartialObject({
+        bucketName: currentBucket,
+        objectName: objectName,
+        byteLength: 5000
+      })
+      .then(objContent => {
+        dispatch(showPreviewObject(object, objContent));
+      })
+      .catch(err => {
+        dispatch(
+          alertActions.set({
+            type: "danger",
+            message: err.message
+          })
+        );
+      });
+  };
+};

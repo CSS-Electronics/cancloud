@@ -63,7 +63,7 @@ export const prepareDataDevices = (
     const deviceId = device.deviceId;
     const lastModified = Moment(device.lastModified);
     const lastModifiedDelta = Moment().diff(lastModified, "minutes");
-    const lastModifiedMin = lastModified.format("YYYY-MM-DD HH:mm");
+    const lastModifiedMin = lastModified.format("YY-MM-DD HH:mm");
 
     return { deviceId, lastModifiedDelta, lastModifiedMin };
   });
@@ -185,7 +185,6 @@ export const prepareDataDevices = (
     configCrc32Data = [0, kpiConnectedVal]; // all configs set to not synced in this case
   }
 
-  // if(Object.keys(deviceFWSorted).length != 0){
   chartDataDevices = {
     kpiConnected: kpiConnectedVal,
     deviceStatus: {
@@ -216,8 +215,6 @@ export const prepareDataDevices = (
       labels: deviceFWLabel
     }
   };
-
-// }
 
   return [
     chartDataDevices,

@@ -10,6 +10,18 @@ const DeviceTable = props => {
     height
   } = props;
 
+  // return empty div if no devices to list
+  if (deviceIdListDeltaSort.length == 0) {
+    return (
+      <div>
+        <p className="widget-no-data">No devices to list</p>
+      </div>
+    );
+  }
+  
+  const deviceLastMf4MetaData = [{deviceId: "17DFD20B", lastModified: "20-02-10 14:32", storageFree: 0.55},{deviceId: "1F82ABA3", lastModified: "20-02-07 12:22", storageFree: 0.9}]
+
+  // aggregate uploaded data size by device
   const uploadedPerDevice = mf4ObjectsFiltered.reduce(
     (acc, { deviceId, size }) => {
       if (!acc[deviceId]) {
@@ -21,15 +33,8 @@ const DeviceTable = props => {
     {}
   );
 
+  // identify the max size & delta (time since heartbeat) for use in the visual "bar charts" in table
   let maxUploaded = Math.max.apply(Math, Object.values(uploadedPerDevice));
-
-  if (deviceIdListDeltaSort.length == 0) {
-    return (
-      <div>
-        <p className="widget-no-data">No devices to list</p>
-      </div>
-    );
-  }
 
   let maxDelta = Math.max.apply(
     Math,
@@ -37,14 +42,25 @@ const DeviceTable = props => {
       return o.lastModifiedDelta;
     })
   );
+
+  // check if a server config exists and if it includes device meta data
   let serverConfigTest =
     serverConfig && serverConfig.devicemeta && serverConfig.devicemeta.devices;
 
+  // construct object containing all relevant table data based on sorted device ID list
   const tableData = deviceIdListDeltaSort.map(e => {
+
+    // extract the device.json content related to the device
     const deviceFile = deviceFileContents.filter(
       devFile => devFile.id == e.deviceId
     )[0];
 
+    // extract object with meta data on last log file uploaded for the device
+    const lastMf4Meta = deviceLastMf4MetaData.filter(
+     meta => meta.deviceId == e.deviceId
+    )[0];
+
+    // if a server config exists, extract the meta data name
     const name = serverConfigTest
       ? serverConfig.devicemeta.devices.filter(o => o.serialno == e.deviceId)[0]
         ? serverConfig.devicemeta.devices.filter(
@@ -53,46 +69,53 @@ const DeviceTable = props => {
         : ""
       : "";
 
+    // calculate the delta time since last heartbeat
     const time_since_heartbeat_min = maxDelta
       ? Math.round((e.lastModifiedDelta) * 100) / 100
       : 0;
 
+    // extract the device ID and various properties from the device.json
     const id = e.deviceId;
-    const meta = deviceFile && deviceFile.log_meta ? deviceFile.log_meta : "";
-    const fw_ver = deviceFile && deviceFile.fw_ver ? deviceFile.fw_ver : "";
-    const last_heartbeat = e.lastModifiedMin;
+    const meta = deviceFile && deviceFile.log_meta 
+    const fwVer = deviceFile && deviceFile.fw_ver  
+    const lastHeartbeat = e.lastModifiedMin;
     const uploadedMb =
       maxUploaded && uploadedPerDevice[e.deviceId]
         ? ((uploadedPerDevice[e.deviceId] / maxUploaded) * 100) / 100
         : NaN;
-    const config_sync =
+    const configSync =
       deviceCrc32Test[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&
-      deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32
-        ? deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32
-        : false;
+      deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32 
+    const storageFree = lastMf4Meta && Math.round(lastMf4Meta.storageFree*100)
+    const lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified
 
     return {
       id,
       name,
       meta,
-      last_heartbeat,
+      lastHeartbeat,
       time_since_heartbeat_min,
-      uploadedMb,
-      fw_ver,
-      config_sync
+      fwVer,
+      configSync,
+      storageFree,
+      lastLogUpload,
+      uploadedMb
     };
   });
 
+
   const stringHeader = {
-    last_heartbeat: "Last heartbeat",
-    time_since_heartbeat_min: "Min since heartbeat",
+    lastHeartbeat: "Last heartbeat",
+    time_since_heartbeat_min: "Time since heartbeat",
     id: "Device ID",
     meta: "Config meta",
     name: "Server meta",
-    fw_ver: "FW",
+    fwVer: "Firmware",
     uploadedMb: "MB uploaded",
-    config_sync: "Config synced"
+    storageFree: "Free SD storage",
+    configSync: "Config synced",
+    lastLogUpload: "Last log upload"
   };
 
   const tableHeader = (
@@ -124,11 +147,11 @@ const DeviceTable = props => {
                         color: (v/maxDelta) > 0.2 ? "white" : "#8e8e8e"
                       }}
                     >
-                      &nbsp;{Math.round(v)}
+                      &nbsp;{Math.round(v)}&nbsp;min
                     </span>
                   </li>
                 </ul>
-              ) : index == 5 ? (
+              ) : index == 9 ? (
                 <ul className="chart">
                   <li>
                     <span
@@ -139,11 +162,26 @@ const DeviceTable = props => {
                         color: v > 0.2 ? "white" : "#8e8e8e"
                       }}
                     >
-                      &nbsp;{Math.round(v * maxUploaded)}
+                     {v ? <div>&nbsp;{Math.round(v * maxUploaded)}&nbsp;MB</div> : v}
                     </span>
                   </li>
                 </ul>
-              ) : index == 7 ? (
+              )  : index == 7 ? (
+                <ul className="chart">
+                  <li>
+                    <span
+                      style={{
+                        width: v ? v : 0,
+                        height: "100",
+                        backgroundColor: "#FF9900",
+                        color: v > 10 ? "white" : "#8e8e8e"
+                      }}
+                    >
+                      {v ? <div>&nbsp;{v}&nbsp;%</div> : ""}
+                    </span>
+                  </li>
+                </ul>
+              ) : index == 6 ? (
                 <div>
                   {" "}
                   {v == true ? (

@@ -30,7 +30,7 @@
 		"comment": "Devices with a heartbeat within the period"
       },
 	   {
-        "title": "Free SD storage",
+        "title": "Avg. free SD storage",
 		"dependency": "files",
         "widget_type": "kpi",
         "dataset": "kpiFreeStorage",

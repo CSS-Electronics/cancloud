@@ -1,8 +1,10 @@
 import web from "../web";
+
 import * as alertActions from "../alert/actions";
 import * as commonActions from "../browser/actions";
 import _ from "lodash";
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
+export const SET_LAST_OBJECT_DATA = "dashboardStatus/SET_LAST_OBJECT_DATA";
 export const SET_OBJECTS_DATA_MIN = "dashboardStatus/SET_OBJECTS_DATA_MIN";
 export const DEVICE_FILE_CONTENT = "dashboardStatus/DEVICE_FILE_CONTENT";
 export const SET_DEVICE_FILE_OBJECT = "dashboardStatus/SET_DEVICE_FILE_OBJECT";
@@ -189,6 +191,7 @@ export const listLogFiles = devicesFilesInput => {
   let iCount = 0;
   let mf4ObjectsHourAry = [];
   let mf4ObjectsMinAry = [];
+  let lastFileAry = [];
   let dateFormats = ["YYYY-MM-DD HH", "YYYY-MM-DD HH:mm"];
 
   return function(dispatch, getState) {
@@ -222,6 +225,10 @@ export const listLogFiles = devicesFilesInput => {
 
             // extract the last uploaded log file for each device
             let lastFile = data.objects[data.objects.length -1]
+            
+            if(lastFile){
+              lastFileAry = lastFileAry.concat(data.objects[data.objects.length -1])
+            }
 
             // Aggregate the loaded data information to either hourly or minute basis by mapping across dateFormats
             // First, data is aggregated to hourly basis for the full period since periodStart
@@ -301,10 +308,12 @@ export const listLogFiles = devicesFilesInput => {
               }
             });
 
+
             dispatch(setDevicesFilesCount(iCount));
 
             // when all devices are processed, dispatch the full data and set loadedFiles to true to display the data
             if (iCount == devicesFiles.length) {
+              dispatch(mf4MetaHeader(lastFileAry))
               dispatch(setObjectsData(mf4ObjectsHourAry));
               dispatch(setObjectsDataMin(mf4ObjectsMinAry));
               dispatch(loadedFiles(true));
@@ -326,6 +335,11 @@ export const clearDataFiles = () => ({
 export const setObjectsData = mf4Objects => ({
   type: SET_OBJECTS_DATA,
   mf4Objects
+});
+
+export const setDeviceLastMf4MetaData = deviceLastMf4MetaData => ({
+  type: SET_LAST_OBJECT_DATA,
+  deviceLastMf4MetaData
 });
 
 export const setDevicesFilesCount = devicesFilesCount => ({
@@ -465,19 +479,33 @@ export const setDeviceFileObjects = deviceFileObjects => ({
 });
 
 // get first part of object
-export const previewObject = object => {
+export const mf4MetaHeader = mf4Objects => {
   return function(dispatch, getState) {
-    const currentBucket = getCurrentBucket(getState());
-    const currentPrefix = getCurrentPrefix(getState());
-    const objectName = `${currentPrefix}${object.name}`;
-    return web
-      .GetPartialObject({
-        bucketName: currentBucket,
-        objectName: objectName,
-        byteLength: 5000
+    
+    let deviceLastMf4MetaData = []
+    let iCount = 0
+
+    mf4Objects.map(object => {
+
+      web.GetPartialObject({
+        bucketName: "Home",
+        objectName: object.name,
+        byteLength: 3000
       })
       .then(objContent => {
-        dispatch(showPreviewObject(object, objContent));
+        iCount += 1
+        let storageTotalKb = objContent.objContent.split('<e name="storage total" ro="true">').pop().split('</e>')
+        let storageFreeKb = objContent.objContent.split('<e name="storage free" ro="true">').pop().split('</e>')
+        let storageFree = Math.round(((parseInt(storageFreeKb)) / (parseInt(storageTotalKb)))*10000)/100
+        let deviceId = object.name.split("/")[0]
+        let lastModified = object.lastModified
+
+        if(storageFree){
+        deviceLastMf4MetaData = deviceLastMf4MetaData.concat({deviceId: deviceId, lastModified: lastModified, storageFree: storageFree })
+      }
+        if(iCount == mf4Objects.length){
+          dispatch(setDeviceLastMf4MetaData(deviceLastMf4MetaData))
+        }
       })
       .catch(err => {
         dispatch(
@@ -487,5 +515,14 @@ export const previewObject = object => {
           })
         );
       });
+
+    
+
+
+    })
+    
+   
+
+
   };
 };

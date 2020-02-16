@@ -1,4 +1,5 @@
 import React from "react";
+import Moment from "moment";
 
 const DeviceTable = props => {
   const {
@@ -7,9 +8,10 @@ const DeviceTable = props => {
     serverConfig,
     mf4ObjectsFiltered,
     deviceCrc32Test,
-    height
+    height,
+    deviceLastMf4MetaData
   } = props;
-
+  
   // return empty div if no devices to list
   if (deviceIdListDeltaSort.length == 0) {
     return (
@@ -19,8 +21,6 @@ const DeviceTable = props => {
     );
   }
   
-  const deviceLastMf4MetaData = [{deviceId: "17DFD20B", lastModified: "20-02-10 14:32", storageFree: 0.55},{deviceId: "1F82ABA3", lastModified: "20-02-07 12:22", storageFree: 0.9}]
-
   // aggregate uploaded data size by device
   const uploadedPerDevice = mf4ObjectsFiltered.reduce(
     (acc, { deviceId, size }) => {
@@ -87,8 +87,9 @@ const DeviceTable = props => {
       deviceCrc32Test[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32 
-    const storageFree = lastMf4Meta && Math.round(lastMf4Meta.storageFree*100)
-    const lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified
+    const storageFree = lastMf4Meta && lastMf4Meta.storageFree
+    let lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified
+    lastLogUpload = Moment(lastLogUpload).format("YY-MM-DD HH:mm");
 
     return {
       id,
@@ -162,7 +163,7 @@ const DeviceTable = props => {
                         color: v > 0.2 ? "white" : "#8e8e8e"
                       }}
                     >
-                     {v ? <div>&nbsp;{Math.round(v * maxUploaded)}&nbsp;MB</div> : v}
+                     {v ? <div>&nbsp;{Math.round(v * maxUploaded)}&nbsp;MB</div> : <div>&nbsp;{Math.round(v * maxUploaded)}</div>}
                     </span>
                   </li>
                 </ul>

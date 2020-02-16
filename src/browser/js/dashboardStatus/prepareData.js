@@ -3,6 +3,7 @@ var speedDate = require("speed-date");
 let uploadedPerTime = {};
 let mf4ObjectsFiltered = [];
 let chartData = {};
+let deviceLastMf4MetaDataFiltered = []
 
 
 export const devicesOptionsFn = deviceList => {
@@ -123,8 +124,10 @@ export const prepareData = (
   periodHours,
   mf4Objects,
   mf4ObjectsMin,
-  devicesFilesCount 
+  devicesFilesCount,
+  deviceLastMf4MetaData
 ) => {
+
   // filter log files & devices based on time period
   let periodEndNew = new Date();
   let periodStartNew = new Date();
@@ -141,17 +144,20 @@ export const prepareData = (
   let periodStartMin = speedDate("YYYY-MM-DD HH:mm", periodStartNew);
   let periodEndMin = speedDate("YYYY-MM-DD HH:mm", periodEndNew);
 
-  // // DEVICE
-  // deviceFileObjectsFiltered = deviceFileObjects.filter(
-  //   e => e.lastModified >= periodStartNew
-  // );
 
-  // bar chart
+  // prepare data for bar chart of uploaded files
   mf4ObjectsFiltered =
     periodHours == 1
       ? mf4ObjectsMin
       : mf4Objects.filter(e => e.lastModified >= periodStart);
 
+  // prepare data for storageFree by removing devices outside period and those without storageFree data
+  deviceLastMf4MetaDataFiltered = deviceLastMf4MetaData.filter(e => (e.lastModified >= periodStartNew));
+  
+  // calculate storageFree values across filtered data
+  let storageFreeAvg = deviceLastMf4MetaDataFiltered.reduce((a, b) => +a + +b.storageFree, 0) / deviceLastMf4MetaDataFiltered.length
+
+  // data for last hour
   if (periodHours <= 1) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
@@ -172,6 +178,7 @@ export const prepareData = (
     );
   }
 
+  // data for last 1 day and 7 days
   if (periodHours > 1 && periodHours <= 24 * 7) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
@@ -192,6 +199,7 @@ export const prepareData = (
     );
   }
 
+  // data for last 30 days
   if (periodHours > 24 * 7) {
     uploadedPerTime = mf4ObjectsFiltered.reduce(
       (acc, { lastModified, size }) => {
@@ -214,14 +222,12 @@ export const prepareData = (
     );
   }
 
-
-  // kpi data
- 
+  // prepare data for KPI boxes
   const kpiUploadedValMB = mf4ObjectsFiltered.length
     ? mf4ObjectsFiltered.reduce((a, b) => +a + +b.size, 0)
     : "";
 
-  const kpiFreeStorage = "WIP";
+  const kpiFreeStorage = `${Math.round(storageFreeAvg)}%`;
 
   const kpiUploadedVal = mf4ObjectsFiltered.length ? Math.round( (kpiUploadedValMB / 1000)*10)/10 : ""
   const kpiDataPerDeviceDayVal =
@@ -237,7 +243,6 @@ export const prepareData = (
       : "";
 
   if (Object.values(uploadedPerTime).length == 0) {
-    // let default_value = "2019-01-01 20" // speedDate('YYYY-MM-DD HH',periodEndNew)
     uploadedPerTime = { [periodStart]: 0, [periodEnd]: 0 };
   }
 
@@ -257,7 +262,7 @@ export const prepareData = (
           label: "#devices"
         }
       ],
-      labels: ["90%+", "70%+", "50%+", "30%+", "10%+", "<10%"]
+      labels: ["99%+", "90%+", "70%+", "50%+", "20%+", "<10%"]
     },
     dataUploadTime: {
       datasets: [

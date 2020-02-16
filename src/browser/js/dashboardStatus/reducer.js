@@ -3,6 +3,7 @@ import * as dashboardStatusActions from "./actions";
 export default (
   state = {
     mf4Objects: [],
+    deviceLastMf4MetaData: [],
     mf4ObjectsMin: [],
     deviceFileContents: [],
     deviceFileObjects: [],
@@ -32,6 +33,7 @@ export default (
       return {
         ...state,
         mf4Objects: [],
+        deviceLastMf4MetaData: [],
         mf4ObjectsMin: [],
         loadedFiles: false,
         devicesFilesCount: 0
@@ -40,6 +42,11 @@ export default (
       return {
         ...state,
         mf4Objects: action.mf4Objects
+      };
+    case dashboardStatusActions.SET_LAST_OBJECT_DATA:
+      return {
+        ...state,
+        deviceLastMf4MetaData: action.deviceLastMf4MetaData
       };
     case dashboardStatusActions.SET_DEVICES_FILES_COUNT:
       return {

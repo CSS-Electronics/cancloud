@@ -121,7 +121,8 @@ class DashboardStatusSection extends React.Component {
       loadedDevice,
       loadedConfig,
       deviceList,
-      devicesFilesCount
+      devicesFilesCount,
+      deviceLastMf4MetaData
     } = this.props;
 
     const { periodHours, devicesDevicesInput, devicesFilesInput } = this.state;
@@ -144,7 +145,8 @@ class DashboardStatusSection extends React.Component {
         periodHours,
         mf4Objects,
         mf4ObjectsMin,
-        devicesFilesCount
+        devicesFilesCount,
+        deviceLastMf4MetaData
       );
 
       chartData = chartDataArray[0];
@@ -356,6 +358,7 @@ class DashboardStatusSection extends React.Component {
                         ) : null}
 
                         {widget.widget_type == "bar" ? (
+                          
                           <Bar
                             data={
                               widget.dependency == "files"
@@ -380,6 +383,7 @@ class DashboardStatusSection extends React.Component {
                               }
                               deviceCrc32Test={chartDataDevicesArray[2]}
                               height={widget.height - 50 + (resWide ? 100 : 0)}
+                              deviceLastMf4MetaData={deviceLastMf4MetaData}
                             />
                         ) : null}
                       </div>
@@ -441,7 +445,8 @@ const mapStateToProps = state => {
     loadedDevice: state.dashboardStatus.loadedDevice,
     loadedConfig: state.dashboardStatus.loadedConfig,
     devicesFilesCount: state.dashboardStatus.devicesFilesCount,
-    deviceList: state.buckets.bucketsMeta
+    deviceList: state.buckets.bucketsMeta,
+    deviceLastMf4MetaData: state.dashboardStatus.deviceLastMf4MetaData
   };
 };
 

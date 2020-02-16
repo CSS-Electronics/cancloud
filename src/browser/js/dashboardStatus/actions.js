@@ -494,9 +494,9 @@ export const mf4MetaHeader = mf4Objects => {
       })
       .then(objContent => {
         iCount += 1
-        let storageTotalKb = objContent.objContent.split('<e name="storage total" ro="true">').pop().split('</e>')
-        let storageFreeKb = objContent.objContent.split('<e name="storage free" ro="true">').pop().split('</e>')
-        let storageFree = Math.round(((parseInt(storageFreeKb)) / (parseInt(storageTotalKb)))*10000)/100
+        let storageTotalKb = objContent.objContent.split('<e name="storage total" ro="true">').pop().split('</e>')[0]
+        let storageFreeKb = objContent.objContent.split('<e name="storage free" ro="true">').pop().split('</e>')[0]
+        let storageFree = Math.round(((parseInt(storageFreeKb)) / (parseInt(storageTotalKb)))*1000)/10
         let deviceId = object.name.split("/")[0]
         let lastModified = object.lastModified
 

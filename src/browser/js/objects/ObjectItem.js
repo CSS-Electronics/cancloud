@@ -35,7 +35,7 @@ export class ObjectItem extends React.Component {
     this.setState({
       openDropdown: true
     });
-    let regexFileExt = new RegExp(/\b(mf4|MF4|txt|TXT|csv|json|JSON)\b/, "g");
+    let regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
     if (this.props.name.split(".").slice(-1)[0].match(regexFileExt)) {
       this.props.fetchState(this.props.name);
     }

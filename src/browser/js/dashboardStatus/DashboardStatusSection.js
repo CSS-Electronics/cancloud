@@ -334,7 +334,7 @@ class DashboardStatusSection extends React.Component {
                         ) : null}
 
                         {widget.widget_type == "pie" &&
-                        chartDataReady &&
+                        chartData[widget.dataset] && chartData[widget.dataset].datasets[0].data.reduce((a, b) => a + b, 0) &&
                         widget.dependency == "files" ? (
                           <Doughnut
                             data={chartData[widget.dataset]}

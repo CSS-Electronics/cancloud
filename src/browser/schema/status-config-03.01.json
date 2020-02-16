@@ -101,7 +101,7 @@
 		"comment": "Overview of the FW version by device and whether the Configuration File on the device is identical to the server version"
       },
 	  {
-        "title": "SD free storage (FW WIP)",
+        "title": "Device free SD storage",
 		"dependency": "files",
         "widget_type": "pie",
         "dataset": "deviceStorage",
@@ -109,7 +109,7 @@
         "aspect_ratio": 0,
         "height": 210,
         "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3",
-		"comment": "Free storage left on the SD card in % when the device last checked in"
+		"comment": "Free storage left on the device SD card in %. Note that the data is based on the last uploaded log file, not the Device File. Requires FW 01.01.01 or above."
       },
       {
         "title": "Log file data uploaded over time ",

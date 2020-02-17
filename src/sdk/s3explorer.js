@@ -163,6 +163,53 @@ class S3Explorer {
     });
   }
 
+  /**
+   * @description list bucket objects
+   * @param {*} bucketName
+   * @param {*} prefix
+   * @param {*} marker
+   * @param {*} cb
+   */
+  listObjectsV2(bucketName, prefix, marker, cb) {
+    var stream;
+    let updatedPrefix = bucketName + "/" + prefix;
+    if ("Home" == bucketName) {
+      stream = this.s3Client.listObjectsV2(
+        this.bucketName,
+        prefix,
+        marker,
+        false
+      );
+    } else {
+      stream = this.s3Client.listObjectsV2(
+        this.bucketName,
+        updatedPrefix,
+        marker,
+        false
+      );
+    }
+
+    let objectsArray = [];
+    stream.on("data", function(obj) {
+      if ((obj.name && !obj.name.endsWith("/")) || obj.prefix) {
+        obj["name"] = obj.prefix
+          ? removeFirstOccurence(obj.prefix, updatedPrefix)
+          : removeFirstOccurence(obj.name, updatedPrefix);
+        objectsArray.push(obj);
+      }
+    });
+    stream.on("end", function() {
+      let response = StorageResponses.makeDefaultResponse(
+        "objects",
+        objectsArray
+      );
+      cb(null, response);
+    });
+    stream.on("error", function(err) {
+      cb(err);
+    });
+  }
+
   // list bucket objects from S3 compatible storage
   listObjectsRecursive(bucketName, prefix, marker, cb) {
     var stream;
@@ -547,6 +594,8 @@ S3Explorer.prototype.getSessionsObject = promisify(
 );
 S3Explorer.prototype.listBuckets = promisify(S3Explorer.prototype.listBuckets);
 S3Explorer.prototype.listObjects = promisify(S3Explorer.prototype.listObjects);
+S3Explorer.prototype.listObjectsV2 = promisify(S3Explorer.prototype.listObjectsV2);
+
 S3Explorer.prototype.listPublicBucketObject = promisify(
   S3Explorer.prototype.listPublicBucketObject
 );

@@ -102,6 +102,10 @@ class Web {
     return this.makeCall("ListObjects", args);
   }
 
+  ListObjectsV2(args) {
+    return this.makeCall("ListObjectsV2", args);
+  }
+
   ListObjectsRecursive(args) {
     return this.makeCall("ListObjectsRecursive", args);
   }

@@ -1,10 +1,12 @@
 import * as dashboardStatusActions from "./actions";
+import _ from "lodash";
 
 export default (
   state = {
     mf4Objects: [],
     deviceLastMf4MetaData: [],
     mf4ObjectsMin: [],
+    logFileMarkers: [],
     deviceFileContents: [],
     deviceFileObjects: [],
     configObjectsUnique: [],
@@ -35,6 +37,7 @@ export default (
         mf4Objects: [],
         deviceLastMf4MetaData: [],
         mf4ObjectsMin: [],
+        logFileMarkers: [],
         loadedFiles: false,
         devicesFilesCount: 0
       };
@@ -53,6 +56,11 @@ export default (
         ...state,
         devicesFilesCount: action.devicesFilesCount
       };
+    case dashboardStatusActions.ADD_DEVICE_MARKER:
+       return {
+        ...state,
+        logFileMarkers: [action.logFileMarker, ...state.logFileMarkers]
+    };
     case dashboardStatusActions.SET_OBJECTS_DATA_MIN:
       return {
         ...state,

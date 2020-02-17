@@ -89,7 +89,7 @@ const DeviceTable = props => {
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32 
     const storageFree = lastMf4Meta && lastMf4Meta.storageFree
     let lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified
-    lastLogUpload = Moment(lastLogUpload).format("YY-MM-DD HH:mm");
+    lastLogUpload = lastLogUpload ? Moment(lastLogUpload).format("YY-MM-DD HH:mm") : ""
 
     return {
       id,

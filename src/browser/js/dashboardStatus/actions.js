@@ -4,6 +4,7 @@ import * as alertActions from "../alert/actions";
 import * as commonActions from "../browser/actions";
 import _ from "lodash";
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
+export const ADD_DEVICE_MARKER = "dashboardStatus/ADD_DEVICE_MARKER";
 export const SET_LAST_OBJECT_DATA = "dashboardStatus/SET_LAST_OBJECT_DATA";
 export const SET_OBJECTS_DATA_MIN = "dashboardStatus/SET_OBJECTS_DATA_MIN";
 export const DEVICE_FILE_CONTENT = "dashboardStatus/DEVICE_FILE_CONTENT";
@@ -52,8 +53,7 @@ export const listAllObjects = devicesDevicesInput => {
       // list devices selected in the status dashboard dropdown - or list all devices as default
       let devicesDevices = devicesDevicesInput ?
         devicesDevicesInput.length ?
-        devicesDevicesInput :
-        [] :
+        devicesDevicesInput : [] :
         devices;
 
       let iDeviceFileCount = 0;
@@ -214,17 +214,15 @@ export const listLogFiles = devicesFilesInput => {
     let devicesFiles = devicesFilesInput ?
       devicesFilesInput :
       devices.length <= devicesFilesDefaultMax ?
-      devices :
-      [];
+      devices : [];
 
     // if no devices for files, set loaded to true
     if (devicesFiles.length == 0) {
       dispatch(loadedFiles(true));
     }
 
+    // identify log file markers (for speed optimization) and then load log file meta data
     dispatch(identifyLogFileMarkers(devicesFiles))
-    dispatch(processLogFiles(devicesFiles, ""))
-
   };
 };
 
@@ -236,8 +234,6 @@ binPeriodStart.setDate(binPeriodStart.getDate() - binPeriodDaysMax);
 export const identifyLogFileMarkers = devicesFiles => {
   return function (dispatch, getState) {
     let logFileMarkers = []
-
-    devicesFiles = ["24B4F1C6"]
     devicesFiles.map(device => {
       web
         .ListObjects({
@@ -256,7 +252,8 @@ export const identifyLogFileMarkers = devicesFiles => {
           let iCountMax = 2
           let objLastPrevious = ""
 
-          dispatch(binarySearchEdges(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious))
+          // initiate binary search by checking the edge cases (all data is before periodStart or after periodStart)
+          dispatch(binarySearchEdges(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles))
 
         });
     });
@@ -264,34 +261,53 @@ export const identifyLogFileMarkers = devicesFiles => {
   }
 }
 
+export const binarySearchEdges = (binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles) => {
 
-export const binarySearchEdges = (binA, binM, binL, binR, iCount, iCountMax, objLastPrevious) => {
-
-  return function (dispatch) {
-
+  return function (dispatch, getState) {
     web.ListObjects({
         bucketName: "Home",
-        prefix: binA[binA.length-1].name
+        prefix: binA[binA.length - 1].name
       })
       .then(data => {
-        let lastObjectLastModified = data.objects[data.objects.length-1].lastModified
-        if(lastObjectLastModified < binPeriodStart){
-          console.log("All objects are before periodStart - don't load anything")
-        }else{
+        let lastObjectLastModified = data.objects[data.objects.length - 1].lastModified
+
+        // if all objects are before periodStart, don't load anything
+        if (lastObjectLastModified < binPeriodStart) {
+          console.log("This device is before periodStart", device)
+          dispatch(addDeviceMarker({
+            deviceId: device,
+            marker: "SKIP"
+          }))
+          let logFileMarkersState = getState().dashboardStatus.logFileMarkers
+          if (devicesFiles.length == logFileMarkersState.length) {
+            dispatch(processLogFiles(devicesFiles, logFileMarkersState))
+          }
+        } else {
 
           web.ListObjects({
-            bucketName: "Home",
-            prefix: binA[0].name
-          })
-          .then(data => {
-            let firstObjectLastModified = data.objects[0].lastModified
-            if(firstObjectLastModified > binPeriodStart){
-              console.log("All objects are after periodStart - load everything")
-            }else{
-              console.log("Objects are inside the period - run binary search")
-              dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious))
-            }
-          })
+              bucketName: "Home",
+              prefix: binA[0].name
+            })
+            .then(data => {
+              let firstObjectLastModified = data.objects[0].lastModified
+
+              // if all objects are after the periodStart, load everything
+              if (firstObjectLastModified > binPeriodStart) {
+                dispatch(addDeviceMarker({
+                  deviceId: device,
+                  marker: ""
+                }))
+
+                let logFileMarkersState = getState().dashboardStatus.logFileMarkers
+                if (devicesFiles.length == logFileMarkersState.length) {
+                  dispatch(processLogFiles(devicesFiles, logFileMarkersState))
+                }
+
+              } else {
+                // if objects are inside the period, run a binary search for a "marker" to optimize starting point
+                dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles))
+              }
+            })
 
         }
 
@@ -300,9 +316,9 @@ export const binarySearchEdges = (binA, binM, binL, binR, iCount, iCountMax, obj
 }
 
 
-export const binarySearch = (binA, binM, binL, binR, iCount, iCountMax, objLastPrevious) => {
+export const binarySearch = (binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles) => {
 
-  return function (dispatch) {
+  return function (dispatch, getState) {
 
     web.ListObjects({
         bucketName: "Home",
@@ -312,60 +328,61 @@ export const binarySearch = (binA, binM, binL, binR, iCount, iCountMax, objLastP
         let objFirst = data.objects[0]
         let objLast = data.objects[data.objects.length - 1]
 
-        console.log("---------------")
-        console.log(binA[binM].name)
-        console.log("first:", objFirst.lastModified)
-        console.log("last:", objLast.lastModified)
-        console.log("target", binPeriodStart)
-
         let firstBeforeT = objFirst.lastModified < binPeriodStart
         let lastBeforeT = objLast.lastModified < binPeriodStart
         if (firstBeforeT && !lastBeforeT) {
-          let finalMarker = objFirst.name
-          console.log("Marker found within session,", finalMarker)
+          dispatch(addDeviceMarker({
+            deviceId: device,
+            marker: objFirst.name
+          }))
         } else if (firstBeforeT && lastBeforeT) {
-          console.log("All session objects are before periodStart --> jump forwards")
+          // console.log("All session objects are before periodStart --> jump forwards")
           binL = binM + 1
           binM = Math.floor((binL + binR) / 2)
 
           if (iCount == iCountMax) {
-            // if final count is reached, take the last marker in session (which will be before periodStart)
-            let finalMarker = objLast.name
-            console.log("final marker:", finalMarker)
+            // if final count is reached, take the last marker in session 
+            dispatch(addDeviceMarker({
+              deviceId: device,
+              marker: objFirst.name
+            }))
           } else {
-            // else, run the binary search again with updated variables
-            // note that objLast is saved as a "backup" marker if the next iteration is the last and ends after the periodStart
             iCount += 1
             objLastPrevious = objLast
-            dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious))
+            dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles))
           }
 
         } else {
-          console.log("All session objects are after periodStart --> jump backwards")
+          // console.log("All session objects are after periodStart --> jump backwards")
           binR = binM - 1
           binM = Math.floor((binL + binR) / 2)
 
           if (iCount == iCountMax) {
             // if final count is reached while we're "too far", we use the previous marker as fallback
-            let finalMarker = objLastPrevious.name
-            console.log("final marker:", finalMarker)
-
+            dispatch(addDeviceMarker({
+              deviceId: device,
+              marker: objFirst.name
+            }))
           } else {
-            // else, run the binary search again. Note that we do not update the objLastPrevious in this case
             iCount += 1
-            dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious))
+            dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles))
           }
-
         }
 
+        // when all markers are found, list and process log files with the markers
+        let logFileMarkersState = getState().dashboardStatus.logFileMarkers
+        if (devicesFiles.length == logFileMarkersState.length) {
+          dispatch(processLogFiles(devicesFiles, logFileMarkersState))
+        }
       })
 
   }
 }
 
-export const processLogFiles = (devicesFiles, marker) => {
+export const processLogFiles = (devicesFiles, logFileMarkers) => {
 
   let iCount = 0
+
   let mf4ObjectsHourAry = [];
   let mf4ObjectsMinAry = [];
   let lastFileAry = [];
@@ -373,17 +390,36 @@ export const processLogFiles = (devicesFiles, marker) => {
 
   return function (dispatch, getState) {
 
+    // start by initializing the device processed counter
+    dispatch(setDevicesFilesCount(iCount));
+
     // load all log files recursively for each device in devicesFiles
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
+        let marker = logFileMarkers.filter(e => e.deviceId == device)[0].marker
+        if(marker == "SKIP"){
+          iCount += 1
+          dispatch(setDevicesFilesCount(iCount));
+
+          if (getState().dashboardStatus.devicesFilesCount == devicesFiles.length) {
+            dispatch(mf4MetaHeader(lastFileAry));
+            dispatch(setObjectsData(mf4ObjectsHourAry));
+            dispatch(setObjectsDataMin(mf4ObjectsMinAry));
+            dispatch(loadedFiles(true));
+          }
+
+        }else{
         web
           .ListObjectsRecursive({
             bucketName: "Home",
             prefix: device + "/0",
-            marker: ""
+            marker: marker
           })
           .then(data => {
-            iCount += 1;
+            console.log(data)
+             iCount += 1;
+            dispatch(setDevicesFilesCount(iCount));
+
 
             // extract the last uploaded log file for each device
             let lastFile = data.objects[data.objects.length - 1];
@@ -475,16 +511,15 @@ export const processLogFiles = (devicesFiles, marker) => {
               }
             });
 
-            dispatch(setDevicesFilesCount(iCount));
-
             // when all devices are processed, dispatch the full data and set loadedFiles to true to display the data
-            if (iCount == devicesFiles.length) {
+            if (getState().dashboardStatus.devicesFilesCount == devicesFiles.length) {
               dispatch(mf4MetaHeader(lastFileAry));
               dispatch(setObjectsData(mf4ObjectsHourAry));
               dispatch(setObjectsDataMin(mf4ObjectsMinAry));
               dispatch(loadedFiles(true));
             }
           });
+        }
       });
     }
   }
@@ -697,4 +732,9 @@ export const setConfigFileCrc32 = configFileCrc32 => ({
 export const setDeviceFileObjects = deviceFileObjects => ({
   type: SET_DEVICE_FILE_OBJECT,
   deviceFileObjects
+});
+
+export const addDeviceMarker = logFileMarker => ({
+  type: ADD_DEVICE_MARKER,
+  logFileMarker
 });

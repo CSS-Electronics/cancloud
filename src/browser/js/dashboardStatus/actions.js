@@ -22,7 +22,6 @@ export const SET_DEVICES_FILES_COUNT =
   "dashboardStatus/SET_DEVICES_FILES_COUNT";
 
 var speedDate = require("speed-date");
-
 const { crc32 } = require("crc");
 let crc32Val = "";
 
@@ -39,6 +38,7 @@ periodStart.setDate(periodStart.getDate() - periodDaysMax);
 let lastHour = new Date();
 lastHour.setTime(lastHour.getTime() - 1 * 60 * 60 * 1000);
 
+// list objects for devices (device.json and config-XX.YY.json)
 export const listAllObjects = devicesDevicesInput => {
   return function(dispatch, getState) {
     let deviceFileObjectsAry = [];
@@ -47,7 +47,7 @@ export const listAllObjects = devicesDevicesInput => {
       let devices = res.buckets ? res.buckets.map(bucket => bucket.name) : [];
       devices = devices.filter(e => e.match(loggerRegex));
 
-      // by default show all devices for the device info and none for the log file info (unless fewer than 3 devices)
+      // list devices selected in the status dashboard dropdown - or list all devices as default
       let devicesDevices = devicesDevicesInput
         ? devicesDevicesInput.length
           ? devicesDevicesInput
@@ -56,13 +56,13 @@ export const listAllObjects = devicesDevicesInput => {
 
       let iDeviceFileCount = 0;
 
-      // if no devices for config/device.json, set loaded to true
+      // if no devices are found, set loaded to true for Device File and Configuration File
       if (devicesDevices.length == 0) {
         dispatch(loadedDevice(true));
         dispatch(loadedConfig(true));
       }
 
-      // get device file object data
+      // else, get relevant Device File object meta data for each device (for Heartbeat info)
       if (!getState().dashboardStatus.loadedDevice) {
         devicesDevices.map(device => {
           web
@@ -81,6 +81,7 @@ export const listAllObjects = devicesDevicesInput => {
                 lastModified
               });
 
+              // when all devices are processed, update state and fetch the Device File contents and list Configuration Files
               if (iDeviceFileCount == devicesDevices.length) {
                 dispatch(setDeviceFileObjects(deviceFileObjectsAry));
                 dispatch(fetchDeviceFileContentAll(deviceFileObjectsAry));
@@ -112,6 +113,7 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
   let iConfigFileCount = 0;
   let configObjectsUniqueAry = [];
 
+  // if the configs are not yet loaded, load one for each device
   return function(dispatch, getState) {
     if (!getState().dashboardStatus.loadedConfig) {
       devicesDevices.map(device => {
@@ -123,8 +125,9 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
           })
           .then(res => {
             iConfigFileCount += 1;
-
             let allObjects = [];
+
+            // allocate the configs to an array of objects (note: Each device may have multiple configs)
             res.objects.forEach(e => {
               const deviceId = device;
               const name = device + "/config-" + e.name;
@@ -136,10 +139,12 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
               });
             });
 
+            // ensure that configs match the regex
             const configObjects = allObjects.filter(obj =>
               obj.name.match(loggerConfigRegex)
             );
 
+            // group the configs by device ID
             let configObjectsGrouped = _.groupBy(configObjects, function(
               object
             ) {
@@ -148,19 +153,26 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
 
             let configObjectsUnique = [];
 
+            // create a list of unique configs per device, taking the last (latest) config
             Object.keys(configObjectsGrouped).map(function(key, index) {
               configObjectsUnique[index] =
                 configObjectsGrouped[key][configObjectsGrouped[key].length - 1];
             });
 
+            // for each device, add the resulting data to an array
             configObjectsUniqueAry = configObjectsUniqueAry.concat(
               configObjectsUnique
             );
 
+            // once each device is processed, update state and fetch the config contents
             if (iConfigFileCount == devicesDevices.length) {
               dispatch(setConfigObjects(configObjectsUniqueAry));
               dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
               dispatch(loadedConfig(true));
+
+              // note: Once the device specific info is loaded, initiate the load of the log file specific data
+              // this is done as a default operation only for the case where no devicesDevicesInput is parsed
+              // i.e. when the user opens the status dashboard from the menu or clicking "update" with no selection
               if (devicesDevicesInput == undefined) {
                 dispatch(listLogFiles());
               }
@@ -187,12 +199,9 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
   };
 };
 
+// list objects for log files for use in status dashboard
+
 export const listLogFiles = devicesFilesInput => {
-  let iCount = 0;
-  let mf4ObjectsHourAry = [];
-  let mf4ObjectsMinAry = [];
-  let lastFileAry = [];
-  let dateFormats = ["YYYY-MM-DD HH", "YYYY-MM-DD HH:mm"];
 
   return function(dispatch, getState) {
     let devices = getState().buckets.list ? getState().buckets.list : [];
@@ -211,6 +220,23 @@ export const listLogFiles = devicesFilesInput => {
       dispatch(loadedFiles(true));
     }
 
+    dispatch(processLogFiles(devicesFiles,""))
+  
+  };
+};
+
+
+
+export const processLogFiles = (devicesFiles,marker) =>{
+
+  let iCount = 0
+  let mf4ObjectsHourAry = [];
+  let mf4ObjectsMinAry = [];
+  let lastFileAry = [];
+  let dateFormats = ["YYYY-MM-DD HH", "YYYY-MM-DD HH:mm"];
+
+  return function(dispatch, getState) {
+
     // load all log files recursively for each device in devicesFiles
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
@@ -224,15 +250,17 @@ export const listLogFiles = devicesFilesInput => {
             iCount += 1;
 
             // extract the last uploaded log file for each device
-            let lastFile = data.objects[data.objects.length -1]
-            
-            if(lastFile){
-              lastFileAry = lastFileAry.concat(data.objects[data.objects.length -1])
+            let lastFile = data.objects[data.objects.length - 1];
+
+            if (lastFile) {
+              lastFileAry = lastFileAry.concat(
+                data.objects[data.objects.length - 1]
+              );
             }
 
             // Aggregate the loaded data information to either hourly or minute basis by mapping across dateFormats
             // First, data is aggregated to hourly basis for the full period since periodStart
-            // After this, it is aggregated to minute basis for the lastHour 
+            // After this, it is aggregated to minute basis for the lastHour
             dateFormats.map((format, index) => {
               let periodStartVar = index == 0 ? periodStart : lastHour;
               let sizePerTime = {};
@@ -308,12 +336,11 @@ export const listLogFiles = devicesFilesInput => {
               }
             });
 
-
             dispatch(setDevicesFilesCount(iCount));
 
             // when all devices are processed, dispatch the full data and set loadedFiles to true to display the data
             if (iCount == devicesFiles.length) {
-              dispatch(mf4MetaHeader(lastFileAry))
+              dispatch(mf4MetaHeader(lastFileAry));
               dispatch(setObjectsData(mf4ObjectsHourAry));
               dispatch(setObjectsDataMin(mf4ObjectsMinAry));
               dispatch(loadedFiles(true));
@@ -321,56 +348,10 @@ export const listLogFiles = devicesFilesInput => {
           });
       });
     }
-  };
-};
+  }
+}
 
-export const clearDataDevices = () => ({
-  type: CLEAR_DATA_DEVICES
-});
 
-export const clearDataFiles = () => ({
-  type: CLEAR_DATA_FILES
-});
-
-export const setObjectsData = mf4Objects => ({
-  type: SET_OBJECTS_DATA,
-  mf4Objects
-});
-
-export const setDeviceLastMf4MetaData = deviceLastMf4MetaData => ({
-  type: SET_LAST_OBJECT_DATA,
-  deviceLastMf4MetaData
-});
-
-export const setDevicesFilesCount = devicesFilesCount => ({
-  type: SET_DEVICES_FILES_COUNT,
-  devicesFilesCount
-});
-
-export const setObjectsDataMin = mf4ObjectsMin => ({
-  type: SET_OBJECTS_DATA_MIN,
-  mf4ObjectsMin
-});
-
-export const loadedFiles = loadedFiles => ({
-  type: LOADED_FILES,
-  loadedFiles
-});
-
-export const loadedDevice = loadedDevice => ({
-  type: LOADED_DEVICE,
-  loadedDevice
-});
-
-export const loadedConfig = loadedConfig => ({
-  type: LOADED_CONFIG,
-  loadedConfig
-});
-
-export const setConfigObjects = configObjectsUnique => ({
-  type: SET_CONFIG_OBJECTS,
-  configObjectsUnique
-});
 
 export const fetchDeviceFileContentAll = deviceFileObjects => {
   const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
@@ -458,6 +439,107 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
   };
 };
 
+// get first part of object
+export const mf4MetaHeader = mf4Objects => {
+  return function(dispatch, getState) {
+    let deviceLastMf4MetaData = [];
+    let iCount = 0;
+
+    mf4Objects.map(object => {
+      web
+        .GetPartialObject({
+          bucketName: "Home",
+          objectName: object.name,
+          byteLength: 3000
+        })
+        .then(objContent => {
+          iCount += 1;
+          let storageTotalKb = objContent.objContent
+            .split('<e name="storage total" ro="true">')
+            .pop()
+            .split("</e>")[0];
+          let storageFreeKb = objContent.objContent
+            .split('<e name="storage free" ro="true">')
+            .pop()
+            .split("</e>")[0];
+          let storageFree =
+            Math.round(
+              (parseInt(storageFreeKb) / parseInt(storageTotalKb)) * 1000
+            ) / 10;
+          let deviceId = object.name.split("/")[0];
+          let lastModified = object.lastModified;
+
+          if (storageFree) {
+            deviceLastMf4MetaData = deviceLastMf4MetaData.concat({
+              deviceId: deviceId,
+              lastModified: lastModified,
+              storageFree: storageFree
+            });
+          }
+          if (iCount == mf4Objects.length) {
+            dispatch(setDeviceLastMf4MetaData(deviceLastMf4MetaData));
+          }
+        })
+        .catch(err => {
+          dispatch(
+            alertActions.set({
+              type: "danger",
+              message: err.message
+            })
+          );
+        });
+    });
+  };
+};
+
+export const clearDataDevices = () => ({
+  type: CLEAR_DATA_DEVICES
+});
+
+export const clearDataFiles = () => ({
+  type: CLEAR_DATA_FILES
+});
+
+export const setObjectsData = mf4Objects => ({
+  type: SET_OBJECTS_DATA,
+  mf4Objects
+});
+
+export const setDeviceLastMf4MetaData = deviceLastMf4MetaData => ({
+  type: SET_LAST_OBJECT_DATA,
+  deviceLastMf4MetaData
+});
+
+export const setDevicesFilesCount = devicesFilesCount => ({
+  type: SET_DEVICES_FILES_COUNT,
+  devicesFilesCount
+});
+
+export const setObjectsDataMin = mf4ObjectsMin => ({
+  type: SET_OBJECTS_DATA_MIN,
+  mf4ObjectsMin
+});
+
+export const loadedFiles = loadedFiles => ({
+  type: LOADED_FILES,
+  loadedFiles
+});
+
+export const loadedDevice = loadedDevice => ({
+  type: LOADED_DEVICE,
+  loadedDevice
+});
+
+export const loadedConfig = loadedConfig => ({
+  type: LOADED_CONFIG,
+  loadedConfig
+});
+
+export const setConfigObjects = configObjectsUnique => ({
+  type: SET_CONFIG_OBJECTS,
+  configObjectsUnique
+});
+
 export const deviceFileContent = deviceFileContents => ({
   type: DEVICE_FILE_CONTENT,
   deviceFileContents
@@ -477,52 +559,3 @@ export const setDeviceFileObjects = deviceFileObjects => ({
   type: SET_DEVICE_FILE_OBJECT,
   deviceFileObjects
 });
-
-// get first part of object
-export const mf4MetaHeader = mf4Objects => {
-  return function(dispatch, getState) {
-    
-    let deviceLastMf4MetaData = []
-    let iCount = 0
-
-    mf4Objects.map(object => {
-
-      web.GetPartialObject({
-        bucketName: "Home",
-        objectName: object.name,
-        byteLength: 3000
-      })
-      .then(objContent => {
-        iCount += 1
-        let storageTotalKb = objContent.objContent.split('<e name="storage total" ro="true">').pop().split('</e>')[0]
-        let storageFreeKb = objContent.objContent.split('<e name="storage free" ro="true">').pop().split('</e>')[0]
-        let storageFree = Math.round(((parseInt(storageFreeKb)) / (parseInt(storageTotalKb)))*1000)/10
-        let deviceId = object.name.split("/")[0]
-        let lastModified = object.lastModified
-
-        if(storageFree){
-        deviceLastMf4MetaData = deviceLastMf4MetaData.concat({deviceId: deviceId, lastModified: lastModified, storageFree: storageFree })
-      }
-        if(iCount == mf4Objects.length){
-          dispatch(setDeviceLastMf4MetaData(deviceLastMf4MetaData))
-        }
-      })
-      .catch(err => {
-        dispatch(
-          alertActions.set({
-            type: "danger",
-            message: err.message
-          })
-        );
-      });
-
-    
-
-
-    })
-    
-   
-
-
-  };
-};

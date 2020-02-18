@@ -3,16 +3,29 @@ import { connect } from "react-redux";
 import history from "../history";
 import { pathSlice } from "../utils";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
-import {DeviceImage, DeviceMeta, DeviceMetaLogFileChart, prepareDeviceData} from  "./metaHeaderModules";
+import {DeviceImage, DeviceMeta, DeviceMetaLogFileChart, prepareDeviceData, prepareStorageFreeData} from  "./metaHeaderModules";
 
-const { bucket } = pathSlice(history.location.pathname);
-const device = bucket;
 
 export class DeviceMetaHeaderContainer extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      showLogFilesChart: true
+    };
+  }
+
   dashboard(e) {
     e.preventDefault();
     console.log(history);
     history.push("/status-dashboard/");
+  }
+
+  switchChartType(e){
+    e.preventDefault();
+    this.setState({
+      showLogFilesChart: !this.state.showLogFilesChart
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -26,7 +39,7 @@ export class DeviceMetaHeaderContainer extends Component {
   componentWillMount() {
     this.props.clearDataDevices();
     this.props.clearDataFiles();
-    this.props.listLogFiles([device]);
+    this.props.listLogFiles([this.props.currentBucket]);
   }
 
   componentWillUnmount() {
@@ -35,10 +48,15 @@ export class DeviceMetaHeaderContainer extends Component {
   }
 
   render() {
-    const { serverConfig, serverImage, mf4Objects } = this.props;
+    const { bucket } = pathSlice(history.location.pathname);
+    const device = bucket;
+
+    const { serverConfig, serverImage, mf4Objects, storageFreeTimeseries} = this.props;
     let metaDevice = "";
 
     let [dataUploadTime, barOptions] = prepareDeviceData(mf4Objects)
+
+    let dataStorageFreeTime = prepareStorageFreeData(storageFreeTimeseries)
     
     if (serverConfig.devicemeta && serverConfig.devicemeta.devices) {
       metaDevice = serverConfig.devicemeta.devices.filter(
@@ -62,6 +80,9 @@ export class DeviceMetaHeaderContainer extends Component {
               dataUploadTime={dataUploadTime}
               barOptions={barOptions}
               dashboard={this.dashboard.bind(this)}
+              showLogFilesChart={this.state.showLogFilesChart}
+              switchChartType={this.switchChartType.bind(this)}
+              dataStorageFreeTime={dataStorageFreeTime}
             />
           </div>
         ) : (
@@ -75,6 +96,8 @@ export class DeviceMetaHeaderContainer extends Component {
 const mapDispatchToProps = dispatch => ({
   listLogFiles: devicesFilesInput =>
     dispatch(dashboardStatusActions.listLogFiles(devicesFilesInput)),
+    extractStorageFreeTimeSeries: () =>
+    dispatch(dashboardStatusActions.extractStorageFreeTimeSeries()),
   clearDataDevices: () => dispatch(dashboardStatusActions.clearDataDevices()),
   clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles())
 });
@@ -84,7 +107,8 @@ function mapStateToProps(state) {
     serverConfig: state.browser.serverConfig,
     currentBucket: state.buckets.currentBucket,
     serverImage: state.browser.serverImage,
-    mf4Objects: state.dashboardStatus.mf4Objects
+    mf4Objects: state.dashboardStatus.mf4Objects,
+    storageFreeTimeseries: state.dashboardStatus.storageFreeTimeseries
   };
 }
 

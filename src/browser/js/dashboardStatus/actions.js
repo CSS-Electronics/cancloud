@@ -3,7 +3,9 @@ import web from "../web";
 import * as alertActions from "../alert/actions";
 import * as commonActions from "../browser/actions";
 import _ from "lodash";
-export const SET_PERIODSTART_BACK = "dashboardStatus/SET_PERIODSTART_BACK"
+export const SET_PERIODSTART_BACK = "dashboardStatus/SET_PERIODSTART_BACK";
+export const SET_STORAGE_FREE_TIMESERIES =
+  "dashboardStatus/SET_STORAGE_FREE_TIMESERIES";
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
 export const ADD_DEVICE_MARKER = "dashboardStatus/ADD_DEVICE_MARKER";
 export const SET_LAST_OBJECT_DATA = "dashboardStatus/SET_LAST_OBJECT_DATA";
@@ -24,9 +26,7 @@ export const SET_DEVICES_FILES_COUNT =
   "dashboardStatus/SET_DEVICES_FILES_COUNT";
 
 var speedDate = require("speed-date");
-const {
-  crc32
-} = require("crc");
+const { crc32 } = require("crc");
 let crc32Val = "";
 
 const loggerRegex = new RegExp(/([0-9A-Fa-f]){8}/);
@@ -44,7 +44,7 @@ lastHour.setTime(lastHour.getTime() - 1 * 60 * 60 * 1000);
 
 // list objects for devices (device.json and config-XX.YY.json)
 export const listAllObjects = devicesDevicesInput => {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     let deviceFileObjectsAry = [];
 
     return web.ListBuckets().then(res => {
@@ -52,10 +52,11 @@ export const listAllObjects = devicesDevicesInput => {
       devices = devices.filter(e => e.match(loggerRegex));
 
       // list devices selected in the status dashboard dropdown - or list all devices as default
-      let devicesDevices = devicesDevicesInput ?
-        devicesDevicesInput.length ?
-        devicesDevicesInput : [] :
-        devices;
+      let devicesDevices = devicesDevicesInput
+        ? devicesDevicesInput.length
+          ? devicesDevicesInput
+          : []
+        : devices;
 
       let iDeviceFileCount = 0;
 
@@ -117,7 +118,7 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
   let configObjectsUniqueAry = [];
 
   // if the configs are not yet loaded, load one for each device
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     if (!getState().dashboardStatus.loadedConfig) {
       devicesDevices.map(device => {
         web
@@ -148,7 +149,7 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
             );
 
             // group the configs by device ID
-            let configObjectsGrouped = _.groupBy(configObjects, function (
+            let configObjectsGrouped = _.groupBy(configObjects, function(
               object
             ) {
               return object.deviceId;
@@ -157,7 +158,7 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
             let configObjectsUnique = [];
 
             // create a list of unique configs per device, taking the last (latest) config
-            Object.keys(configObjectsGrouped).map(function (key, index) {
+            Object.keys(configObjectsGrouped).map(function(key, index) {
               configObjectsUnique[index] =
                 configObjectsGrouped[key][configObjectsGrouped[key].length - 1];
             });
@@ -205,18 +206,18 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
 // list objects for log files for use in status dashboard
 
 export const listLogFiles = devicesFilesInput => {
-
-  return function (dispatch, getState) {
-
+  return function(dispatch, getState) {
     let devices = getState().buckets.list ? getState().buckets.list : [];
     devices = devices.filter(e => e.match(loggerRegex));
     const devicesFilesDefaultMax = 5;
 
     // if the user selects specific devices (devicesFilesInput) show these. If no selection, show up to X devices by default
-    let devicesFiles = (devicesFilesInput != undefined && devicesFilesInput.length != 0) ?
-      devicesFilesInput :
-      devices.length <= devicesFilesDefaultMax ?
-      devices : [];
+    let devicesFiles =
+      devicesFilesInput != undefined && devicesFilesInput.length != 0
+        ? devicesFilesInput
+        : devices.length <= devicesFilesDefaultMax
+        ? devices
+        : [];
 
     // if no devices for files, set loaded to true
     if (devicesFiles.length == 0) {
@@ -224,13 +225,13 @@ export const listLogFiles = devicesFilesInput => {
     }
 
     // identify log file markers (for speed optimization) and then load log file meta data
-    dispatch(identifyLogFileMarkers(devicesFiles))
+    dispatch(identifyLogFileMarkers(devicesFiles));
   };
 };
 
 export const identifyLogFileMarkers = devicesFiles => {
-  return function (dispatch, getState) {
-    let logFileMarkers = []
+  return function(dispatch, getState) {
+    let logFileMarkers = [];
     devicesFiles.map(device => {
       web
         .ListObjects({
@@ -238,158 +239,251 @@ export const identifyLogFileMarkers = devicesFiles => {
           prefix: device + "/0"
         })
         .then(data => {
+          // implement basic binary search:
+          let binL = 0;
+          let binA = data.objects;
+          let binR = binA.length - 1;
+          let binM = Math.floor((binL + binR) / 2);
 
-          // implement basic binary search: 
-          let binL = 0
-          let binA = data.objects
-          let binR = binA.length - 1
-          let binM = Math.floor((binL + binR) / 2)
-
-          let iCount = 0
-          let iCountMax = 2
-          let objLastPrevious = ""
+          let iCount = 0;
+          let iCountMax = 2;
+          let objLastPrevious = "";
 
           // initiate binary search by checking the edge cases (all data is before periodStart or after periodStart)
-          dispatch(binarySearchEdges(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles))
-
+          dispatch(
+            binarySearchEdges(
+              binA,
+              binM,
+              binL,
+              binR,
+              iCount,
+              iCountMax,
+              objLastPrevious,
+              logFileMarkers,
+              device,
+              devicesFiles
+            )
+          );
         });
     });
+  };
+};
 
-  }
-}
+export const binarySearchEdges = (
+  binA,
+  binM,
+  binL,
+  binR,
+  iCount,
+  iCountMax,
+  objLastPrevious,
+  logFileMarkers,
+  device,
+  devicesFiles
+) => {
+  return function(dispatch, getState) {
+    let binPeriodStart = getState().dashboardStatus.periodStart;
+    
+    // if the device has no data, SKIP:
+    if (binA.length == 0) {
+      dispatch(
+        addDeviceMarker({
+          deviceId: device,
+          marker: "SKIP"
+        })
+      );
+      let logFileMarkersState = getState().dashboardStatus.logFileMarkers;
+      if (devicesFiles.length == logFileMarkersState.length) {
+        dispatch(processLogFiles(devicesFiles, logFileMarkersState));
+      }
+    } else {
+      // else, if the device has data, load all objects from last session
+      web
+        .ListObjects({
+          bucketName: "Home",
+          prefix: binA[binA.length - 1].name
+        })
+        .then(data => {
+          let lastObjectLastModified =
+            data.objects[data.objects.length - 1].lastModified;
 
-export const binarySearchEdges = (binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles) => {
+          // if all these objects are before periodStart, don't load anything
+          if (lastObjectLastModified < binPeriodStart) {
+            dispatch(
+              addDeviceMarker({
+                deviceId: device,
+                marker: "SKIP"
+              })
+            );
+            let logFileMarkersState = getState().dashboardStatus.logFileMarkers;
+            if (devicesFiles.length == logFileMarkersState.length) {
+              dispatch(processLogFiles(devicesFiles, logFileMarkersState));
+            }
+          }else {
+            // else, proceed to load objects from the first session of the device
+            web
+              .ListObjects({
+                bucketName: "Home",
+                prefix: binA[0].name
+              })
+              .then(data => {
+                let firstObjectLastModified = data.objects[0].lastModified;
 
-  return function (dispatch, getState) {
-    let binPeriodStart = getState().dashboardStatus.periodStart 
+                // if all these objects are after the periodStart, load everything
+                if (firstObjectLastModified > binPeriodStart) {
+                  dispatch(
+                    addDeviceMarker({
+                      deviceId: device,
+                      marker: ""
+                    })
+                  );
 
-    web.ListObjects({
-        bucketName: "Home",
-        prefix: binA[binA.length - 1].name
-      })
-      .then(data => {
-        let lastObjectLastModified = data.objects[data.objects.length - 1].lastModified
-
-        // if all objects are before periodStart, don't load anything
-        if (lastObjectLastModified < binPeriodStart) {
-          dispatch(addDeviceMarker({
-            deviceId: device,
-            marker: "SKIP"
-          }))
-          let logFileMarkersState = getState().dashboardStatus.logFileMarkers
-          if (devicesFiles.length == logFileMarkersState.length) {
-            dispatch(processLogFiles(devicesFiles, logFileMarkersState))
-          }
-        } else {
-
-          web.ListObjects({
-              bucketName: "Home",
-              prefix: binA[0].name
-            })
-            .then(data => {
-              let firstObjectLastModified = data.objects[0].lastModified
-
-              // if all objects are after the periodStart, load everything
-              if (firstObjectLastModified > binPeriodStart) {
-                dispatch(addDeviceMarker({
-                  deviceId: device,
-                  marker: ""
-                }))
-
-                let logFileMarkersState = getState().dashboardStatus.logFileMarkers
-                if (devicesFiles.length == logFileMarkersState.length) {
-                  dispatch(processLogFiles(devicesFiles, logFileMarkersState))
+                  let logFileMarkersState = getState().dashboardStatus
+                    .logFileMarkers;
+                  if (devicesFiles.length == logFileMarkersState.length) {
+                    dispatch(
+                      processLogFiles(devicesFiles, logFileMarkersState)
+                    );
+                  }
+                } else {
+                  // if objects are inside the period, run a binary search for a "marker" to optimize starting point
+                  dispatch(
+                    binarySearch(
+                      binA,
+                      binM,
+                      binL,
+                      binR,
+                      iCount,
+                      iCountMax,
+                      objLastPrevious,
+                      logFileMarkers,
+                      device,
+                      devicesFiles
+                    )
+                  );
                 }
+              });
+          }
+        });
+    }
+  };
+};
 
-              } else {
-                // if objects are inside the period, run a binary search for a "marker" to optimize starting point
-                dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles))
-              }
-            })
+export const binarySearch = (
+  binA,
+  binM,
+  binL,
+  binR,
+  iCount,
+  iCountMax,
+  objLastPrevious,
+  logFileMarkers,
+  device,
+  devicesFiles
+) => {
+  return function(dispatch, getState) {
+    let binPeriodStart = getState().dashboardStatus.periodStart;
 
-        }
-
-      })
-  }
-}
-
-
-export const binarySearch = (binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles) => {
-
-  return function (dispatch, getState) {
-    let binPeriodStart = getState().dashboardStatus.periodStart 
-
-    web.ListObjects({
+    web
+      .ListObjects({
         bucketName: "Home",
         prefix: binA[binM].name
       })
       .then(data => {
-        let objFirst = data.objects[0]
-        let objLast = data.objects[data.objects.length - 1]
+        let objFirst = data.objects[0];
+        let objLast = data.objects[data.objects.length - 1];
 
-        let firstBeforeT = objFirst.lastModified < binPeriodStart
-        let lastBeforeT = objLast.lastModified < binPeriodStart
+        let firstBeforeT = objFirst.lastModified < binPeriodStart;
+        let lastBeforeT = objLast.lastModified < binPeriodStart;
         if (firstBeforeT && !lastBeforeT) {
-          dispatch(addDeviceMarker({
-            deviceId: device,
-            marker: objFirst.name
-          }))
-        } else if (firstBeforeT && lastBeforeT) {
-          // all session objects are before periodStart --> jump forwards
-          binL = binM + 1
-          binM = Math.floor((binL + binR) / 2)
-
-          if (iCount == iCountMax) {
-            // if final count is reached, take the last marker in session 
-            dispatch(addDeviceMarker({
+          dispatch(
+            addDeviceMarker({
               deviceId: device,
               marker: objFirst.name
-            }))
-          } else {
-            iCount += 1
-            objLastPrevious = objLast
-            dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles))
-          }
+            })
+          );
+        } else if (firstBeforeT && lastBeforeT) {
+          // all session objects are before periodStart --> jump forwards
+          binL = binM + 1;
+          binM = Math.floor((binL + binR) / 2);
 
+          if (iCount == iCountMax) {
+            // if final count is reached, take the last marker in session
+            dispatch(
+              addDeviceMarker({
+                deviceId: device,
+                marker: objFirst.name
+              })
+            );
+          } else {
+            iCount += 1;
+            objLastPrevious = objLast;
+            dispatch(
+              binarySearch(
+                binA,
+                binM,
+                binL,
+                binR,
+                iCount,
+                iCountMax,
+                objLastPrevious,
+                logFileMarkers,
+                device,
+                devicesFiles
+              )
+            );
+          }
         } else {
           // all session objects are after periodStart --> jump backwards
-          binR = binM - 1
-          binM = Math.floor((binL + binR) / 2)
+          binR = binM - 1;
+          binM = Math.floor((binL + binR) / 2);
 
           if (iCount == iCountMax) {
             // if final count is reached while we're "too far", we use the previous marker as fallback
-            dispatch(addDeviceMarker({
-              deviceId: device,
-              marker: objFirst.name
-            }))
+            dispatch(
+              addDeviceMarker({
+                deviceId: device,
+                marker: objFirst.name
+              })
+            );
           } else {
-            iCount += 1
-            dispatch(binarySearch(binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles))
+            iCount += 1;
+            dispatch(
+              binarySearch(
+                binA,
+                binM,
+                binL,
+                binR,
+                iCount,
+                iCountMax,
+                objLastPrevious,
+                logFileMarkers,
+                device,
+                devicesFiles
+              )
+            );
           }
         }
 
         // when all markers are found, list and process log files with the markers
-        let logFileMarkersState = getState().dashboardStatus.logFileMarkers
+        let logFileMarkersState = getState().dashboardStatus.logFileMarkers;
         if (devicesFiles.length == logFileMarkersState.length) {
-          dispatch(processLogFiles(devicesFiles, logFileMarkersState))
+          dispatch(processLogFiles(devicesFiles, logFileMarkersState));
         }
-      })
-
-  }
-}
+      });
+  };
+};
 
 export const processLogFiles = (devicesFiles, logFileMarkers) => {
-
-  let iCount = 0
+  let iCount = 0;
 
   let mf4ObjectsHourAry = [];
   let mf4ObjectsMinAry = [];
   let lastFileAry = [];
   let dateFormats = ["YYYY-MM-DD HH", "YYYY-MM-DD HH:mm"];
 
-  return function (dispatch, getState) {
-
-    let binPeriodStart = getState().dashboardStatus.periodStart
+  return function(dispatch, getState) {
+    let binPeriodStart = getState().dashboardStatus.periodStart;
 
     // start by initializing the device processed counter
     dispatch(setDevicesFilesCount(iCount));
@@ -397,167 +491,176 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
     // load all log files recursively for each device in devicesFiles
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
-        let marker = logFileMarkers.filter(e => e.deviceId == device)[0].marker
-        if(marker == "SKIP"){
-          iCount += 1
+        let marker = logFileMarkers.filter(e => e.deviceId == device)[0].marker;
+        if (marker == "SKIP") {
+          iCount += 1;
           dispatch(setDevicesFilesCount(iCount));
 
-          if (getState().dashboardStatus.devicesFilesCount == devicesFiles.length) {
+          if (
+            getState().dashboardStatus.devicesFilesCount == devicesFiles.length
+          ) {
             dispatch(mf4MetaHeader(lastFileAry));
             dispatch(setObjectsData(mf4ObjectsHourAry));
             dispatch(setObjectsDataMin(mf4ObjectsMinAry));
             dispatch(loadedFiles(true));
           }
+        } else {
+          web
+            .ListObjectsRecursive({
+              bucketName: "Home",
+              prefix: device + "/0",
+              marker: marker
+            })
+            .then(data => {
+              iCount += 1;
+              dispatch(setDevicesFilesCount(iCount));
 
-        }else{
-        web
-          .ListObjectsRecursive({
-            bucketName: "Home",
-            prefix: device + "/0",
-            marker: marker
-          })
-          .then(data => {
-             iCount += 1;
-            dispatch(setDevicesFilesCount(iCount));
-
-
-            // extract the last uploaded log file for each device
-            let lastFile = data.objects[data.objects.length - 1];
-
-            if (lastFile) {
-              lastFileAry = lastFileAry.concat(
-                data.objects[data.objects.length - 1]
-              );
-            }
-
-            // Aggregate the loaded data information to either hourly or minute basis by mapping across dateFormats
-            // First, data is aggregated to hourly basis for the full period since periodStart
-            // After this, it is aggregated to minute basis for the lastHour
-            dateFormats.map((format, index) => {
-              let periodStartVar = index == 0 ? binPeriodStart : lastHour;
-              let sizePerTime = {};
-
-              // aggregate log file size
-              sizePerTime = data.objects.reduce(
-                (acc, {
-                  lastModified,
-                  size
-                }) => {
-                  if (lastModified > periodStartVar) {
-                    const lastModH = speedDate.cached(format, lastModified);
-
-                    if (!acc) {
-                      acc = {};
-                    }
-
-                    if (!acc[lastModH]) {
-                      acc[lastModH] = 0;
-                    }
-
-                    acc[lastModH] =
-                      Math.round(parseFloat(acc[lastModH] + size) * 100) / 100;
-                    return acc;
-                  }
-                }, {}
-              );
-
-              // aggregate log file count
-              let countPerTime = data.objects.reduce(
-                (accCnt, {
-                  lastModified
-                }) => {
-                  if (lastModified > periodStartVar) {
-                    const lastModH = speedDate.cached(format, lastModified);
-
-                    if (!accCnt) {
-                      accCnt = {};
-                    }
-
-                    if (!accCnt[lastModH]) {
-                      accCnt[lastModH] = 0;
-                    }
-
-                    accCnt[lastModH] = parseInt(accCnt[lastModH] + 1);
-                    return accCnt;
-                  }
-                }, {}
-              );
-
-              // combine device log file data into an object structure for combining with data from other devices
-              let dataPerTimeAry = [];
-              if (sizePerTime) {
-                const periodStartVarFormat = speedDate(format, periodStartVar);
-
-                Object.keys(sizePerTime).forEach(e => {
-                  if (e > periodStartVarFormat) {
-                    const deviceId = device;
-                    const lastModified = e;
-                    const size = sizePerTime[e] / (1024 * 1024);
-                    const count = countPerTime[e];
-                    dataPerTimeAry.push({
-                      deviceId,
-                      lastModified,
-                      size,
-                      count
-                    });
-                  }
-                });
+              // if data is loaded for a single device (e.g. for meta headers), process extractStorageFreeTimeSeries
+              if (devicesFiles && devicesFiles.length == 1) {
+                dispatch(extractStorageFreeTimeSeries(data));
               }
 
-              if (index == 0) {
-                mf4ObjectsHourAry = mf4ObjectsHourAry.concat(dataPerTimeAry);
-              } else {
-                mf4ObjectsMinAry = mf4ObjectsMinAry.concat(dataPerTimeAry);
+              dispatch(setDevicesFilesCount(iCount));
+
+              // extract the last uploaded log file for each device
+              let lastFile = data.objects[data.objects.length - 1];
+
+              if (lastFile) {
+                lastFileAry = lastFileAry.concat(
+                  data.objects[data.objects.length - 1]
+                );
+              }
+
+              // Aggregate the loaded data information to either hourly or minute basis by mapping across dateFormats
+              // First, data is aggregated to hourly basis for the full period since periodStart
+              // After this, it is aggregated to minute basis for the lastHour
+              dateFormats.map((format, index) => {
+                let periodStartVar = index == 0 ? binPeriodStart : lastHour;
+                let sizePerTime = {};
+
+                // aggregate log file size
+                sizePerTime = data.objects.reduce(
+                  (acc, { lastModified, size }) => {
+                    if (lastModified > periodStartVar) {
+                      const lastModH = speedDate.cached(format, lastModified);
+
+                      if (!acc) {
+                        acc = {};
+                      }
+
+                      if (!acc[lastModH]) {
+                        acc[lastModH] = 0;
+                      }
+
+                      acc[lastModH] =
+                        Math.round(parseFloat(acc[lastModH] + size) * 100) /
+                        100;
+                      return acc;
+                    }
+                  },
+                  {}
+                );
+
+                // aggregate log file count
+                let countPerTime = data.objects.reduce(
+                  (accCnt, { lastModified }) => {
+                    if (lastModified > periodStartVar) {
+                      const lastModH = speedDate.cached(format, lastModified);
+
+                      if (!accCnt) {
+                        accCnt = {};
+                      }
+
+                      if (!accCnt[lastModH]) {
+                        accCnt[lastModH] = 0;
+                      }
+
+                      accCnt[lastModH] = parseInt(accCnt[lastModH] + 1);
+                      return accCnt;
+                    }
+                  },
+                  {}
+                );
+
+                // combine device log file data into an object structure for combining with data from other devices
+                let dataPerTimeAry = [];
+                if (sizePerTime) {
+                  const periodStartVarFormat = speedDate(
+                    format,
+                    periodStartVar
+                  );
+
+                  Object.keys(sizePerTime).forEach(e => {
+                    if (e > periodStartVarFormat) {
+                      const deviceId = device;
+                      const lastModified = e;
+                      const size = sizePerTime[e] / (1024 * 1024);
+                      const count = countPerTime[e];
+                      dataPerTimeAry.push({
+                        deviceId,
+                        lastModified,
+                        size,
+                        count
+                      });
+                    }
+                  });
+                }
+
+                if (index == 0) {
+                  mf4ObjectsHourAry = mf4ObjectsHourAry.concat(dataPerTimeAry);
+                } else {
+                  mf4ObjectsMinAry = mf4ObjectsMinAry.concat(dataPerTimeAry);
+                }
+              });
+
+              // when all devices are processed, dispatch the full data and set loadedFiles to true to display the data
+              if (
+                getState().dashboardStatus.devicesFilesCount ==
+                devicesFiles.length
+              ) {
+                dispatch(mf4MetaHeader(lastFileAry));
+                dispatch(setObjectsData(mf4ObjectsHourAry));
+                dispatch(setObjectsDataMin(mf4ObjectsMinAry));
+                dispatch(loadedFiles(true));
               }
             });
-
-            // when all devices are processed, dispatch the full data and set loadedFiles to true to display the data
-            if (getState().dashboardStatus.devicesFilesCount == devicesFiles.length) {
-              dispatch(mf4MetaHeader(lastFileAry));
-              dispatch(setObjectsData(mf4ObjectsHourAry));
-              dispatch(setObjectsDataMin(mf4ObjectsMinAry));
-              dispatch(loadedFiles(true));
-            }
-          });
         }
       });
     }
-  }
-}
-
-
+  };
+};
 
 export const fetchDeviceFileContentAll = deviceFileObjects => {
   const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
   let deviceFileContents = [];
 
-  return function (dispatch) {
+  return function(dispatch) {
     deviceFileObjects.map((deviceFileObject, i) =>
       web
-      .PresignedGet({
-        bucket: deviceFileObject.deviceId,
-        object: "device.json",
-        expiry: expiry
-      })
-      .then(res => {
-        fetch(res.url)
-          .then(r => r.json())
-          .then(data => {
-            deviceFileContents.push(data);
-            if (deviceFileObjects.length == deviceFileContents.length) {
-              dispatch(deviceFileContent(deviceFileContents));
-            }
-          });
-      })
-      .catch(e => {
-        dispatch(
-          alertActions.set({
-            type: "danger",
-            message: e.message,
-            autoClear: true
-          })
-        );
-      })
+        .PresignedGet({
+          bucket: deviceFileObject.deviceId,
+          object: "device.json",
+          expiry: expiry
+        })
+        .then(res => {
+          fetch(res.url)
+            .then(r => r.json())
+            .then(data => {
+              deviceFileContents.push(data);
+              if (deviceFileObjects.length == deviceFileContents.length) {
+                dispatch(deviceFileContent(deviceFileContents));
+              }
+            });
+        })
+        .catch(e => {
+          dispatch(
+            alertActions.set({
+              type: "danger",
+              message: e.message,
+              autoClear: true
+            })
+          );
+        })
     );
   };
 };
@@ -567,55 +670,70 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
   let configFileContents = [];
   let configFileCrc32 = [];
 
-  return function (dispatch) {
+  return function(dispatch) {
     configObjectsUnique.map((configObject, i) =>
       web
-      .PresignedGet({
-        bucket: configObject.deviceId,
-        object: configObject.name.split("/")[1],
-        expiry: expiry
-      })
-      .then(res => {
-        fetch(res.url)
-          .then(r => r.text())
-          .then(data => {
-            configFileContents.push(JSON.parse(data));
+        .PresignedGet({
+          bucket: configObject.deviceId,
+          object: configObject.name.split("/")[1],
+          expiry: expiry
+        })
+        .then(res => {
+          fetch(res.url)
+            .then(r => r.text())
+            .then(data => {
+              configFileContents.push(JSON.parse(data));
 
-            crc32Val = crc32(data)
-              .toString(16)
-              .toUpperCase()
-              .padStart(8, "0");
+              crc32Val = crc32(data)
+                .toString(16)
+                .toUpperCase()
+                .padStart(8, "0");
 
-            configFileCrc32.push({
-              deviceId: configObject.deviceId,
-              crc32: crc32Val
+              configFileCrc32.push({
+                deviceId: configObject.deviceId,
+                crc32: crc32Val
+              });
+
+              if (
+                configObjectsUnique.length == configFileContents.length &&
+                configObjectsUnique.length == configFileCrc32.length
+              ) {
+                dispatch(configFileContent(configFileContents));
+                dispatch(setConfigFileCrc32(configFileCrc32));
+              }
             });
-
-            if (
-              configObjectsUnique.length == configFileContents.length &&
-              configObjectsUnique.length == configFileCrc32.length
-            ) {
-              dispatch(configFileContent(configFileContents));
-              dispatch(setConfigFileCrc32(configFileCrc32));
-            }
-          });
-      })
-      .catch(e => {
-        dispatch(
-          alertActions.set({
-            type: "danger",
-            message: e.message,
-            autoClear: true
-          })
-        );
-      })
+        })
+        .catch(e => {
+          dispatch(
+            alertActions.set({
+              type: "danger",
+              message: e.message,
+              autoClear: true
+            })
+          );
+        })
     );
   };
 };
 
-// get first part of object
+function extractStorageFromMetaHeader(objContent) {
+  let storageTotalKb = objContent.objContent
+    .split('<e name="storage total" ro="true">')
+    .pop()
+    .split("</e>")[0];
+  let storageFreeKb = objContent.objContent
+    .split('<e name="storage free" ro="true">')
+    .pop()
+    .split("</e>")[0];
+  let storageFree =
+    Math.round((parseInt(storageFreeKb) / parseInt(storageTotalKb)) * 1000) /
+    10;
+  return storageFree;
+}
+
+// get storageFree from metaHeader of the "last mf4 log file" of each device
 export const mf4MetaHeader = mf4Objects => {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     let deviceLastMf4MetaData = [];
     let iCount = 0;
 
@@ -628,18 +746,8 @@ export const mf4MetaHeader = mf4Objects => {
         })
         .then(objContent => {
           iCount += 1;
-          let storageTotalKb = objContent.objContent
-            .split('<e name="storage total" ro="true">')
-            .pop()
-            .split("</e>")[0];
-          let storageFreeKb = objContent.objContent
-            .split('<e name="storage free" ro="true">')
-            .pop()
-            .split("</e>")[0];
-          let storageFree =
-            Math.round(
-              (parseInt(storageFreeKb) / parseInt(storageTotalKb)) * 1000
-            ) / 10;
+
+          let storageFree = extractStorageFromMetaHeader(objContent);
           let deviceId = object.name.split("/")[0];
           let lastModified = object.lastModified;
 
@@ -652,6 +760,57 @@ export const mf4MetaHeader = mf4Objects => {
           }
           if (iCount == mf4Objects.length) {
             dispatch(setDeviceLastMf4MetaData(deviceLastMf4MetaData));
+          }
+        })
+        .catch(err => {
+          dispatch(
+            alertActions.set({
+              type: "danger",
+              message: err.message
+            })
+          );
+        });
+    });
+  };
+};
+
+// get storageFree as a time series for a single device using meta header data from every Nth mf4 object
+export const extractStorageFreeTimeSeries = mf4ObjectsRaw => {
+  return function(dispatch, getState) {
+    let storageFreeTimeseries = [];
+    let mf4ObjectsResampled = [];
+    const maxValue = 100; // limit the number of observation to reduce processing time & API calls
+    const delta = Math.max(
+      1,
+      Math.floor(mf4ObjectsRaw.objects.length / maxValue)
+    );
+
+    for (let i = 0; i < mf4ObjectsRaw.objects.length; i = i + delta) {
+      mf4ObjectsResampled.push(mf4ObjectsRaw.objects[i]);
+    }
+
+    let iCount = 0;
+    mf4ObjectsResampled.map(object => {
+      web
+        .GetPartialObject({
+          bucketName: "Home",
+          objectName: object.name,
+          byteLength: 3000
+        })
+        .then(objContent => {
+          iCount += 1;
+
+          let storageFree = extractStorageFromMetaHeader(objContent);
+          let lastModified = object.lastModified;
+
+          if (storageFree) {
+            storageFreeTimeseries = storageFreeTimeseries.concat({
+              lastModified: lastModified,
+              storageFree: storageFree
+            });
+          }
+          if (iCount == mf4ObjectsResampled.length) {
+            dispatch(setStorageFreeTimeseries(storageFreeTimeseries));
           }
         })
         .catch(err => {
@@ -682,6 +841,11 @@ export const setObjectsData = mf4Objects => ({
 export const setDeviceLastMf4MetaData = deviceLastMf4MetaData => ({
   type: SET_LAST_OBJECT_DATA,
   deviceLastMf4MetaData
+});
+
+export const setStorageFreeTimeseries = storageFreeTimeseries => ({
+  type: SET_STORAGE_FREE_TIMESERIES,
+  storageFreeTimeseries
 });
 
 export const setDevicesFilesCount = devicesFilesCount => ({

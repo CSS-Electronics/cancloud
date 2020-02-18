@@ -19,7 +19,7 @@ import classNames from "classnames";
 import BucketDropdown from "./BucketDropdown";
 import history from "../history";
 
-export const Bucket = ({ bucket, isActive, selectBucket, serverConfig }) => {
+export const Bucket = ({ bucket, isActive, selectBucket, serverConfig, listLogFiles }) => {
   const loggerRegex = new RegExp(/([0-9A-Fa-f]){8}/g);
   const serverRegex = new RegExp(/server/g);
   let deviceMeta = {};

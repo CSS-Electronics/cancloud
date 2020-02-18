@@ -114,6 +114,7 @@ class DashboardStatusSection extends React.Component {
   componentWillUnmount() {
     this.props.clearDataDevices();
     this.props.clearDataFiles();
+    this.props.setPeriodStartBack(7);
   }
 
   render() {

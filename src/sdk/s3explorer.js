@@ -566,10 +566,10 @@ class S3Explorer {
       0,
       byteLength,
       (err, stream) => {
-        if (err) {
-          console.log(err);
-          return cb(err);
-        }
+        // if (err) {
+        //   console.log(err);
+        //   return cb(err);
+        // }
         stream.on("data", function(chunk) {
           partialContent += chunk.toString();
         });

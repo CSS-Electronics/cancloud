@@ -3,8 +3,13 @@ import { connect } from "react-redux";
 import history from "../history";
 import { pathSlice } from "../utils";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
-import {DeviceImage, DeviceMeta, DeviceMetaLogFileChart, prepareDeviceData, prepareStorageFreeData} from  "./metaHeaderModules";
-
+import {
+  DeviceImage,
+  DeviceMeta,
+  DeviceMetaLogFileChart,
+  prepareDeviceData,
+  prepareStorageFreeData
+} from "./metaHeaderModules";
 
 export class DeviceMetaHeaderContainer extends Component {
   constructor(props) {
@@ -17,11 +22,10 @@ export class DeviceMetaHeaderContainer extends Component {
 
   dashboard(e) {
     e.preventDefault();
-    console.log(history);
     history.push("/status-dashboard/");
   }
 
-  switchChartType(e){
+  switchChartType(e) {
     e.preventDefault();
     this.setState({
       showLogFilesChart: !this.state.showLogFilesChart
@@ -29,21 +33,21 @@ export class DeviceMetaHeaderContainer extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.currentBucket != nextProps.currentBucket) {
-      this.props.clearDataDevices();
+    const { bucket } = pathSlice(history.location.pathname);
+
+    if (this.props.currentBucket != "" && this.props.currentBucket != nextProps.currentBucket) {
       this.props.clearDataFiles();
-      this.props.listLogFiles([nextProps.currentBucket]);
+      this.props.listLogFiles([bucket]);
     }
   }
 
-  componentWillMount() {
-    this.props.clearDataDevices();
-    this.props.clearDataFiles();
-    this.props.listLogFiles([this.props.currentBucket]);
+  componentWillMount(nextProps){
+      const { bucket } = pathSlice(history.location.pathname);
+      this.props.clearDataFiles();
+      this.props.listLogFiles([bucket]);
   }
 
   componentWillUnmount() {
-    this.props.clearDataDevices();
     this.props.clearDataFiles();
   }
 
@@ -51,13 +55,25 @@ export class DeviceMetaHeaderContainer extends Component {
     const { bucket } = pathSlice(history.location.pathname);
     const device = bucket;
 
-    const { serverConfig, serverImage, mf4Objects, storageFreeTimeseries} = this.props;
+    const {
+      serverConfig,
+      serverImage,
+      mf4Objects,
+      storageFreeTimeseries
+    } = this.props;
     let metaDevice = "";
+    let dataUploadTime = [];
+    let barOptions = [];
+    let dataStorageFreeTime = [];
 
-    let [dataUploadTime, barOptions] = prepareDeviceData(mf4Objects)
+    if (mf4Objects.length) {
+      [dataUploadTime, barOptions] = prepareDeviceData(mf4Objects);
+    }
 
-    let dataStorageFreeTime = prepareStorageFreeData(storageFreeTimeseries)
-    
+    if (storageFreeTimeseries.length) {
+      dataStorageFreeTime = prepareStorageFreeData(storageFreeTimeseries);
+    }
+
     if (serverConfig.devicemeta && serverConfig.devicemeta.devices) {
       metaDevice = serverConfig.devicemeta.devices.filter(
         p => p.serialno === device
@@ -68,7 +84,11 @@ export class DeviceMetaHeaderContainer extends Component {
       <div>
         {metaDevice ? (
           <div
-            className={serverConfig.devicemeta.display ? "row meta-container" : "row hidden"}
+            className={
+              serverConfig.devicemeta.display
+                ? "row meta-container"
+                : "row hidden"
+            }
           >
             <DeviceImage
               device={device}
@@ -96,9 +116,8 @@ export class DeviceMetaHeaderContainer extends Component {
 const mapDispatchToProps = dispatch => ({
   listLogFiles: devicesFilesInput =>
     dispatch(dashboardStatusActions.listLogFiles(devicesFilesInput)),
-    extractStorageFreeTimeSeries: () =>
+  extractStorageFreeTimeSeries: () =>
     dispatch(dashboardStatusActions.extractStorageFreeTimeSeries()),
-  clearDataDevices: () => dispatch(dashboardStatusActions.clearDataDevices()),
   clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles())
 });
 

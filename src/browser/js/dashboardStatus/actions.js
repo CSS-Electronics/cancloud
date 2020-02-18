@@ -283,7 +283,7 @@ export const binarySearchEdges = (
 ) => {
   return function(dispatch, getState) {
     let binPeriodStart = getState().dashboardStatus.periodStart;
-    
+
     // if the device has no data, SKIP:
     if (binA.length == 0) {
       dispatch(
@@ -383,7 +383,6 @@ export const binarySearch = (
 ) => {
   return function(dispatch, getState) {
     let binPeriodStart = getState().dashboardStatus.periodStart;
-
     web
       .ListObjects({
         bucketName: "Home",
@@ -467,7 +466,7 @@ export const binarySearch = (
 
         // when all markers are found, list and process log files with the markers
         let logFileMarkersState = getState().dashboardStatus.logFileMarkers;
-        if (devicesFiles.length == logFileMarkersState.length) {
+        if (devicesFiles.length == logFileMarkersState.length && devicesFiles.length != 0) {
           dispatch(processLogFiles(devicesFiles, logFileMarkersState));
         }
       });
@@ -475,6 +474,7 @@ export const binarySearch = (
 };
 
 export const processLogFiles = (devicesFiles, logFileMarkers) => {
+
   let iCount = 0;
 
   let mf4ObjectsHourAry = [];
@@ -491,7 +491,7 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
     // load all log files recursively for each device in devicesFiles
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
-        let marker = logFileMarkers.filter(e => e.deviceId == device)[0].marker;
+        let marker = logFileMarkers.filter(e => e.deviceId == device)[0] ? logFileMarkers.filter(e => e.deviceId == device)[0].marker : "";
         if (marker == "SKIP") {
           iCount += 1;
           dispatch(setDevicesFilesCount(iCount));

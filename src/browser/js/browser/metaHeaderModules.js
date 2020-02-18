@@ -79,11 +79,12 @@ export function DeviceMeta(props) {
   );
 }
 
-export function DeviceMetaLogFileChart(props) {
+export function DeviceMetaLogFileChart(props) {  
   if (
     props.dataUploadTime &&
     props.dataUploadTime.datasets &&
-    props.dataUploadTime.datasets.length
+    props.dataUploadTime.datasets.length && 
+    props.dataUploadTime.labels.length
   ) {
     return (
       <div className="col-sm-6">

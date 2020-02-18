@@ -3,6 +3,7 @@ import web from "../web";
 import * as alertActions from "../alert/actions";
 import * as commonActions from "../browser/actions";
 import _ from "lodash";
+export const SET_PERIODSTART_BACK = "dashboardStatus/SET_PERIODSTART_BACK"
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
 export const ADD_DEVICE_MARKER = "dashboardStatus/ADD_DEVICE_MARKER";
 export const SET_LAST_OBJECT_DATA = "dashboardStatus/SET_LAST_OBJECT_DATA";
@@ -206,12 +207,13 @@ export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
 export const listLogFiles = devicesFilesInput => {
 
   return function (dispatch, getState) {
+
     let devices = getState().buckets.list ? getState().buckets.list : [];
     devices = devices.filter(e => e.match(loggerRegex));
     const devicesFilesDefaultMax = 5;
 
     // if the user selects specific devices (devicesFilesInput) show these. If no selection, show up to X devices by default
-    let devicesFiles = devicesFilesInput ?
+    let devicesFiles = (devicesFilesInput != undefined && devicesFilesInput.length != 0) ?
       devicesFilesInput :
       devices.length <= devicesFilesDefaultMax ?
       devices : [];
@@ -225,11 +227,6 @@ export const listLogFiles = devicesFilesInput => {
     dispatch(identifyLogFileMarkers(devicesFiles))
   };
 };
-
-
-let binPeriodStart = new Date(); // get current date & time
-let binPeriodDaysMax = 3; // all objects before this period are excluded
-binPeriodStart.setDate(binPeriodStart.getDate() - binPeriodDaysMax);
 
 export const identifyLogFileMarkers = devicesFiles => {
   return function (dispatch, getState) {
@@ -264,6 +261,8 @@ export const identifyLogFileMarkers = devicesFiles => {
 export const binarySearchEdges = (binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles) => {
 
   return function (dispatch, getState) {
+    let binPeriodStart = getState().dashboardStatus.periodStart 
+
     web.ListObjects({
         bucketName: "Home",
         prefix: binA[binA.length - 1].name
@@ -273,7 +272,6 @@ export const binarySearchEdges = (binA, binM, binL, binR, iCount, iCountMax, obj
 
         // if all objects are before periodStart, don't load anything
         if (lastObjectLastModified < binPeriodStart) {
-          console.log("This device is before periodStart", device)
           dispatch(addDeviceMarker({
             deviceId: device,
             marker: "SKIP"
@@ -319,6 +317,7 @@ export const binarySearchEdges = (binA, binM, binL, binR, iCount, iCountMax, obj
 export const binarySearch = (binA, binM, binL, binR, iCount, iCountMax, objLastPrevious, logFileMarkers, device, devicesFiles) => {
 
   return function (dispatch, getState) {
+    let binPeriodStart = getState().dashboardStatus.periodStart 
 
     web.ListObjects({
         bucketName: "Home",
@@ -336,7 +335,7 @@ export const binarySearch = (binA, binM, binL, binR, iCount, iCountMax, objLastP
             marker: objFirst.name
           }))
         } else if (firstBeforeT && lastBeforeT) {
-          // console.log("All session objects are before periodStart --> jump forwards")
+          // all session objects are before periodStart --> jump forwards
           binL = binM + 1
           binM = Math.floor((binL + binR) / 2)
 
@@ -353,7 +352,7 @@ export const binarySearch = (binA, binM, binL, binR, iCount, iCountMax, objLastP
           }
 
         } else {
-          // console.log("All session objects are after periodStart --> jump backwards")
+          // all session objects are after periodStart --> jump backwards
           binR = binM - 1
           binM = Math.floor((binL + binR) / 2)
 
@@ -390,6 +389,8 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
 
   return function (dispatch, getState) {
 
+    let binPeriodStart = getState().dashboardStatus.periodStart
+
     // start by initializing the device processed counter
     dispatch(setDevicesFilesCount(iCount));
 
@@ -416,7 +417,6 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
             marker: marker
           })
           .then(data => {
-            console.log(data)
              iCount += 1;
             dispatch(setDevicesFilesCount(iCount));
 
@@ -434,7 +434,7 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
             // First, data is aggregated to hourly basis for the full period since periodStart
             // After this, it is aggregated to minute basis for the lastHour
             dateFormats.map((format, index) => {
-              let periodStartVar = index == 0 ? periodStart : lastHour;
+              let periodStartVar = index == 0 ? binPeriodStart : lastHour;
               let sizePerTime = {};
 
               // aggregate log file size
@@ -737,4 +737,9 @@ export const setDeviceFileObjects = deviceFileObjects => ({
 export const addDeviceMarker = logFileMarker => ({
   type: ADD_DEVICE_MARKER,
   logFileMarker
+});
+
+export const setPeriodStartBack = periodDelta => ({
+  type: SET_PERIODSTART_BACK,
+  periodDelta
 });

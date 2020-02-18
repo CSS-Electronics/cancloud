@@ -1,6 +1,10 @@
 import * as dashboardStatusActions from "./actions";
 import _ from "lodash";
 
+// initialize periodStart for first load
+let periodStart = new Date();
+periodStart.setDate(periodStart.getDate() - 7);
+
 export default (
   state = {
     mf4Objects: [],
@@ -15,7 +19,8 @@ export default (
     loadedFiles: false,
     loadedConfig: false,
     loadedDevice: false,
-    devicesFilesCount: 0
+    devicesFilesCount: 0,
+    periodStart: periodStart
   },
   action
 ) => {
@@ -45,6 +50,13 @@ export default (
       return {
         ...state,
         mf4Objects: action.mf4Objects
+      };
+    case dashboardStatusActions.SET_PERIODSTART_BACK:
+      let periodStart = new Date();
+      periodStart.setDate(periodStart.getDate() - action.periodDelta)
+      return {
+        ...state,
+        periodStart: periodStart
       };
     case dashboardStatusActions.SET_LAST_OBJECT_DATA:
       return {

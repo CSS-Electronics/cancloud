@@ -50,6 +50,13 @@ class DashboardStatusSection extends React.Component {
   }
 
   handleChange(event) {
+
+    if(event.target.value == 24*30){
+      this.props.clearDataFiles();
+      this.props.setPeriodStartBack(30);
+      this.props.listLogFiles(this.state.devicesFilesInput.map(e => e.value));
+    }
+
     this.setState({
       periodHours: event.target.value
     });
@@ -429,7 +436,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(dashboardStatusActions.loadedDevice(loadedDevice)),
   fetchServerObjectList: () => dispatch(browserActions.fetchServerObjectList()),
   clearDataDevices: () => dispatch(dashboardStatusActions.clearDataDevices()),
-  clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles())
+  clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles()),
+  setPeriodStartBack: (periodDelta) => dispatch(dashboardStatusActions.setPeriodStartBack(periodDelta))
 });
 
 const mapStateToProps = state => {

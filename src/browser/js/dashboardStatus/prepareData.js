@@ -120,6 +120,52 @@ export const barOptionsFunc = periodHours => {
   };
 };
 
+export const barOptionsFuncStorageFree = periodHours => {
+  return {
+    maintainAspectRatio: false,
+    legend: {
+      display: false
+    },
+    scales: {
+      yAxes: [
+        {
+          display: true,
+          ticks: {
+            beginAtZero: true,
+            suggestedMax: 100
+          }
+        }
+      ],
+      xAxes: [
+        {
+          barPercentage: periodHours <= 1 ? 0.2 : 0.9,
+          maxBarThickness: 5,
+          gridLines: { display: false },
+          ticks: {
+            beginAtZero: true,
+            maxRotation:0
+          },
+          type: "time",
+          time: {
+            unit:
+              periodHours <= 1
+                ? "minute"
+                : periodHours <= 48 && periodHours > 1
+                ? "hour"
+                : "day",
+            displayFormats: {
+              minute: "HH:mm",
+              hour: "MM/DD HH:mm",
+              day: "MM/DD"
+            }
+          }
+        }
+      ]
+    }
+  };
+};
+
+
 export const prepareData = (
   periodHours,
   mf4Objects,

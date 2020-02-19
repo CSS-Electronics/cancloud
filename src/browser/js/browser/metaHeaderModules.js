@@ -1,7 +1,15 @@
 import React, { Component } from "react";
 import { Bar } from "react-chartjs-2";
 var speedDate = require("speed-date");
-import { barOptionsFunc } from "../dashboardStatus/prepareData";
+import { barOptionsFunc, barOptionsFuncStorageFree} from "../dashboardStatus/prepareData";
+
+export function extractMetaDevice(serverConfig, device) {
+  if (serverConfig.devicemeta && serverConfig.devicemeta.devices) {
+    return serverConfig.devicemeta.devices.filter(
+      p => p.serialno === device
+    )[0];
+  }
+}
 
 export function DeviceImage(props) {
   const { metaDevice, serverImage } = props;
@@ -114,12 +122,14 @@ export function DeviceMetaLogFileChart(props) {
               data={props.dataUploadTime}
               height={130}
               options={props.barOptions}
+              key={"bar-chart-logfiles"}
             />
           ) : (
             <Bar
               data={props.dataStorageFreeTime}
               height={130}
-              options={props.barOptions}
+              options={props.barOptionsStorageFree}
+              key={"bar-chart-storageFree"}
             />
           )}
         </div>
@@ -166,7 +176,7 @@ export const prepareDeviceData = mf4Objects => {
     labels: Object.keys(uploadedPerTime)
   };
 
-  let barOptions = barOptionsFunc(7 * 24, Object.keys(uploadedPerTime));
+  let barOptions = barOptionsFunc(7 * 24);
 
   return [dataUploadTime, barOptions];
 };
@@ -178,7 +188,9 @@ export const prepareStorageFreeData = storageFreeTimeseries => {
   // first, aggregate the data observations to hourly level
   let storageFreePerTimeAry = storageFreeTimeseries.reduce(
     (acc, { lastModified, storageFree }) => {
+      if(lastModified > periodStartNew){
       const lastModH = speedDate.cached("YYYY-MM-DD HH", lastModified);
+      
       if (!acc) {
         acc = {};
       }
@@ -188,11 +200,12 @@ export const prepareStorageFreeData = storageFreeTimeseries => {
       acc[lastModH].push(storageFree);
 
       return acc;
+    }
     },
     {}
   );
 
-  if (Object.keys(storageFreePerTimeAry).length != 0) {
+  if (storageFreePerTimeAry && Object.keys(storageFreePerTimeAry).length != 0) {
     storageFreePerTime = []; // important to initialize to empty before below is called
 
     let lastModH = "";
@@ -215,13 +228,13 @@ export const prepareStorageFreeData = storageFreeTimeseries => {
     if (!storageFreePerTime[periodStart]) {
       storageFreePerTime = storageFreePerTime.concat({
         lastModH: periodStart,
-        storageFree: NaN
+        storageFree: 0
       });
     }
     if (!storageFreePerTime[periodEnd]) {
       storageFreePerTime = storageFreePerTime.concat({
         lastModH: periodEnd,
-        storageFree: NaN
+        storageFree: 0
       });
     }
 
@@ -242,5 +255,6 @@ export const prepareStorageFreeData = storageFreeTimeseries => {
     labels: Object.keys(storageFreePerTimeObj)
   };
 
-  return dataStorageFreeTime;
+  let barOptionsStorageFree = barOptionsFuncStorageFree(7 * 24)
+  return [dataStorageFreeTime, barOptionsStorageFree];
 };

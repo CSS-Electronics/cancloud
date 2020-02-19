@@ -8,8 +8,10 @@ import {
   DeviceMeta,
   DeviceMetaLogFileChart,
   prepareDeviceData,
-  prepareStorageFreeData
+  prepareStorageFreeData,
+  extractMetaDevice
 } from "./metaHeaderModules";
+
 
 export class DeviceMetaHeaderContainer extends Component {
   constructor(props) {
@@ -34,17 +36,23 @@ export class DeviceMetaHeaderContainer extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { bucket } = pathSlice(history.location.pathname);
+    let metaDevice = extractMetaDevice(this.props.serverConfig, bucket);
 
-    if (this.props.currentBucket != "" && this.props.currentBucket != nextProps.currentBucket) {
+    if (
+      metaDevice &&
+      this.props.currentBucket != "" &&
+      this.props.currentBucket != nextProps.currentBucket
+    ) {
       this.props.clearDataFiles();
       this.props.listLogFiles([bucket]);
     }
   }
 
-  componentWillMount(nextProps){
-      const { bucket } = pathSlice(history.location.pathname);
-      this.props.clearDataFiles();
-      this.props.listLogFiles([bucket]);
+  componentWillMount() {
+    const { bucket } = pathSlice(history.location.pathname);
+
+    this.props.clearDataFiles();
+    this.props.listLogFiles([bucket]);
   }
 
   componentWillUnmount() {
@@ -64,6 +72,7 @@ export class DeviceMetaHeaderContainer extends Component {
     let metaDevice = "";
     let dataUploadTime = [];
     let barOptions = [];
+    let barOptionsStorageFree = [];
     let dataStorageFreeTime = [];
 
     if (mf4Objects.length) {
@@ -71,14 +80,10 @@ export class DeviceMetaHeaderContainer extends Component {
     }
 
     if (storageFreeTimeseries.length) {
-      dataStorageFreeTime = prepareStorageFreeData(storageFreeTimeseries);
+      [dataStorageFreeTime, barOptionsStorageFree] = prepareStorageFreeData(storageFreeTimeseries);
     }
 
-    if (serverConfig.devicemeta && serverConfig.devicemeta.devices) {
-      metaDevice = serverConfig.devicemeta.devices.filter(
-        p => p.serialno === device
-      )[0];
-    }
+    metaDevice = extractMetaDevice(serverConfig, device);
 
     return (
       <div>
@@ -99,6 +104,7 @@ export class DeviceMetaHeaderContainer extends Component {
             <DeviceMetaLogFileChart
               dataUploadTime={dataUploadTime}
               barOptions={barOptions}
+              barOptionsStorageFree={barOptionsStorageFree}
               dashboard={this.dashboard.bind(this)}
               showLogFilesChart={this.state.showLogFilesChart}
               switchChartType={this.switchChartType.bind(this)}

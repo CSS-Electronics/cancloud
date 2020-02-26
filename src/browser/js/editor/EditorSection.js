@@ -372,6 +372,7 @@ class LoadEditorFiles extends React.Component {
 
     let FormWithNav = schemaContent ? applyNav(Form, EditorNavs) : Form;
     const { bucket, prefix } = pathSlice(history.location.pathname);
+    const simpleEditorTest = bucket == "configuration" && prefix == ""
 
     // Update Select boxes upon a "partial refresh" (pressing Configure while in Configure mode)
     let selectedUISchemaAdj = this.state.selectedUISchema;
@@ -440,6 +441,7 @@ class LoadEditorFiles extends React.Component {
             handleUiSchemaChange={this.handleUiSchemaChange}
             handleSchemaChange={this.handleSchemaChange}
             handleConfigChange={this.handleConfigChange}
+            animateConfig={simpleEditorTest}
           />
         </div>
         <div>
@@ -512,7 +514,7 @@ class LoadEditorFiles extends React.Component {
                 <div
                   className={
                     "config-bar" +
-                    (EDITOR.offline
+                    (EDITOR.offline || simpleEditorTest
                       ? " fe-sidebar-shift-offline"
                       : " fe-sidebar-shift")
                   }
@@ -544,7 +546,7 @@ class LoadEditorFiles extends React.Component {
             <div
               className={
                 "config-bar" +
-                (EDITOR.offline
+                (EDITOR.offline || simpleEditorTest
                   ? " fe-sidebar-shift-offline"
                   : " fe-sidebar-shift")
               }

@@ -45,6 +45,10 @@ class Editor extends React.Component {
       deviceFileTableOpen,
       partialConfigLoaderSidebarOpen
     } = this.props;
+
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+    const simpleEditorTest = bucket == "configuration" && prefix == ""
+
     return (
       <div
         className={classNames({
@@ -58,7 +62,7 @@ class Editor extends React.Component {
             partialConfigLoaderSidebarOpen
         })}
       >
-        {!EDITOR.offline && <SideBar />}
+        {!EDITOR.offline && !simpleEditorTest && <SideBar />}
         <EditorMainContent />
         <AlertContainer />
         {encryptionSidebarOpen ? <EncryptionModal /> : null}

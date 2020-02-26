@@ -22,6 +22,7 @@ class EditorSchemaModal extends React.Component {
         this.props.toggleEditorSchemaSideBar();
       });
     }
+    
   }
 
   componentWillUnmount() {
@@ -42,7 +43,8 @@ class EditorSchemaModal extends React.Component {
       handleUploadedConfig,
       selectedUISchema,
       selectedSchema,
-      selectedConfig
+      selectedConfig,
+      animateConfig
     } = this.props;
 
     return (
@@ -72,11 +74,12 @@ class EditorSchemaModal extends React.Component {
         /><hr/>
         <EditorDropdown
           options={editorConfigFiles}
+          animate={animateConfig}
           name="Configuration File"
           selected={selectedConfig}
           onChange={handleConfigChange}
           handleUplodedFile={handleUploadedConfig}
-          comment="The Configuration File contains the settings that will be used on the device."
+          comment="The Configuration File contains the settings that will be used on the device. You can upload a new Configuration File via the dropdown to modify it using the editor."
         />
       </div>
     );

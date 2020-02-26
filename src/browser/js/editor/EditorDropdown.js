@@ -1,5 +1,6 @@
 import React from "react";
 import Select from "react-select";
+import classNames from "classnames";
 
 const defaultOptions = [{ name: "None" }, { name: "Upload" }];
 
@@ -66,7 +67,7 @@ class EditorDropDown extends React.Component {
 
     return (
       <div className="form-group pl0 field-string">
-        <p>{this.props.name}</p>
+        <p className={classNames({"animate-highlight": this.props.animate})}>{this.props.name}</p>
         <Select
           value={this.state.defaultOption}
           options={selectOptions(options)}

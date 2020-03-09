@@ -20,7 +20,6 @@ import StorageInfo from "./StorageInfo";
 import BrowserDropdown from "./BrowserDropdown";
 import web from "../web";
 import history from "../history";
-import { minioBrowserPrefix } from "../constants";
 
 class Header extends React.Component {
   constructor() {
@@ -35,22 +34,24 @@ class Header extends React.Component {
     const loggedIn = web.LoggedIn();
     return (
       <header className="fe-header top-header">
-        {loggedIn && <Path />}
-        {loggedIn && <StorageInfo />}
-        <ul className="feh-actions float-top">
-          {loggedIn ? (
-            <BrowserDropdown />
-          ) : (
-            !EDITOR.offline && (
-              <a
-                className="btn btn-danger btn-login"
-                onClick={this.moveToLogin}
-              >
-                Login
-              </a>
-            )
-          )}
-        </ul>
+        {!EDITOR.offline ? (
+          <div>
+            {loggedIn && <Path />}
+            {loggedIn && <StorageInfo />}
+            <ul className="feh-actions float-top">
+              {loggedIn ? (
+                <BrowserDropdown />
+              ) : (
+                <a
+                  className="btn btn-danger btn-login"
+                  onClick={this.moveToLogin}
+                >
+                  Login
+                </a>
+              )}
+            </ul>
+          </div>
+        ) : null}
       </header>
     );
   }

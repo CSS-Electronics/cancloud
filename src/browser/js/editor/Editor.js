@@ -47,7 +47,6 @@ class Editor extends React.Component {
     } = this.props;
 
     const { bucket, prefix } = pathSlice(history.location.pathname);
-    const simpleEditorTest = bucket == "configuration" && prefix == ""
 
     return (
       <div
@@ -62,7 +61,7 @@ class Editor extends React.Component {
             partialConfigLoaderSidebarOpen
         })}
       >
-        {!EDITOR.offline && !simpleEditorTest && <SideBar />}
+        {!EDITOR.offline && <SideBar />}
         <EditorMainContent />
         <AlertContainer />
         {encryptionSidebarOpen ? <EncryptionModal /> : null}

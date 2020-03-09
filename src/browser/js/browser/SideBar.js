@@ -35,7 +35,6 @@ export const SideBar = ({
   bucketName
 }) => {
   const { bucket, prefix} = pathSlice(history.location.pathname);
-  const simpleEditorTest = bucket == "configuration" && prefix == ""
   
   return (
     <ClickOutHandler onClickOut={clickOutside}>
@@ -54,7 +53,7 @@ export const SideBar = ({
         </div>
         <div className="fes-list">
           {web.LoggedIn() && <BucketSearch />}
-          {!EDITOR.offline && <BucketList />}
+          <BucketList />
         </div>
         <Host endPoint={endPoint} bucketName={bucketName} />
       </div>

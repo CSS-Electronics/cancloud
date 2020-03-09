@@ -43,8 +43,7 @@ class EditorSchemaModal extends React.Component {
       handleUploadedConfig,
       selectedUISchema,
       selectedSchema,
-      selectedConfig,
-      animateConfig
+      selectedConfig
     } = this.props;
 
     return (
@@ -74,7 +73,6 @@ class EditorSchemaModal extends React.Component {
         /><hr/>
         <EditorDropdown
           options={editorConfigFiles}
-          animate={animateConfig}
           name="Configuration File"
           selected={selectedConfig}
           onChange={handleConfigChange}

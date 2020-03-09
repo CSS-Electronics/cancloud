@@ -201,14 +201,6 @@ export class Login extends React.Component {
             </button>
           </form>
         </div>
-        <a
-          href=""
-          onClick={this.configureGeneral.bind(this)}
-          className="btn btn-simple-editor simple-editor-btn-position"
-        >
-          Simple Editor
-        </a>
-
         <div className="l-footer">
           <a className="lf-logo" href="">
             <img src={logo} alt="" />

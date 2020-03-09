@@ -11,10 +11,9 @@ import history from "../history";
 class EditorMainContent extends React.Component {
   render() {
     const { bucket, prefix } = pathSlice(history.location.pathname);
-    const simpleEditorTest = bucket == "configuration" && prefix == ""
 
     return (
-      <div className={"fe-body" + (EDITOR.offline || simpleEditorTest ? " fe-body-offline" : "")}>
+      <div className={"fe-body" + (EDITOR.offline ? " fe-body-offline" : "")}>
         {web.LoggedIn() && <MobileHeader />}
         <Header />
         <EditorSection 

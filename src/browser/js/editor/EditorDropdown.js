@@ -67,7 +67,7 @@ class EditorDropDown extends React.Component {
 
     return (
       <div className="form-group pl0 field-string">
-        <p className={classNames({"animate-highlight": this.props.animate})}>{this.props.name}</p>
+        <p>{this.props.name}</p>
         <Select
           value={this.state.defaultOption}
           options={selectOptions(options)}

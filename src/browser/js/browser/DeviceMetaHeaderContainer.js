@@ -39,7 +39,6 @@ export class DeviceMetaHeaderContainer extends Component {
     let metaDevice = extractMetaDevice(this.props.serverConfig, bucket);
 
     if (
-      metaDevice &&
       this.props.currentBucket != "" &&
       this.props.currentBucket != nextProps.currentBucket
     ) {
@@ -79,27 +78,28 @@ export class DeviceMetaHeaderContainer extends Component {
       [dataUploadTime, barOptions] = prepareDeviceData(mf4Objects);
     }
 
-    if (storageFreeTimeseries.length) {
-      [dataStorageFreeTime, barOptionsStorageFree] = prepareStorageFreeData(storageFreeTimeseries);
-    }
-
+    [dataStorageFreeTime, barOptionsStorageFree] = prepareStorageFreeData(storageFreeTimeseries);
+  
     metaDevice = extractMetaDevice(serverConfig, device);
+    let display = serverConfig && serverConfig.devicemeta && serverConfig.devicemeta.display 
 
     return (
       <div>
-        {metaDevice ? (
+        {(display == undefined || display == 1) ? (
           <div
             className={
-              serverConfig.devicemeta.display
-                ? "row meta-container"
-                : "row hidden"
+              serverConfig && serverConfig.deviceMeta && !serverConfig.devicemeta.display
+                ? "meta-header-height row hidden"
+                : "meta-header-height row meta-container"
             }
           >
+            {metaDevice ? 
             <DeviceImage
               device={device}
               metaDevice={metaDevice}
               serverImage={serverImage}
-            />
+            /> : null}
+
             <DeviceMeta device={device} metaDevice={metaDevice} />
             <DeviceMetaLogFileChart
               dataUploadTime={dataUploadTime}

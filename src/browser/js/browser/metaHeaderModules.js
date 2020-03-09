@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 import { Bar } from "react-chartjs-2";
 var speedDate = require("speed-date");
-import { barOptionsFunc, barOptionsFuncStorageFree} from "../dashboardStatus/prepareData";
+import {
+  barOptionsFunc,
+  barOptionsFuncStorageFree
+} from "../dashboardStatus/prepareData";
 
 export function extractMetaDevice(serverConfig, device) {
   if (serverConfig.devicemeta && serverConfig.devicemeta.devices) {
@@ -54,28 +57,33 @@ export function DeviceImage(props) {
 
 export function DeviceMeta(props) {
   const { metaDevice } = props;
+ 
+  const name = metaDevice && metaDevice.name ? metaDevice.name : undefined
+  const group = metaDevice && metaDevice.group ? metaDevice.group : undefined
+  const subgroup = metaDevice && metaDevice.subgroup ? metaDevice.subgroup : undefined
+  const comment = metaDevice && metaDevice.name ?  metaDevice.name : undefined
 
   return (
     <div className="col-sm-4">
-      {metaDevice ? (
+      {1 ? (
         <div>
           <br />
           <table className="table table-background">
             <tbody>
               <tr>
                 <td className="col-md-2">Name</td>
-                <td>{metaDevice.name}</td>
+                <td>{name}</td>
               </tr>
               <tr>
                 <td className="col-md-2">Group</td>
                 <td>
-                  {metaDevice.group}{" "}
-                  {metaDevice.subgroup ? "/" + metaDevice.subgroup : ""}
+                  {group}{" "}
+                  {subgroup ? "/" + subgroup : ""}
                 </td>
               </tr>
               <tr>
                 <td className="col-md-2">Comment</td>
-                <td>{metaDevice.comment}</td>
+                <td>{comment}</td>
               </tr>
             </tbody>
           </table>
@@ -87,11 +95,11 @@ export function DeviceMeta(props) {
   );
 }
 
-export function DeviceMetaLogFileChart(props) {  
+export function DeviceMetaLogFileChart(props) {
   if (
     props.dataUploadTime &&
     props.dataUploadTime.datasets &&
-    props.dataUploadTime.datasets.length && 
+    props.dataUploadTime.datasets.length &&
     props.dataUploadTime.labels.length
   ) {
     return (
@@ -188,19 +196,19 @@ export const prepareStorageFreeData = storageFreeTimeseries => {
   // first, aggregate the data observations to hourly level
   let storageFreePerTimeAry = storageFreeTimeseries.reduce(
     (acc, { lastModified, storageFree }) => {
-      if(lastModified > periodStartNew){
-      const lastModH = speedDate.cached("YYYY-MM-DD HH", lastModified);
-      
-      if (!acc) {
-        acc = {};
-      }
-      if (!acc[lastModH]) {
-        acc[lastModH] = [];
-      }
-      acc[lastModH].push(storageFree);
+      if (lastModified > periodStartNew) {
+        const lastModH = speedDate.cached("YYYY-MM-DD HH", lastModified);
 
-      return acc;
-    }
+        if (!acc) {
+          acc = {};
+        }
+        if (!acc[lastModH]) {
+          acc[lastModH] = [];
+        }
+        acc[lastModH].push(storageFree);
+
+        return acc;
+      }
     },
     {}
   );
@@ -223,25 +231,25 @@ export const prepareStorageFreeData = storageFreeTimeseries => {
         storageFree: storageFree
       });
     });
+  }
 
-    // add boundaries to dataset
-    if (!storageFreePerTime[periodStart]) {
-      storageFreePerTime = storageFreePerTime.concat({
-        lastModH: periodStart,
-        storageFree: 0
-      });
-    }
-    if (!storageFreePerTime[periodEnd]) {
-      storageFreePerTime = storageFreePerTime.concat({
-        lastModH: periodEnd,
-        storageFree: 0
-      });
-    }
+  // add boundaries to dataset
+  if (!storageFreePerTime[periodStart]) {
+    storageFreePerTime = storageFreePerTime.concat({
+      lastModH: periodStart,
+      storageFree: 0
+    });
+  }
+  if (!storageFreePerTime[periodEnd]) {
+    storageFreePerTime = storageFreePerTime.concat({
+      lastModH: periodEnd,
+      storageFree: 0
+    });
+  }
 
-    for (let i = 0; i < storageFreePerTime.length; i++) {
-      storageFreePerTimeObj[storageFreePerTime[i].lastModH] =
-        storageFreePerTime[i].storageFree;
-    }
+  for (let i = 0; i < storageFreePerTime.length; i++) {
+    storageFreePerTimeObj[storageFreePerTime[i].lastModH] =
+      storageFreePerTime[i].storageFree;
   }
 
   let dataStorageFreeTime = {
@@ -255,6 +263,6 @@ export const prepareStorageFreeData = storageFreeTimeseries => {
     labels: Object.keys(storageFreePerTimeObj)
   };
 
-  let barOptionsStorageFree = barOptionsFuncStorageFree(7 * 24)
+  let barOptionsStorageFree = barOptionsFuncStorageFree(7 * 24);
   return [dataStorageFreeTime, barOptionsStorageFree];
 };

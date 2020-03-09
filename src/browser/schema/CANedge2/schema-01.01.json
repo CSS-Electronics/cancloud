@@ -650,17 +650,113 @@
                           0
                         ]
                       },
-                      "prescaler": {
-                        "title": "Prescaler (1 = disable)",
-                        "description": "Acceptance messages prescaling. Can be used to scale the number of messages accepted by the filter. In total 100 unique message IDs can be prescaled (additional unique IDs are assigned prescaler 1)",
+                      "prescaler_type": {
+                        "title": "Prescaling type",
+                        "description": "Select prescaling type. Prescale by message count, time or data. Select None to disable prescaling.",
                         "type": "integer",
-                        "default": 1,
-                        "minimum": 1,
-                        "maximum": 256
+                        "default": 0,
+                        "anyOf": [
+                          {
+                            "title": "None",
+                            "enum": [
+                              0
+                            ]
+                          },
+                          {
+                            "title": "Count",
+                            "enum": [
+                              1
+                            ]
+                          },
+                          {
+                            "title": "Time",
+                            "enum": [
+                              2
+                            ]
+                          },
+                          {
+                            "title": "Data",
+                            "enum": [
+                              3
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "dependencies": {
+                      "prescaler_type": {
+                        "oneOf": [
+                          {
+                            "properties": {
+                              "prescaler_type": {
+                                "enum": [
+                                  0
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "properties": {
+                              "prescaler_type": {
+                                "enum": [
+                                  1
+                                ]
+                              },
+                              "prescaler_value": {
+                                "title": "Count",
+                                "type": "integer",
+                                "description": "Count prescaler value. Example: Set to 2 to sample a message with a specific ID every second time.",
+                                "default": 1,
+                                "minimum": 1,
+                                "maximum": 256
+                              }
+                            },
+                            "required": [
+                              "prescaler_value"
+                            ]
+                          },
+                          {
+                            "properties": {
+                              "prescaler_type": {
+                                "enum": [
+                                  2
+                                ]
+                              },
+                              "prescaler_value": {
+                                "title": "Time",
+                                "description": "Time prescaler value in milliseconds. Example: Set to 1000 to sample a message with a specific ID with a minimum period time of 1 second. Note that messages are not resampled to a specific fixed period time.",
+                                "type": "integer",
+                                "default": 1,
+                                "minimum": 1,
+                                "maximum": 4194304
+                              }
+                            },
+                            "required": [
+                              "prescaler_value"
+                            ]
+                          },
+                          {
+                            "properties": {
+                              "prescaler_type": {
+                                "enum": [
+                                  3
+                                ]
+                              },
+                              "prescaler_value": {
+                                "title": "Mask",
+                                "description": "Data prescaler mask value in hex. Each bit corresponds to a data byte (up to 64 bytes). Leave empty to disable the mask (triggers on any data change). Example 1: Set to FF (0b11111111) to sample a message with a specific ID if any of the first 8 data bytes change. Example 2: Set to 03 (0b00000011) to sample if any of the two first data bytes change. Example 3: Set to 9 (0b00001001) to sample if any of the first or fourth data bytes change.",
+                                "type": "string",
+                                "default": "FF",
+                                "pattern": "^[a-fA-F0-9]+$",
+                                "maxLength": 16
+                              }
+                            }
+                          }
+                        ]
                       }
                     },
                     "required": [
-                      "prescaler"
+                      "prescaler_type"
                     ]
                   },
                   {
@@ -677,7 +773,8 @@
             },
             "additionalProperties": false,
             "patternProperties": {
-              "prescaler": {}
+              "prescaler_type": {},
+              "prescaler_value": {}
             },
             "required": [
               "state",

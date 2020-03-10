@@ -144,6 +144,10 @@
           "ui:placeholder": "To/Mask (HEX)",
           "ui:title": " "
         },
+		"prescaler": {
+          "classNames": "col-sm-1 smaller-margins",
+          "ui:title": " "
+        },
         "prescaler_type": {
           "classNames": "col-sm-1 smaller-margins",
           "ui:title": " "
@@ -334,6 +338,10 @@
         "f2": {
           "classNames": "col-sm-2 smaller-margins",
           "ui:placeholder": "To/Mask (HEX)",
+          "ui:title": " "
+        },
+		"prescaler": {
+          "classNames": "col-sm-1 smaller-margins",
           "ui:title": " "
         },
         "prescaler_type": {

@@ -61,7 +61,7 @@ export class ObjectItem extends React.Component {
       onClick
     } = this.props;
 
-    let regexFileExt = new RegExp(/\b(mf4|MF4|txt|TXT|csv|json|JSON)\b/, "g");
+    let regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
     const regexLogFile = new RegExp("^\\d{8}-[a-zA-Z0-9]{64}\\.mf4$", "g");
     const regexLogFileCrc = new RegExp("-[a-zA-Z0-9]{64}\\.mf4", "g");
 

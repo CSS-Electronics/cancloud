@@ -2,8 +2,7 @@ import React, { Component } from "react";
 import { Bar } from "react-chartjs-2";
 var speedDate = require("speed-date");
 import {
-  barOptionsFunc,
-  barOptionsFuncStorageFree
+  barOptionsFunc
 } from "../dashboardStatus/prepareData";
 
 export function extractMetaDevice(serverConfig, device) {
@@ -106,18 +105,9 @@ export function DeviceMetaLogFileChart(props) {
       <div className="col-sm-6">
         <div className="row">
           <div className="col-sm-7">
-            <p>
-              {props.showLogFilesChart
-                ? "Log file data uploaded last week (MB/hour)"
-                : "Free storage left on SD (%)"}
-            </p>
+            <p>Log file data uploaded last week (MB/hour)</p>
           </div>
           <div className="col-sm-5 chart-menu">
-            {" "}
-            <a href="" onClick={props.switchChartType}>
-              {props.showLogFilesChart ? "SD storage" : "log file uploads"}
-            </a>{" "}
-            |{" "}
             <a href="" onClick={props.dashboard}>
               status dashboard
             </a>
@@ -125,21 +115,12 @@ export function DeviceMetaLogFileChart(props) {
         </div>
 
         <div>
-          {props.showLogFilesChart ? (
-            <Bar
+        <Bar
               data={props.dataUploadTime}
               height={130}
               options={props.barOptions}
               key={"bar-chart-logfiles"}
             />
-          ) : (
-            <Bar
-              data={props.dataStorageFreeTime}
-              height={130}
-              options={props.barOptionsStorageFree}
-              key={"bar-chart-storageFree"}
-            />
-          )}
         </div>
       </div>
     );
@@ -189,80 +170,80 @@ export const prepareDeviceData = mf4Objects => {
   return [dataUploadTime, barOptions];
 };
 
-export const prepareStorageFreeData = storageFreeTimeseries => {
-  let storageFreePerTime = [];
-  let storageFreePerTimeObj = {};
+// export const prepareStorageFreeData = storageFreeTimeseries => {
+//   let storageFreePerTime = [];
+//   let storageFreePerTimeObj = {};
 
-  // first, aggregate the data observations to hourly level
-  let storageFreePerTimeAry = storageFreeTimeseries.reduce(
-    (acc, { lastModified, storageFree }) => {
-      if (lastModified > periodStartNew) {
-        const lastModH = speedDate.cached("YYYY-MM-DD HH", lastModified);
+//   // first, aggregate the data observations to hourly level
+//   let storageFreePerTimeAry = storageFreeTimeseries.reduce(
+//     (acc, { lastModified, storageFree }) => {
+//       if (lastModified > periodStartNew) {
+//         const lastModH = speedDate.cached("YYYY-MM-DD HH", lastModified);
 
-        if (!acc) {
-          acc = {};
-        }
-        if (!acc[lastModH]) {
-          acc[lastModH] = [];
-        }
-        acc[lastModH].push(storageFree);
+//         if (!acc) {
+//           acc = {};
+//         }
+//         if (!acc[lastModH]) {
+//           acc[lastModH] = [];
+//         }
+//         acc[lastModH].push(storageFree);
 
-        return acc;
-      }
-    },
-    {}
-  );
+//         return acc;
+//       }
+//     },
+//     {}
+//   );
 
-  if (storageFreePerTimeAry && Object.keys(storageFreePerTimeAry).length != 0) {
-    storageFreePerTime = []; // important to initialize to empty before below is called
+//   if (storageFreePerTimeAry && Object.keys(storageFreePerTimeAry).length != 0) {
+//     storageFreePerTime = []; // important to initialize to empty before below is called
 
-    let lastModH = "";
-    let storageFree = NaN;
+//     let lastModH = "";
+//     let storageFree = NaN;
 
-    Object.entries(storageFreePerTimeAry).map(object => {
-      lastModH = object[0];
-      storageFree =
-        Math.round(
-          (object[1].reduce((a, b) => a + b, 0) / object[1].length) * 100
-        ) / 100;
+//     Object.entries(storageFreePerTimeAry).map(object => {
+//       lastModH = object[0];
+//       storageFree =
+//         Math.round(
+//           (object[1].reduce((a, b) => a + b, 0) / object[1].length) * 100
+//         ) / 100;
 
-      storageFreePerTime = storageFreePerTime.concat({
-        lastModH: lastModH,
-        storageFree: storageFree
-      });
-    });
-  }
+//       storageFreePerTime = storageFreePerTime.concat({
+//         lastModH: lastModH,
+//         storageFree: storageFree
+//       });
+//     });
+//   }
 
-  // add boundaries to dataset
-  if (!storageFreePerTime[periodStart]) {
-    storageFreePerTime = storageFreePerTime.concat({
-      lastModH: periodStart,
-      storageFree: 0
-    });
-  }
-  if (!storageFreePerTime[periodEnd]) {
-    storageFreePerTime = storageFreePerTime.concat({
-      lastModH: periodEnd,
-      storageFree: 0
-    });
-  }
+//   // add boundaries to dataset
+//   if (!storageFreePerTime[periodStart]) {
+//     storageFreePerTime = storageFreePerTime.concat({
+//       lastModH: periodStart,
+//       storageFree: 0
+//     });
+//   }
+//   if (!storageFreePerTime[periodEnd]) {
+//     storageFreePerTime = storageFreePerTime.concat({
+//       lastModH: periodEnd,
+//       storageFree: 0
+//     });
+//   }
 
-  for (let i = 0; i < storageFreePerTime.length; i++) {
-    storageFreePerTimeObj[storageFreePerTime[i].lastModH] =
-      storageFreePerTime[i].storageFree;
-  }
+//   for (let i = 0; i < storageFreePerTime.length; i++) {
+//     storageFreePerTimeObj[storageFreePerTime[i].lastModH] =
+//       storageFreePerTime[i].storageFree;
+//   }
 
-  let dataStorageFreeTime = {
-    datasets: [
-      {
-        type: "bar",
-        data: Object.values(storageFreePerTimeObj),
-        backgroundColor: "#ff9900"
-      }
-    ],
-    labels: Object.keys(storageFreePerTimeObj)
-  };
+//   let dataStorageFreeTime = {
+//     datasets: [
+//       {
+//         type: "bar",
+//         data: Object.values(storageFreePerTimeObj),
+//         backgroundColor: "#ff9900"
+//       }
+//     ],
+//     labels: Object.keys(storageFreePerTimeObj)
+//   };
 
-  let barOptionsStorageFree = barOptionsFuncStorageFree(7 * 24);
-  return [dataStorageFreeTime, barOptionsStorageFree];
-};
+//   let barOptionsStorageFree = barOptionsFuncStorageFree(7 * 24);
+//   return [dataStorageFreeTime, barOptionsStorageFree];
+// };

@@ -41,8 +41,8 @@ export const SET_CONFIG_DATA_LOCAL = "SET_CONFIG_DATA_LOCAL";
 
 // Note: These need to be updated with future firmware revisions
 const uiSchemaAry = [
-  "uischema-01.02.json | Simple",
-  "uischema-01.02.json | Advanced"
+  "uischema-00.07.json | Simple",
+  "uischema-00.07.json | Advanced"
 ];
 
 const schemaAry = [

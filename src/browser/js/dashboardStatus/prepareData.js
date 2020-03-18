@@ -119,7 +119,7 @@ export const barOptionsFunc = periodHours => {
   };
 };
 
-export const barOptionsFuncStorageFree = periodHours => {
+export const barOptionsFuncStorageUsed = periodHours => {
   return {
     maintainAspectRatio: false,
     legend: {

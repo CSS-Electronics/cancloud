@@ -27,17 +27,17 @@
         "class_name": "col-sm-2",
         "height": 105,
         "colors": "",
-		"comment": "Devices with a heartbeat within the period"
+		"comment": "Number of devices with a heartbeat within the period"
       },
 	   {
-        "title": "Avg. free SD storage",
+        "title": "Avg. SD storage used",
 		"dependency": "devices",
         "widget_type": "kpi",
-        "dataset": "kpiFreeStorage",
+        "dataset": "kpiUsedStorage",
         "class_name": "col-sm-2",
         "height": 105,
         "colors": "",
-		"comment": "Average free SD capacity across devices as of their last heartbeats"
+		"comment": "Average storage used on the SD across devices based on their last heartbeats (requires FW 01.02.02 or above)"
       },
       {
         "title": "GB uploaded",
@@ -101,7 +101,7 @@
 		"comment": "Overview of the FW version by device and whether the Configuration File on the device is identical to the server version"
       },
 	  {
-        "title": "Device free SD storage",
+        "title": "SD storage used",
 		"dependency": "devices",
         "widget_type": "pie",
         "dataset": "deviceStorage",
@@ -109,7 +109,7 @@
         "aspect_ratio": 0,
         "height": 210,
         "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3",
-		"comment": "Free storage left on the device SD card in %. Note that the data is based on the last uploaded log file, not the Device File. Requires FW 01.01.01 or above."
+		"comment": "Storage used on the device SD card in %. Note that the data is based on the last uploaded Device File. Requires FW 01.02.02 or above."
       },
       {
         "title": "Log file data uploaded over time ",

@@ -4,8 +4,6 @@ import * as alertActions from "../alert/actions";
 import * as commonActions from "../browser/actions";
 import _ from "lodash";
 export const SET_PERIODSTART_BACK = "dashboardStatus/SET_PERIODSTART_BACK";
-export const SET_STORAGE_FREE_TIMESERIES =
-  "dashboardStatus/SET_STORAGE_FREE_TIMESERIES";
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
 export const ADD_DEVICE_MARKER = "dashboardStatus/ADD_DEVICE_MARKER";
 export const SET_LAST_OBJECT_DATA = "dashboardStatus/SET_LAST_OBJECT_DATA";
@@ -709,20 +707,6 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
   };
 };
 
-function extractStorageFromMetaHeader(objContent) {
-  let storageTotalKb = objContent.objContent
-    .split('<e name="storage total" ro="true">')
-    .pop()
-    .split("</e>")[0];
-  let storageFreeKb = objContent.objContent
-    .split('<e name="storage free" ro="true">')
-    .pop()
-    .split("</e>")[0];
-  let storageFree =
-    Math.round((parseInt(storageFreeKb) / parseInt(storageTotalKb)) * 1000) /
-    10;
-  return storageFree;
-}
 
 export const clearDataDevices = () => ({
   type: CLEAR_DATA_DEVICES

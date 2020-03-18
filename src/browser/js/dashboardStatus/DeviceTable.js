@@ -87,8 +87,8 @@ const DeviceTable = props => {
       deviceCrc32Test[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32 
-    let storageFree = deviceFile && Math.round(deviceFile.space_used_mb.split("/")[0] / deviceFile.space_used_mb.split("/")[1] * 10000)/100 
-    storageFree = storageFree <= 100 ? storageFree : ""
+    let storageUsed = deviceFile && Math.round(deviceFile.space_used_mb.split("/")[0] / deviceFile.space_used_mb.split("/")[1] * 10000)/100 
+    storageUsed = storageUsed <= 100 ? storageUsed : ""
     let lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified
     lastLogUpload = lastLogUpload ? Moment(lastLogUpload).format("YY-MM-DD HH:mm") : ""
 
@@ -100,7 +100,7 @@ const DeviceTable = props => {
       time_since_heartbeat_min,
       fwVer,
       configSync,
-      storageFree,
+      storageUsed,
       lastLogUpload,
       uploadedMb
     };
@@ -115,7 +115,7 @@ const DeviceTable = props => {
     name: "Server meta",
     fwVer: "Firmware",
     uploadedMb: "MB uploaded",
-    storageFree: "Free SD storage",
+    storageUsed: "Used SD storage",
     configSync: "Config synced",
     lastLogUpload: "Last log upload"
   };

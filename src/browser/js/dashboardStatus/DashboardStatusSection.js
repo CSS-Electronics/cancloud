@@ -50,8 +50,7 @@ class DashboardStatusSection extends React.Component {
   }
 
   handleChange(event) {
-
-    if(event.target.value == 24*30){
+    if (event.target.value == 24 * 30) {
       this.props.clearDataFiles();
       this.props.setPeriodStartBack(30);
       this.props.listLogFiles(this.state.devicesFilesInput.map(e => e.value));
@@ -341,7 +340,11 @@ class DashboardStatusSection extends React.Component {
                         ) : null}
 
                         {widget.widget_type == "pie" &&
-                        chartData[widget.dataset] && chartData[widget.dataset].datasets[0].data.reduce((a, b) => a + b, 0) &&
+                        chartData[widget.dataset] &&
+                        chartData[widget.dataset].datasets[0].data.reduce(
+                          (a, b) => a + b,
+                          0
+                        ) &&
                         widget.dependency == "files" ? (
                           <Doughnut
                             data={chartData[widget.dataset]}
@@ -365,7 +368,6 @@ class DashboardStatusSection extends React.Component {
                         ) : null}
 
                         {widget.widget_type == "bar" ? (
-                          
                           <Bar
                             data={
                               widget.dependency == "files"
@@ -379,19 +381,18 @@ class DashboardStatusSection extends React.Component {
 
                         {widget.widget_type == "table" &&
                         deviceFileContents.length ? (
-                          
                           <DeviceTable
-                              deviceIdListDeltaSort={chartDataDevicesArray[1]}
-                              deviceFileContents={deviceFileContents}
-                              configFileCrc32={configFileCrc32}
-                              serverConfig={serverConfig}
-                              mf4ObjectsFiltered={
-                                chartDataArray[2] ? chartDataArray[2] : []
-                              }
-                              deviceCrc32Test={chartDataDevicesArray[2]}
-                              height={widget.height - 50 + (resWide ? 100 : 0)}
-                              deviceLastMf4MetaData={deviceLastMf4MetaData}
-                            />
+                            deviceIdListDeltaSort={chartDataDevicesArray[1]}
+                            deviceFileContents={deviceFileContents}
+                            configFileCrc32={configFileCrc32}
+                            serverConfig={serverConfig}
+                            mf4ObjectsFiltered={
+                              chartDataArray[2] ? chartDataArray[2] : []
+                            }
+                            deviceCrc32Test={chartDataDevicesArray[2]}
+                            height={widget.height - 50 + (resWide ? 100 : 0)}
+                            deviceLastMf4MetaData={deviceLastMf4MetaData}
+                          />
                         ) : null}
                       </div>
                     ) : !loadedFiles ? (
@@ -437,7 +438,8 @@ const mapDispatchToProps = dispatch => ({
   fetchServerObjectList: () => dispatch(browserActions.fetchServerObjectList()),
   clearDataDevices: () => dispatch(dashboardStatusActions.clearDataDevices()),
   clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles()),
-  setPeriodStartBack: (periodDelta) => dispatch(dashboardStatusActions.setPeriodStartBack(periodDelta))
+  setPeriodStartBack: periodDelta =>
+    dispatch(dashboardStatusActions.setPeriodStartBack(periodDelta))
 });
 
 const mapStateToProps = state => {

@@ -89,17 +89,6 @@
         "colors": "#3d85c6 #6fa8dc #9fc5e8 #cfe2f3 #f2f9ff",
 		"comment": "Overview of when the devices last checked-in to the server with a heartbeat"
       },
-	    {
-        "title": "Device config & FW",
-		"dependency": "devices",
-        "widget_type": "pie",
-        "dataset": "deviceConfigFW",
-        "class_name": "col-sm-2",
-        "aspect_ratio": 0,
-        "height": 210,
-        "colors": "#666666 #999999 #b7b7b7 #cccccc #d9d9d9",
-		"comment": "Overview of the FW version by device and whether the Configuration File on the device is identical to the server version"
-      },
 	  {
         "title": "SD storage used",
 		"dependency": "devices",
@@ -110,6 +99,17 @@
         "height": 210,
         "colors": "#ff9900 #f6b26b #f9cb9c #fce5cd #fff1e3",
 		"comment": "Storage used on the device SD card in %. Note that the data is based on the last uploaded Device File. Requires FW 01.02.02 or above."
+      },
+	  {
+        "title": "Device config & FW",
+		"dependency": "devices",
+        "widget_type": "pie",
+        "dataset": "deviceConfigFW",
+        "class_name": "col-sm-2",
+        "aspect_ratio": 0,
+        "height": 210,
+        "colors": "#666666 #999999 #b7b7b7 #cccccc #d9d9d9",
+		"comment": "Overview of the FW version by device and whether the Configuration File on the device is identical to the server version"
       },
       {
         "title": "Log file data uploaded over time ",

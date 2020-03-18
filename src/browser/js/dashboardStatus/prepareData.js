@@ -4,7 +4,6 @@ let uploadedPerTime = {};
 let mf4ObjectsFiltered = [];
 let chartData = {};
 
-
 export const devicesOptionsFn = deviceList => {
   const loggerRegex = new RegExp(/([0-9A-Fa-f]){8}/);
 
@@ -23,20 +22,19 @@ export const devicesOptionsFn = deviceList => {
 };
 
 export const selectedListFn = (event, list) => {
+  const all = event.filter(e => e.value == "all").length;
+  const clear = event.filter(e => e.value == "clear").length;
 
-  const all = event.filter(e => e.value == "all").length
-  const clear = event.filter(e => e.value == "clear").length
-
-  let selectedList = event
-  if(all){
-    selectedList = devicesOptionsFn(list)
-    selectedList = selectedList.slice(2,selectedList.length)
+  let selectedList = event;
+  if (all) {
+    selectedList = devicesOptionsFn(list);
+    selectedList = selectedList.slice(2, selectedList.length);
   }
-  if(clear){
-    selectedList = []
+  if (clear) {
+    selectedList = [];
   }
-  return selectedList
-}
+  return selectedList;
+};
 
 export const customCheckboxStyles = {
   option: (provided, state) => ({
@@ -54,7 +52,7 @@ export const customCheckboxStyles = {
     cursor: "pointer",
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
-    maxWidth:"300px",
+    maxWidth: "300px",
     overflow: "hidden",
     fontFamily: "consolas"
   }),
@@ -97,7 +95,7 @@ export const barOptionsFunc = periodHours => {
           gridLines: { display: false },
           ticks: {
             beginAtZero: true,
-            maxRotation:0
+            maxRotation: 0
           },
           type: "time",
           time: {
@@ -142,7 +140,7 @@ export const barOptionsFuncStorageUsed = periodHours => {
           gridLines: { display: false },
           ticks: {
             beginAtZero: true,
-            maxRotation:0
+            maxRotation: 0
           },
           type: "time",
           time: {
@@ -164,14 +162,12 @@ export const barOptionsFuncStorageUsed = periodHours => {
   };
 };
 
-
 export const prepareData = (
   periodHours,
   mf4Objects,
   mf4ObjectsMin,
   devicesFilesCount
 ) => {
-
   // filter log files & devices based on time period
   let periodEndNew = new Date();
   let periodStartNew = new Date();
@@ -187,7 +183,6 @@ export const prepareData = (
 
   let periodStartMin = speedDate("YYYY-MM-DD HH:mm", periodStartNew);
   let periodEndMin = speedDate("YYYY-MM-DD HH:mm", periodEndNew);
-
 
   // prepare data for bar chart of uploaded files
   mf4ObjectsFiltered =
@@ -260,22 +255,25 @@ export const prepareData = (
     );
   }
 
-
   // prepare data for KPI boxes
   const kpiUploadedValMB = mf4ObjectsFiltered.length
     ? mf4ObjectsFiltered.reduce((a, b) => +a + +b.size, 0)
     : "";
-  const kpiUploadedVal = mf4ObjectsFiltered.length ? Math.round( (kpiUploadedValMB / 1000)*10)/10 : ""
+  const kpiUploadedVal = mf4ObjectsFiltered.length
+    ? Math.round((kpiUploadedValMB / 1000) * 10) / 10
+    : "";
   const kpiDataPerDeviceDayVal =
     mf4ObjectsFiltered.length && devicesFilesCount
-      ? Math.round((kpiUploadedValMB / devicesFilesCount / (periodHours / 24))*10)/10
+      ? Math.round(
+          (kpiUploadedValMB / devicesFilesCount / (periodHours / 24)) * 10
+        ) / 10
       : "";
   const kpiFilesVal = mf4ObjectsFiltered.length
     ? mf4ObjectsFiltered.reduce((a, b) => +a + +b.count, 0)
     : "";
   const kpiAvgFileSize =
     mf4ObjectsFiltered.length && kpiFilesVal
-      ? Math.round((kpiUploadedValMB / kpiFilesVal)*10)/10
+      ? Math.round((kpiUploadedValMB / kpiFilesVal) * 10) / 10
       : "";
 
   if (Object.values(uploadedPerTime).length == 0) {

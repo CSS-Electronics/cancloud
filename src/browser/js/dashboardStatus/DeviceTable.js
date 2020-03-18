@@ -11,7 +11,7 @@ const DeviceTable = props => {
     height,
     deviceLastMf4MetaData
   } = props;
-  
+
   // return empty div if no devices to list
   if (deviceIdListDeltaSort.length == 0) {
     return (
@@ -20,7 +20,7 @@ const DeviceTable = props => {
       </div>
     );
   }
-  
+
   // aggregate uploaded data size by device
   const uploadedPerDevice = mf4ObjectsFiltered.reduce(
     (acc, { deviceId, size }) => {
@@ -49,7 +49,6 @@ const DeviceTable = props => {
 
   // construct object containing all relevant table data based on sorted device ID list
   const tableData = deviceIdListDeltaSort.map(e => {
-
     // extract the device.json content related to the device
     const deviceFile = deviceFileContents.filter(
       devFile => devFile.id == e.deviceId
@@ -57,7 +56,7 @@ const DeviceTable = props => {
 
     // extract object with meta data on last log file uploaded for the device
     const lastMf4Meta = deviceLastMf4MetaData.filter(
-     meta => meta.name.split("/")[0] == e.deviceId
+      meta => meta.name.split("/")[0] == e.deviceId
     )[0];
 
     // if a server config exists, extract the meta data name
@@ -71,13 +70,13 @@ const DeviceTable = props => {
 
     // calculate the delta time since last heartbeat
     const time_since_heartbeat_min = maxDelta
-      ? Math.round((e.lastModifiedDelta) * 100) / 100
+      ? Math.round(e.lastModifiedDelta * 100) / 100
       : 0;
 
     // extract the device ID and various properties from the device.json
     const id = e.deviceId;
-    const meta = deviceFile && deviceFile.log_meta 
-    const fwVer = deviceFile && deviceFile.fw_ver  
+    const meta = deviceFile && deviceFile.log_meta;
+    const fwVer = deviceFile && deviceFile.fw_ver;
     const lastHeartbeat = e.lastModifiedMin;
     const uploadedMb =
       maxUploaded && uploadedPerDevice[e.deviceId]
@@ -86,11 +85,20 @@ const DeviceTable = props => {
     const configSync =
       deviceCrc32Test[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&
-      deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32 
-    let storageUsed = deviceFile && Math.round(deviceFile.space_used_mb.split("/")[0] / deviceFile.space_used_mb.split("/")[1] * 10000)/100 
-    storageUsed = storageUsed <= 100 ? storageUsed : ""
-    let lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified
-    lastLogUpload = lastLogUpload ? Moment(lastLogUpload).format("YY-MM-DD HH:mm") : ""
+      deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32;
+    let storageUsed =
+      deviceFile &&
+      deviceFile.space_used_mb &&
+      Math.round(
+        (deviceFile.space_used_mb.split("/")[0] /
+          deviceFile.space_used_mb.split("/")[1]) *
+          10000
+      ) / 100;
+    storageUsed = storageUsed <= 100 ? storageUsed : "";
+    let lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified;
+    lastLogUpload = lastLogUpload
+      ? Moment(lastLogUpload).format("YY-MM-DD HH:mm")
+      : "";
 
     return {
       id,
@@ -98,14 +106,13 @@ const DeviceTable = props => {
       meta,
       lastHeartbeat,
       time_since_heartbeat_min,
+      storageUsed,
       fwVer,
       configSync,
-      storageUsed,
       lastLogUpload,
       uploadedMb
     };
   });
-
 
   const stringHeader = {
     lastHeartbeat: "Last heartbeat",
@@ -143,13 +150,28 @@ const DeviceTable = props => {
                   <li>
                     <span
                       style={{
-                        width: v ? v/maxDelta * 100 : 0,
+                        width: v ? (v / maxDelta) * 100 : 0,
                         height: "100%",
                         backgroundColor: "#3d85c6",
-                        color: (v/maxDelta) > 0.2 ? "white" : "#8e8e8e"
+                        color: v / maxDelta > 0.2 ? "white" : "#8e8e8e"
                       }}
                     >
-                      &nbsp;{Math.round(v)}&nbsp;min
+                      {v / maxDelta > 0.1 && v / maxDelta < 0.2
+                        ? "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0"
+                        : null}
+                      &nbsp;
+                      {v < 60
+                        ? Math.round(v) + "\u00A0" + "min"
+                        : v < 24 * 60
+                        ? Math.round((v / 60) * 10) / 10 + "\u00A0" + "hours"
+                        : Math.round((v / (60 * 24)) * 10) / 10 +
+                          "\u00A0" +
+                          "days"}
                     </span>
                   </li>
                 </ul>
@@ -164,11 +186,15 @@ const DeviceTable = props => {
                         color: v > 0.2 ? "white" : "#8e8e8e"
                       }}
                     >
-                     {v ? <div>&nbsp;{Math.round(v * maxUploaded)}&nbsp;MB</div> : <div>&nbsp;{Math.round(v * maxUploaded)}</div>}
+                      {v ? (
+                        <div>&nbsp;{Math.round(v * maxUploaded)}&nbsp;MB</div>
+                      ) : (
+                        <div>&nbsp;{Math.round(v * maxUploaded)}</div>
+                      )}
                     </span>
                   </li>
                 </ul>
-              )  : index == 7 ? (
+              ) : index == 5 ? (
                 <ul className="chart">
                   <li>
                     <span
@@ -183,13 +209,17 @@ const DeviceTable = props => {
                     </span>
                   </li>
                 </ul>
-              ) : index == 6 ? (
+              ) : index == 7 ? (
                 <div>
                   {" "}
                   {v == true ? (
-                    <p className="blue-text zero-bottom-margin"><i className="fa fa-check" /></p>
+                    <p className="blue-text zero-bottom-margin">
+                      <i className="fa fa-check" />
+                    </p>
                   ) : (
-                    <p className="red-text zero-bottom-margin"><i className="fa fa-times" /></p>
+                    <p className="red-text zero-bottom-margin">
+                      <i className="fa fa-times" />
+                    </p>
                   )}
                 </div>
               ) : (

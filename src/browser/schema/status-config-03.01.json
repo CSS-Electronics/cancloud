@@ -31,7 +31,7 @@
       },
 	   {
         "title": "Avg. free SD storage",
-		"dependency": "files",
+		"dependency": "devices",
         "widget_type": "kpi",
         "dataset": "kpiFreeStorage",
         "class_name": "col-sm-2",
@@ -102,7 +102,7 @@
       },
 	  {
         "title": "Device free SD storage",
-		"dependency": "files",
+		"dependency": "devices",
         "widget_type": "pie",
         "dataset": "deviceStorage",
         "class_name": "col-sm-2",

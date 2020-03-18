@@ -153,8 +153,7 @@ class DashboardStatusSection extends React.Component {
         periodHours,
         mf4Objects,
         mf4ObjectsMin,
-        devicesFilesCount,
-        deviceLastMf4MetaData
+        devicesFilesCount
       );
 
       chartData = chartDataArray[0];

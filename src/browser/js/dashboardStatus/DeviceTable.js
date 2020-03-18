@@ -57,7 +57,7 @@ const DeviceTable = props => {
 
     // extract object with meta data on last log file uploaded for the device
     const lastMf4Meta = deviceLastMf4MetaData.filter(
-     meta => meta.deviceId == e.deviceId
+     meta => meta.name.split("/")[0] == e.deviceId
     )[0];
 
     // if a server config exists, extract the meta data name
@@ -87,7 +87,8 @@ const DeviceTable = props => {
       deviceCrc32Test[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32 
-    const storageFree = lastMf4Meta && lastMf4Meta.storageFree
+    let storageFree = deviceFile && Math.round(deviceFile.space_used_mb.split("/")[0] / deviceFile.space_used_mb.split("/")[1] * 10000)/100 
+    storageFree = storageFree <= 100 ? storageFree : ""
     let lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified
     lastLogUpload = lastLogUpload ? Moment(lastLogUpload).format("YY-MM-DD HH:mm") : ""
 

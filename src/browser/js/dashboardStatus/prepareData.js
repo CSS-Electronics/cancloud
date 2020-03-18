@@ -3,7 +3,6 @@ var speedDate = require("speed-date");
 let uploadedPerTime = {};
 let mf4ObjectsFiltered = [];
 let chartData = {};
-let deviceLastMf4MetaDataFiltered = []
 
 
 export const devicesOptionsFn = deviceList => {
@@ -170,8 +169,7 @@ export const prepareData = (
   periodHours,
   mf4Objects,
   mf4ObjectsMin,
-  devicesFilesCount,
-  deviceLastMf4MetaData
+  devicesFilesCount
 ) => {
 
   // filter log files & devices based on time period
@@ -263,42 +261,10 @@ export const prepareData = (
   }
 
 
-  // prepare data for storageFree by removing devices outside period and those without storageFree data
-  deviceLastMf4MetaDataFiltered = deviceLastMf4MetaData.filter(e => (e.lastModified >= periodStartNew));
-  
-  // calculate storageFree values across filtered data
-  let storageFreeAvg = deviceLastMf4MetaDataFiltered.reduce((a, b) => +a + +b.storageFree, 0) / deviceLastMf4MetaDataFiltered.length
-
-  let storageFreeLabels = ["99%+", "90%+", "70%+", "50%+", "20%+", "<20%"]
-  let storageFreeData = [0,0,0,0,0,0]
-  deviceLastMf4MetaDataFiltered.map(e => {
-    if(e.storageFree > 99){
-      storageFreeData[0] += 1
-    }
-    else if(e.storageFree>90){
-      storageFreeData[1] += 1
-    }
-    else if(e.storageFree>70){
-      storageFreeData[2] += 1
-    }
-    else if(e.storageFree>50){
-      storageFreeData[3] += 1
-    }
-    else if(e.storageFree>20){
-      storageFreeData[4] += 1
-    }
-    else if(e.storageFree<=20){
-      storageFreeData[5] += 1
-    }
-  })
-
   // prepare data for KPI boxes
   const kpiUploadedValMB = mf4ObjectsFiltered.length
     ? mf4ObjectsFiltered.reduce((a, b) => +a + +b.size, 0)
     : "";
-
-  const kpiFreeStorage = storageFreeAvg ? `${Math.round(storageFreeAvg*10)/10}%` : "";
-
   const kpiUploadedVal = mf4ObjectsFiltered.length ? Math.round( (kpiUploadedValMB / 1000)*10)/10 : ""
   const kpiDataPerDeviceDayVal =
     mf4ObjectsFiltered.length && devicesFilesCount
@@ -318,22 +284,9 @@ export const prepareData = (
 
   chartData = {
     kpiUploaded: kpiUploadedVal,
-    kpiFreeStorage: kpiFreeStorage,
     kpiDataPerDeviceDay: kpiDataPerDeviceDayVal,
     kpiFiles: kpiFilesVal,
     kpiAvgFileSize: kpiAvgFileSize,
-    deviceStorage: {
-      datasets: [
-        {
-          data: storageFreeData,
-          backgroundColor: "#ff9900 #f6b26b #f9cb9c #fce1c5 #ffebd7 #fff7ee".split(
-            " "
-          ),
-          label: "#devices"
-        }
-      ],
-      labels: storageFreeLabels
-    },
     dataUploadTime: {
       datasets: [
         {

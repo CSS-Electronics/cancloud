@@ -20,8 +20,7 @@ export default (
     loadedConfig: false,
     loadedDevice: false,
     devicesFilesCount: 0,
-    periodStart: periodStart,
-    storageFreeTimeseries: []
+    periodStart: periodStart
   },
   action
 ) => {
@@ -45,8 +44,7 @@ export default (
         mf4ObjectsMin: [],
         logFileMarkers: [],
         loadedFiles: false,
-        devicesFilesCount: 0,
-        storageFreeTimeseries: []
+        devicesFilesCount: 0
       };
     case dashboardStatusActions.SET_OBJECTS_DATA:
       return {
@@ -64,11 +62,6 @@ export default (
       return {
         ...state,
         deviceLastMf4MetaData: action.deviceLastMf4MetaData
-      };
-    case dashboardStatusActions.SET_STORAGE_FREE_TIMESERIES:
-      return {
-        ...state,
-        storageFreeTimeseries: action.storageFreeTimeseries
       };
     case dashboardStatusActions.SET_DEVICES_FILES_COUNT:
       return {

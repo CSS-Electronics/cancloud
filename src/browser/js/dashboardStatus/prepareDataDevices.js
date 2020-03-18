@@ -101,6 +101,40 @@ export const prepareDataDevices = (
       : 0
   );
 
+
+
+  // storage free pie chart
+  let deviceStorageFreeLabel = ["99%+", "90%+", "70%+", "50%+", "20%+", "<20%"]
+
+  let deviceStorageFreeGrouped = _.groupBy(deviceFileContentsFiltered, function(object) {
+    const storageFree = object.space_used_mb && Math.round(object.space_used_mb.split("/")[0] / object.space_used_mb.split("/")[1] * 10000)/100 ;
+
+    return storageFree > 99
+      ? deviceStorageFreeLabel[0]
+      : storageFree > 90
+      ? deviceStorageFreeLabel[1]
+      : storageFree > 70
+      ? deviceStorageFreeLabel[2]
+      : storageFree > 50
+      ? deviceStorageFreeLabel[3]
+      : storageFree > 20
+      ? deviceStorageFreeLabel[4]
+      : deviceStorageFreeLabel[5]
+  });
+
+
+  let deviceStorageFreeData = deviceStorageFreeLabel.map((counter, i) =>
+  deviceStorageFreeGrouped[deviceStorageFreeLabel[i]]
+      ? deviceStorageFreeGrouped[deviceStorageFreeLabel[i]].length
+      : 0
+  );
+
+  // calculate storageFree average for KPIs
+  let storageFreeAry = deviceFileContentsFiltered.map(object => object.space_used_mb && object.space_used_mb.split("/")[0] && Math.round(object.space_used_mb.split("/")[0] / object.space_used_mb.split("/")[1] * 10000)/100)
+  storageFreeAry = storageFreeAry.filter(object => (object <= 100 && object != "" && object != NaN && object != undefined))
+  
+  const kpiFreeStorage = (Math.round((storageFreeAry.reduce((a,b) => a + b, 0) / storageFreeAry.length)*10)/10).toString() + "%"
+
   // firmware pie chart
   const deviceFWUnsorted = _.countBy(
     deviceFileContentsFiltered.map(device => device.fw_ver)
@@ -213,7 +247,20 @@ export const prepareDataDevices = (
         }
       ],
       labels: deviceFWLabel
-    }
+    },
+    deviceStorage: {
+      datasets: [
+        {
+          data: deviceStorageFreeData,
+          backgroundColor: "#ff9900 #f6b26b #f9cb9c #fce1c5 #fff2e6 #fffbf7".split(
+            " "
+          ),
+          label: "#devices"
+        }
+      ],
+      labels: deviceStorageFreeLabel
+    },
+    kpiFreeStorage: kpiFreeStorage
   };
 
   return [

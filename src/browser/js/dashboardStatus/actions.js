@@ -499,7 +499,7 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
           if (
             getState().dashboardStatus.devicesFilesCount == devicesFiles.length
           ) {
-            dispatch(mf4MetaHeader(lastFileAry));
+            dispatch(setDeviceLastMf4MetaData(lastFileAry));
             dispatch(setObjectsData(mf4ObjectsHourAry));
             dispatch(setObjectsDataMin(mf4ObjectsMinAry));
             dispatch(loadedFiles(true));
@@ -513,13 +513,6 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
             })
             .then(data => {
               iCount += 1;
-              dispatch(setDevicesFilesCount(iCount));
-
-              // if data is loaded for a single device (e.g. for meta headers), process extractStorageFreeTimeSeries
-              if (devicesFiles && devicesFiles.length == 1) {
-                dispatch(extractStorageFreeTimeSeries(data));
-              }
-
               dispatch(setDevicesFilesCount(iCount));
 
               // extract the last uploaded log file for each device
@@ -618,7 +611,7 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
                 getState().dashboardStatus.devicesFilesCount ==
                 devicesFiles.length
               ) {
-                dispatch(mf4MetaHeader(lastFileAry));
+                dispatch(setDeviceLastMf4MetaData(lastFileAry));
                 dispatch(setObjectsData(mf4ObjectsHourAry));
                 dispatch(setObjectsDataMin(mf4ObjectsMinAry));
                 dispatch(loadedFiles(true));
@@ -731,100 +724,6 @@ function extractStorageFromMetaHeader(objContent) {
   return storageFree;
 }
 
-// get storageFree from metaHeader of the "last mf4 log file" of each device
-export const mf4MetaHeader = mf4Objects => {
-  return function(dispatch, getState) {
-    let deviceLastMf4MetaData = [];
-    let iCount = 0;
-
-    mf4Objects.map(object => {
-      web
-        .GetPartialObject({
-          bucketName: "Home",
-          objectName: object.name,
-          byteLength: 3000
-        })
-        .then(objContent => {
-          iCount += 1;
-
-          let storageFree = extractStorageFromMetaHeader(objContent);
-          let deviceId = object.name.split("/")[0];
-          let lastModified = object.lastModified;
-
-          if (storageFree) {
-            deviceLastMf4MetaData = deviceLastMf4MetaData.concat({
-              deviceId: deviceId,
-              lastModified: lastModified,
-              storageFree: storageFree
-            });
-          }
-          if (iCount == mf4Objects.length) {
-            dispatch(setDeviceLastMf4MetaData(deviceLastMf4MetaData));
-          }
-        })
-        .catch(err => {
-          dispatch(
-            alertActions.set({
-              type: "danger",
-              message: err.message
-            })
-          );
-        });
-    });
-  };
-};
-
-// get storageFree as a time series for a single device using meta header data from every Nth mf4 object
-export const extractStorageFreeTimeSeries = mf4ObjectsRaw => {
-  return function(dispatch, getState) {
-    let storageFreeTimeseries = [];
-    let mf4ObjectsResampled = [];
-    const maxValue = 100; // limit the number of observation to reduce processing time & API calls
-    const delta = Math.max(
-      1,
-      Math.floor(mf4ObjectsRaw.objects.length / maxValue)
-    );
-
-    for (let i = 0; i < mf4ObjectsRaw.objects.length; i = i + delta) {
-      mf4ObjectsResampled.push(mf4ObjectsRaw.objects[i]);
-    }
-
-    let iCount = 0;
-    mf4ObjectsResampled.map(object => {
-      web
-        .GetPartialObject({
-          bucketName: "Home",
-          objectName: object.name,
-          byteLength: 3000
-        })
-        .then(objContent => {
-          iCount += 1;
-
-          let storageFree = extractStorageFromMetaHeader(objContent);
-          let lastModified = object.lastModified;
-
-          if (storageFree) {
-            storageFreeTimeseries = storageFreeTimeseries.concat({
-              lastModified: lastModified,
-              storageFree: storageFree
-            });
-          }
-          if (iCount == mf4ObjectsResampled.length) {
-            dispatch(setStorageFreeTimeseries(storageFreeTimeseries));
-          }
-        })
-        .catch(err => {
-          dispatch(
-            alertActions.set({
-              type: "danger",
-              message: err.message
-            })
-          );
-        });
-    });
-  };
-};
-
 export const clearDataDevices = () => ({
   type: CLEAR_DATA_DEVICES
 });
@@ -841,11 +740,6 @@ export const setObjectsData = mf4Objects => ({
 export const setDeviceLastMf4MetaData = deviceLastMf4MetaData => ({
   type: SET_LAST_OBJECT_DATA,
   deviceLastMf4MetaData
-});
-
-export const setStorageFreeTimeseries = storageFreeTimeseries => ({
-  type: SET_STORAGE_FREE_TIMESERIES,
-  storageFreeTimeseries
 });
 
 export const setDevicesFilesCount = devicesFilesCount => ({

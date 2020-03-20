@@ -128,45 +128,6 @@
       }
     },
     "filter": {
-      "items": {
-        "state": {
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:title": " "
-        },
-        "type": {
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:title": " "
-        },
-        "id_format": {
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:title": " "
-        },
-        "method": {
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:title": " "
-        },
-        "prescaler": {
-          "classNames": "col-sm-2 smaller-margins",
-          "ui:placeholder": "Prescaler",
-          "ui:widget": "updown",
-          "ui:title": " "
-        },
-        "f1": {
-          "classNames": "col-sm-2 smaller-margins",
-          "ui:placeholder": "From/ID (HEX)",
-          "ui:title": " "
-        },
-        "f2": {
-          "classNames": "col-sm-2 smaller-margins",
-          "ui:placeholder": "To/Mask (HEX)",
-          "ui:title": " "
-        },
-        "name": {
-          "ui:title": " ",
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:placeholder": "Name"
-        }
-      },
       "ui:widget": "hidden"
     },
     "transmit": {
@@ -218,7 +179,7 @@
         },
         "name": {
           "ui:title": " ",
-          "classNames": "col-sm-1 smaller-margins",
+          "classNames": "col-sm-2 smaller-margins",
           "ui:placeholder": "Name"
         }
       }
@@ -329,45 +290,6 @@
       }
     },
     "filter": {
-      "items": {
-        "state": {
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:title": " "
-        },
-        "type": {
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:title": " "
-        },
-        "id_format": {
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:title": " "
-        },
-        "method": {
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:title": " "
-        },
-        "prescaler": {
-          "classNames": "col-sm-2 smaller-margins",
-          "ui:placeholder": "Prescaler",
-          "ui:widget": "updown",
-          "ui:title": " "
-        },
-        "f1": {
-          "classNames": "col-sm-2 smaller-margins",
-          "ui:placeholder": "From/ID (HEX)",
-          "ui:title": " "
-        },
-        "f2": {
-          "classNames": "col-sm-2 smaller-margins",
-          "ui:placeholder": "To/Mask (HEX)",
-          "ui:title": " "
-        },
-        "name": {
-          "ui:title": " ",
-          "classNames": "col-sm-1 smaller-margins",
-          "ui:placeholder": "Name"
-        }
-      },
       "ui:widget": "hidden"
     },
     "transmit": {

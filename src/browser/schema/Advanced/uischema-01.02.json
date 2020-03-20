@@ -144,7 +144,7 @@
           "ui:placeholder": "To/Mask (HEX)",
           "ui:title": " "
         },
-		"prescaler": {
+        "prescaler": {
           "classNames": "col-sm-1 smaller-margins",
           "ui:title": " "
         },

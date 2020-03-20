@@ -41,15 +41,15 @@ export const SET_CONFIG_DATA_LOCAL = "SET_CONFIG_DATA_LOCAL";
 
 // Note: These need to be updated with future firmware revisions
 const uiSchemaAry = [
-  "uischema-00.07.json | Simple",
-  "uischema-00.07.json | Advanced"
+  "uischema-01.02.json | Simple",
+  "uischema-01.02.json | Advanced"
 ];
 
 const schemaAry = [
   "schema-01.02.json | CANedge2",
   "schema-01.02.json | CANedge1",
-  "schema-00.07.json | CANedge2",
-  "schema-00.07.json | CANedge1",
+  "schema-01.02.json | CANedge2",
+  "schema-01.02.json | CANedge1",
   "schema-00.06.json | CANedge2",
   "schema-00.06.json | CANedge1",
   "schema-00.05.json | CANedge2",

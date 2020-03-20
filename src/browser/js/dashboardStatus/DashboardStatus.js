@@ -3,10 +3,12 @@ import React from "react";
 import SideBar from "../browser/SideBar";
 import AlertContainer from "../alert/AlertContainer";
 import DashboardStatusMainContent from "./DashboardStatusMainContent";
+import DeviceFileModal from "../editorTools/DeviceFileModal"
 
 const DashboardStatus = () => (
   <div>
     <SideBar />
+    <DeviceFileModal/>
     <DashboardStatusMainContent />
     <AlertContainer />
   </div>

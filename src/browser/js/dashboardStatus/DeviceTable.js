@@ -86,6 +86,11 @@ const DeviceTable = props => {
       deviceCrc32Test[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&
       deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32;
+   
+   let storageUsedAbs =
+    deviceFile &&
+    deviceFile.space_used_mb && deviceFile.space_used_mb.replace("/"," / ")
+  
     let storageUsed =
       deviceFile &&
       deviceFile.space_used_mb &&
@@ -94,7 +99,7 @@ const DeviceTable = props => {
           deviceFile.space_used_mb.split("/")[1]) *
           10000
       ) / 100;
-    storageUsed = storageUsed <= 100 ? storageUsed : "";
+    storageUsed = storageUsed <= 100 ? storageUsed : undefined;
     let lastLogUpload = lastMf4Meta && lastMf4Meta.lastModified;
     lastLogUpload = lastLogUpload
       ? Moment(lastLogUpload).format("YY-MM-DD HH:mm")
@@ -107,6 +112,7 @@ const DeviceTable = props => {
       lastHeartbeat,
       time_since_heartbeat_min,
       storageUsed,
+      storageUsedAbs,
       fwVer,
       configSync,
       lastLogUpload,
@@ -122,7 +128,8 @@ const DeviceTable = props => {
     name: "Server meta",
     fwVer: "Firmware",
     uploadedMb: "MB uploaded",
-    storageUsed: "Used SD storage",
+    storageUsed: "SD storage used",
+    storageUsedAbs: "SD used vs total",
     configSync: "Config synced",
     lastLogUpload: "Last log upload"
   };
@@ -175,7 +182,7 @@ const DeviceTable = props => {
                     </span>
                   </li>
                 </ul>
-              ) : index == 9 ? (
+              ) : index == 10 ? (
                 <ul className="chart">
                   <li>
                     <span
@@ -202,14 +209,31 @@ const DeviceTable = props => {
                         width: v ? v : 0,
                         height: "100",
                         backgroundColor: "#FF9900",
-                        color: v > 10 ? "white" : "#8e8e8e"
+                        color: v > 25 ? "white" : "#8e8e8e"
                       }}
                     >
-                      {v ? <div>&nbsp;{v}&nbsp;%</div> : ""}
+                      
+                      {v != undefined && !isNaN(v) ? <div>{v < 25
+                        ? "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0" +
+                          "\u00A0"
+                        : null}&nbsp;{v}&nbsp;%</div> : ""}
                     </span>
                   </li>
                 </ul>
-              ) : index == 7 ? (
+              ) 
+              : index == 6 ? (
+                <span >
+                {v != undefined ? v + " MB" : null}
+              </span>
+              ) : index == 8 ? (
                 <div>
                   {" "}
                   {v == true ? (

@@ -3,6 +3,8 @@ import web from "../web";
 import * as alertActions from "../alert/actions";
 import * as commonActions from "../browser/actions";
 import _ from "lodash";
+import {demoMode, demoDate} from "../utils";
+
 export const SET_PERIODSTART_BACK = "dashboardStatus/SET_PERIODSTART_BACK";
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
 export const ADD_DEVICE_MARKER = "dashboardStatus/ADD_DEVICE_MARKER";
@@ -33,9 +35,6 @@ const loggerConfigRegex = new RegExp(
   "g"
 );
 
-let periodStart = new Date(); // get current date & time
-let periodDaysMax = 30; // all objects before this period are excluded
-periodStart.setDate(periodStart.getDate() - periodDaysMax);
 
 let lastHour = new Date();
 lastHour.setTime(lastHour.getTime() - 1 * 60 * 60 * 1000);
@@ -207,7 +206,7 @@ export const listLogFiles = devicesFilesInput => {
   return function(dispatch, getState) {
     let devices = getState().buckets.list ? getState().buckets.list : [];
     devices = devices.filter(e => e.match(loggerRegex));
-    const devicesFilesDefaultMax = 5;
+    const devicesFilesDefaultMax = demoMode ? 15 : 5;
 
     // if the user selects specific devices (devicesFilesInput) show these. If no selection, show up to X devices by default
     let devicesFiles =

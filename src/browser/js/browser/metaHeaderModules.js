@@ -4,6 +4,7 @@ var speedDate = require("speed-date");
 import {
   barOptionsFunc
 } from "../dashboardStatus/prepareData";
+import {demoMode, demoDate} from "../utils";
 
 export function extractMetaDevice(serverConfig, device) {
   if (serverConfig.devicemeta && serverConfig.devicemeta.devices) {
@@ -130,8 +131,11 @@ export function DeviceMetaLogFileChart(props) {
 }
 
 let periodHours = 7 * 24;
-let periodEndNew = new Date();
-let periodStartNew = new Date();
+let periodEndNew = demoMode ? new Date(demoDate) : new Date();
+let periodStartNew = demoMode ? new Date(demoDate) : new Date();
+
+console.log(periodEndNew)
+
 periodStartNew.setTime(periodStartNew.getTime() - periodHours * 60 * 60 * 1000);
 
 let periodStart = speedDate("YYYY-MM-DD HH", periodStartNew);

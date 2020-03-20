@@ -24,16 +24,34 @@ import InputGroup from "./InputGroup";
 import web from "../web";
 import { Redirect } from "react-router-dom";
 import history from "../history";
+import {demoMode} from "../utils";
 
 export class Login extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      accessKey: "",
-      secretKey: "",
-      endPoint: "",
-      bucketName: ""
-    };
+
+    if(demoMode){
+      try{
+      let demo = require("../../schema/demo-credentials.json")
+      this.state = demo.demoCredentials
+      }
+      catch(err){
+        this.state = {
+          accessKey: "",
+          secretKey: "",
+          endPoint: "",
+          bucketName: ""
+        };
+      }
+    }else{
+      this.state = {
+        accessKey: "",
+        secretKey: "",
+        endPoint: "",
+        bucketName: ""
+      };
+    }
+
 
     // LIVE DEMO
   }

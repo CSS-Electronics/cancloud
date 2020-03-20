@@ -1,8 +1,12 @@
 import * as dashboardStatusActions from "./actions";
 import _ from "lodash";
+import {demoMode, demoDate} from "../utils";
 
 // initialize periodStart for first load
 let periodStart = new Date();
+if(demoMode){
+  periodStart = new Date(demoDate);  // set fixed date for demo purposes
+}
 periodStart.setDate(periodStart.getDate() - 7);
 
 export default (
@@ -53,6 +57,9 @@ export default (
       };
     case dashboardStatusActions.SET_PERIODSTART_BACK:
       let periodStart = new Date();
+      if(demoMode){
+        periodStart = new Date(demoDate);  // set fixed date for demo purposes
+      }
       periodStart.setDate(periodStart.getDate() - action.periodDelta)
       return {
         ...state,

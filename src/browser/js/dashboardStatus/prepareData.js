@@ -1,3 +1,5 @@
+import {demoMode, demoDate} from "../utils";
+
 var speedDate = require("speed-date");
 
 let uploadedPerTime = {};
@@ -171,6 +173,13 @@ export const prepareData = (
   // filter log files & devices based on time period
   let periodEndNew = new Date();
   let periodStartNew = new Date();
+
+  if(demoMode){
+    periodEndNew = new Date(demoDate);  // set fixed date for demo purposes
+    periodStartNew = new Date(demoDate);
+  }
+
+
   periodStartNew.setTime(
     periodStartNew.getTime() - periodHours * 60 * 60 * 1000
   );

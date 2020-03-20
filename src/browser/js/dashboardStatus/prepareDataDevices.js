@@ -1,4 +1,5 @@
 import Moment from "moment";
+import {demoMode, demoDate} from "../utils";
 
 let deviceFileObjectsFiltered = [];
 let deviceFileContentsFiltered = [];
@@ -84,6 +85,11 @@ export const prepareDataDevices = (
 ) => {
   // filter log files & devices based on time period
   let periodStartNew = new Date();
+
+  if(demoMode){
+    periodStartNew = new Date(demoDate);
+  }
+
   periodStartNew.setTime(
     periodStartNew.getTime() - periodHours * 60 * 60 * 1000
   );
@@ -97,7 +103,7 @@ export const prepareDataDevices = (
   const deviceIdListDelta = deviceFileObjectsFiltered.map(device => {
     const deviceId = device.deviceId;
     const lastModified = Moment(device.lastModified);
-    const lastModifiedDelta = Moment().diff(lastModified, "minutes");
+    const lastModifiedDelta = demoMode ? Moment(demoDate).diff(lastModified, "minutes") : Moment().diff(lastModified, "minutes");
     const lastModifiedMin = lastModified.format("YY-MM-DD HH:mm");
 
     return { deviceId, lastModifiedDelta, lastModifiedMin };
@@ -166,8 +172,6 @@ export const prepareDataDevices = (
 
 
 
-
-
   // calculate storageUsed average for KPIs
   let storageUsedAry = deviceFileContentsFiltered.map(
     object =>
@@ -179,9 +183,10 @@ export const prepareDataDevices = (
           10000
       ) / 100
   );
+
   storageUsedAry = storageUsedAry.filter(
     object =>
-      object <= 100 && object != "" && object != NaN && object != undefined
+      object <= 100  && !isNaN(object) && object != undefined
   );
 
   const kpiUsedStorage = storageUsedAry.length

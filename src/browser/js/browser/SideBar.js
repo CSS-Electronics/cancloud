@@ -27,6 +27,7 @@ import * as actionsCommon from "./actions";
 import web from "../web";
 import history from "../history";
 import { pathSlice } from "../utils";
+import {demoMode, demoDate} from "../utils";
 
 export const SideBar = ({
   sidebarOpen,
@@ -48,7 +49,8 @@ export const SideBar = ({
         <div className="fes-header clearfix hidden-sm hidden-xs">
           <img src={logo} style={{ width: "65%", maxHeight: "70px" }} />
           <div className="version-text sb-custom-version">
-            v03.06.04
+            v03.06.05
+            {demoMode ? <div><br/>DEMO MODE (date fixed at {demoDate.split(" ")[0]})</div>: null}
           </div>
         </div>
         <div className="fes-list">

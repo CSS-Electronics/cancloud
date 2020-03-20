@@ -678,7 +678,6 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
               crc32Val = crc32(data)
                 .toString(16)
                 .toUpperCase()
-                .padStart(8, "0");
 
               configFileCrc32.push({
                 deviceId: configObject.deviceId,

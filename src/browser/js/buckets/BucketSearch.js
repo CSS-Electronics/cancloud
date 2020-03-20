@@ -18,7 +18,7 @@ import React from "react";
 import { connect } from "react-redux";
 import * as actionsBuckets from "./actions";
 
-export const BucketSearch = ({ onChange }) => (
+export const BucketSearch = ({ filter, onChange }) => (
   <div
     className="input-group ig-dark ig-left ig-search sb-custom-search-icon"
     style={{ display: "block" }}
@@ -27,12 +27,19 @@ export const BucketSearch = ({ onChange }) => (
       className="ig-text sb-custom-search-text"
       style={{ color: "red" }}
       type="text"
+      value={filter}
       onChange={e => onChange(e.target.value)}
       placeholder="Search devices..."
     />
     <i className="ig-helpers" />
   </div>
 );
+
+const mapStateToProps = state => {
+  return {
+    filter: state.buckets.filter
+  };
+};
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -43,6 +50,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 export default connect(
-  undefined,
+  mapStateToProps,
   mapDispatchToProps
 )(BucketSearch);

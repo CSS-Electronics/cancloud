@@ -55,6 +55,7 @@ export default (
         list: removeBucket(state.list, action)
       };
     case actionsBuckets.SET_FILTER:
+      console.log(action.filter)
       return {
         ...state,
         filter: action.filter

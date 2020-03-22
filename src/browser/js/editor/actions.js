@@ -13,6 +13,7 @@ import {
   pathSlice
 } from "../utils";
 import { getCurrentBucket } from "../buckets/selectors";
+import { setConfigFileCrc32 } from "../dashboardStatus/actions";
 
 export const SET_SCHEMA_LIST = "editor/SET_SCHEMA_LIST";
 export const SET_CONFIG_LIST = "editor/SET_CONFIG_LIST";
@@ -394,6 +395,7 @@ export const updateConfigFile = (content, object) => {
       });
   };
 };
+
 
 export const fetchConfigContent = (fileName, type) => {
   return function(dispatch, getState) {

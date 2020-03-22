@@ -126,6 +126,9 @@ export const fetchServerConfigContent = fileObject => {
       // No configuration file
       dispatch(setServerConfigContent({}));
 
+      // if no serverConfig, still assign meta data to devices
+      dispatch(bucketActions.addBucketMetaData());
+      
       if(bucket == "status-dashboard"){
         dispatch(dashboardStatusActions.listAllObjects())
       }
@@ -200,6 +203,8 @@ export const fetchServerConfigContent = fileObject => {
                 autoClear: false
               })
             );
+            // if no serverConfig, still assign meta data to devices
+            dispatch(bucketActions.addBucketMetaData());
 
             if(bucket == "status-dashboard"){
               dispatch(dashboardStatusActions.listAllObjects())
@@ -209,6 +214,9 @@ export const fetchServerConfigContent = fileObject => {
           }
         });
     } else {
+      // if no serverConfig, still assign meta data to devices
+      dispatch(bucketActions.addBucketMetaData());
+
       if(bucket == "status-dashboard"){
         dispatch(dashboardStatusActions.listAllObjects())
       }

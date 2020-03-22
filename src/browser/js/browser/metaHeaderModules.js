@@ -56,12 +56,25 @@ export function DeviceImage(props) {
 }
 
 export function DeviceMeta(props) {
-  const { metaDevice } = props;
+  const { metaDevice , device, deviceFileContents, configFileCrc32} = props;
  
-  const name = metaDevice && metaDevice.name ? metaDevice.name : undefined
-  const group = metaDevice && metaDevice.group ? metaDevice.group : undefined
-  const subgroup = metaDevice && metaDevice.subgroup ? metaDevice.subgroup : undefined
-  const comment = metaDevice && metaDevice.name ?  metaDevice.name : undefined
+  let deviceFileContentsFiltered = deviceFileContents.filter(object => object != undefined && object.id == device)[0]
+
+  let log_meta = deviceFileContentsFiltered && deviceFileContentsFiltered.log_meta
+  let space_used_mb = deviceFileContentsFiltered && deviceFileContentsFiltered.space_used_mb
+  let cfg_crc32 = deviceFileContentsFiltered && deviceFileContentsFiltered.cfg_crc32
+
+  let crcTest = cfg_crc32 && configFileCrc32.length > 0 && configFileCrc32[0].crc32 ? cfg_crc32 == configFileCrc32[0].crc32 : undefined
+
+
+  // console.log("cfg_crc32",cfg_crc32)
+  // console.log("configFileCrc32",configFileCrc32)
+
+  let cfgSync = crcTest == undefined ? null : !crcTest ? <p className="red-text zero-bottom-margin">
+  <i className="fa fa-times" />
+</p> : <p className="blue-text zero-bottom-margin">
+  <i className="fa fa-check" />
+</p>
 
   return (
     <div className="col-sm-4">
@@ -70,20 +83,19 @@ export function DeviceMeta(props) {
           <br />
           <table className="table table-background">
             <tbody>
-              <tr>
-                <td className="col-md-2">Name</td>
-                <td>{name}</td>
+            <tr>
+                <td className="col-md-2">Meta</td>
+                <td>{log_meta}</td>
               </tr>
               <tr>
-                <td className="col-md-2">Group</td>
+                <td className="col-md-2" style={{whiteSpace:"nowrap"}}>Config sync</td>
                 <td>
-                  {group}{" "}
-                  {subgroup ? "/" + subgroup : ""}
+                {cfgSync}
                 </td>
               </tr>
               <tr>
-                <td className="col-md-2">Comment</td>
-                <td>{comment}</td>
+                <td className="col-md-2" style={{whiteSpace:"nowrap"}}>Space used</td>
+      <td>{space_used_mb}{space_used_mb ? " MB" : null}</td>
               </tr>
             </tbody>
           </table>
@@ -133,8 +145,6 @@ export function DeviceMetaLogFileChart(props) {
 let periodHours = 7 * 24;
 let periodEndNew = demoMode ? new Date(demoDate) : new Date();
 let periodStartNew = demoMode ? new Date(demoDate) : new Date();
-
-console.log(periodEndNew)
 
 periodStartNew.setTime(periodStartNew.getTime() - periodHours * 60 * 60 * 1000);
 

@@ -109,8 +109,9 @@ export const prepareDataDevices = (
     return { deviceId, lastModifiedDelta, lastModifiedMin };
   });
 
+  console.log("deviceFileContents",deviceFileContents)
   deviceFileContentsFiltered = deviceFileContents.filter(e =>
-    deviceIdList.includes(e.id) ? e : null
+    e && e.id && deviceIdList.includes(e.id) ? e : null
   );
 
   // device heartbeat pie chart

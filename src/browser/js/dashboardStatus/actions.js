@@ -625,6 +625,8 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
   let deviceFileContents = [];
 
   return function(dispatch) {
+    let iDeviceFileCount = 0;
+
     deviceFileObjects.map((deviceFileObject, i) =>
       web
         .PresignedGet({
@@ -634,23 +636,24 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
         })
         .then(res => {
           fetch(res.url)
-            .then(r => r.json())
+            .then(r => r.json().catch(e => {}))
             .then(data => {
+              iDeviceFileCount += 1
               deviceFileContents.push(data);
-              if (deviceFileObjects.length == deviceFileContents.length) {
-                dispatch(deviceFileContent(deviceFileContents));
+
+              if (deviceFileObjects.length == iDeviceFileCount) {
+                dispatch(deviceFileContent(deviceFileContents.filter(obj => obj != undefined)));
               }
             });
         })
         .catch(e => {
-          dispatch(
-            alertActions.set({
-              type: "danger",
-              message: e.message,
-              autoClear: true
-            })
-          );
+          iDeviceFileCount += 1
+
+          if (deviceFileObjects.length == iDeviceFileCount) {
+            dispatch(deviceFileContent(deviceFileContents.filter(obj => obj != undefined)));
+          }
         })
+       
     );
   };
 };
@@ -660,9 +663,14 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
   let configFileContents = [];
   let configFileCrc32 = [];
 
+  console.log("configObjectsUnique",configObjectsUnique)
   return function(dispatch) {
-    configObjectsUnique.map((configObject, i) =>
-      web
+    // clear configFileCrc32
+    dispatch(setConfigFileCrc32([]));
+
+    configObjectsUnique.map((configObject, i) =>     
+
+        web
         .PresignedGet({
           bucket: configObject.deviceId,
           object: configObject.name.split("/")[1],
@@ -672,8 +680,9 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
           fetch(res.url)
             .then(r => r.text())
             .then(data => {
+              
               configFileContents.push(JSON.parse(data));
-
+              
               crc32Val = crc32(data)
                 .toString(16)
                 .toUpperCase()
@@ -690,9 +699,14 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
                 dispatch(configFileContent(configFileContents));
                 dispatch(setConfigFileCrc32(configFileCrc32));
               }
-            });
+            }).catch(e => {
+              console.log("No valid config found")
+              configFileContents.push({});
+            })
         })
         .catch(e => {
+          console.log("Not this?")
+
           dispatch(
             alertActions.set({
               type: "danger",
@@ -701,7 +715,7 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
             })
           );
         })
-    );
+      )
   };
 };
 

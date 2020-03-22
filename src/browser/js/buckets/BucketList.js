@@ -55,7 +55,7 @@ export class BucketList extends React.Component {
               <BucketContainer
                 key={bucket}
                 bucket={bucket}
-                serverConfig={this.props.serverConfig}
+                bucketsMeta={this.props.bucketsMeta}
               />
             ))}
           </ul>
@@ -68,7 +68,7 @@ export class BucketList extends React.Component {
 const mapStateToProps = state => {
   return {
     visibleBucketsMeta: getVisibleBucketsMeta(state),
-    serverConfig: state.browser.serverConfig,
+    bucketsMeta: state.buckets.bucketsMeta,
     filter: state.buckets.filter,
     list: state.buckets.list
   };

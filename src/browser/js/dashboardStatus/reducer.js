@@ -32,7 +32,6 @@ export default (
     case dashboardStatusActions.CLEAR_DATA_DEVICES:
       return {
         ...state,
-        deviceFileContents: [],
         deviceFileObjects: [],
         configObjectsUnique: [],
         configFileContents: [],

@@ -107,8 +107,8 @@ const DeviceTable = props => {
 
     return {
       id,
-      name,
       meta,
+      name,
       lastHeartbeat,
       time_since_heartbeat_min,
       storageUsed,

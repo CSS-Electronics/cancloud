@@ -11,7 +11,6 @@ import {
   extractMetaDevice
 } from "./metaHeaderModules";
 
-
 export class DeviceMetaHeaderContainer extends Component {
   constructor(props) {
     super(props);
@@ -24,11 +23,17 @@ export class DeviceMetaHeaderContainer extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { bucket } = pathSlice(history.location.pathname);
+    let deviceFile = this.props.deviceFileContents.filter(
+      obj => obj.id == bucket
+    )[0];
+    let cfg_name = deviceFile && deviceFile.cfg_name;
+    let configObject = [{ deviceId: bucket, name: bucket + "/" + cfg_name }];
 
     if (
-      this.props.currentBucket != "" &&
+      this.props.deviceFileContents != nextProps.deviceFileContents ||
       this.props.currentBucket != nextProps.currentBucket
     ) {
+      this.props.fetchConfigFileContentAll(configObject);
       this.props.clearDataFiles();
       this.props.listLogFiles([bucket]);
     }
@@ -36,7 +41,6 @@ export class DeviceMetaHeaderContainer extends Component {
 
   componentWillMount() {
     const { bucket } = pathSlice(history.location.pathname);
-
     this.props.clearDataFiles();
     this.props.listLogFiles([bucket]);
   }
@@ -52,8 +56,11 @@ export class DeviceMetaHeaderContainer extends Component {
     const {
       serverConfig,
       serverImage,
-      mf4Objects
+      mf4Objects,
+      deviceFileContents,
+      configFileCrc32
     } = this.props;
+
     let metaDevice = "";
     let dataUploadTime = [];
     let barOptions = [];
@@ -61,28 +68,39 @@ export class DeviceMetaHeaderContainer extends Component {
     if (mf4Objects.length) {
       [dataUploadTime, barOptions] = prepareDeviceData(mf4Objects);
     }
-  
+
     metaDevice = extractMetaDevice(serverConfig, device);
-    let display = serverConfig && serverConfig.devicemeta && serverConfig.devicemeta.display 
+    let display =
+      serverConfig &&
+      serverConfig.devicemeta &&
+      serverConfig.devicemeta.display;
 
     return (
       <div>
-        {(display == undefined || display == 1) ? (
+        {display == undefined || display == 1 ? (
           <div
             className={
-              serverConfig && serverConfig.deviceMeta && !serverConfig.devicemeta.display
+              serverConfig &&
+              serverConfig.deviceMeta &&
+              !serverConfig.devicemeta.display
                 ? "meta-header-height row hidden"
                 : "meta-header-height row meta-container"
             }
           >
-            {metaDevice ? 
-            <DeviceImage
+            {metaDevice ? (
+              <DeviceImage
+                device={device}
+                metaDevice={metaDevice}
+                serverImage={serverImage}
+              />
+            ) : null}
+
+            <DeviceMeta
               device={device}
               metaDevice={metaDevice}
-              serverImage={serverImage}
-            /> : null}
-
-            <DeviceMeta device={device} metaDevice={metaDevice} />
+              deviceFileContents={deviceFileContents}
+              configFileCrc32={configFileCrc32}
+            />
             <DeviceMetaLogFileChart
               dataUploadTime={dataUploadTime}
               barOptions={barOptions}
@@ -100,7 +118,11 @@ export class DeviceMetaHeaderContainer extends Component {
 const mapDispatchToProps = dispatch => ({
   listLogFiles: devicesFilesInput =>
     dispatch(dashboardStatusActions.listLogFiles(devicesFilesInput)),
-  clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles())
+  clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles()),
+  fetchConfigFileContentAll: configObjectsUnique =>
+    dispatch(
+      dashboardStatusActions.fetchConfigFileContentAll(configObjectsUnique)
+    )
 });
 
 function mapStateToProps(state) {
@@ -109,6 +131,8 @@ function mapStateToProps(state) {
     currentBucket: state.buckets.currentBucket,
     serverImage: state.browser.serverImage,
     mf4Objects: state.dashboardStatus.mf4Objects,
+    deviceFileContents: state.dashboardStatus.deviceFileContents,
+    configFileCrc32: state.dashboardStatus.configFileCrc32
   };
 }
 

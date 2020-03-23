@@ -60,7 +60,7 @@ class EditorSchemaModal extends React.Component {
           onChange={handleUiSchemaChange}
           handleUplodedFile={handleUplodedUISchema}
           customBackground={true}
-          comment="The UIschema affects the visual presentation of the editor. It does not impact the Configuration File. It can also be used to hide e.g. advanced settings via a Simple variant - or show all settings via an Advanced variant. The default UIschema can be changed by uploading a UIschema to the server folder."
+          comment="The UIschema affects the visual presentation of the editor. It does not impact the Configuration File. It can also be used to hide e.g. advanced settings via a Simple variant - or show all settings via an Advanced variant."
         />
         <EditorDropdown
           options={editorSchemaFiles}

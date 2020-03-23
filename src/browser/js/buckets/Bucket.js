@@ -21,7 +21,6 @@ import history from "../history";
 
 export const Bucket = ({ bucket, isActive, selectBucket, bucketsMeta, listLogFiles }) => {
   const loggerRegex = new RegExp(/([0-9A-Fa-f]){8}/g);
-  const serverRegex = new RegExp(/server/g);
   let deviceName = "";
 
   if(bucketsMeta && bucketsMeta.length > 0){
@@ -51,7 +50,7 @@ export const Bucket = ({ bucket, isActive, selectBucket, bucketsMeta, listLogFil
       >
         {deviceName}
       </a>
-      {bucket.match(loggerRegex) || bucket.match(serverRegex) ? (
+      {bucket.match(loggerRegex) ? (
         <BucketDropdown bucket={bucket} selectBucket={selectBucket} />
       ) : null}
     </li>

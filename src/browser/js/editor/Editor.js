@@ -26,7 +26,7 @@ class Editor extends React.Component {
     selectBucket(prefix);
     if (
       prefix &&
-      (isValidDevice(prefix) || prefix == "server") &&
+      (isValidDevice(prefix)) &&
       !web.LoggedIn()
     ) {
       history.push("/login");

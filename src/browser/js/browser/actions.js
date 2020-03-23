@@ -33,42 +33,38 @@ export const closeSidebar = () => ({
   type: CLOSE_SIDEBAR
 });
 
-
 // use existing listObjects for device view to extract the name of the image, then parse below (and run if an image is there)
-export const fetchDeviceImage = (fileName) => {
+export const fetchDeviceImage = fileName => {
   return function(dispatch, getState) {
-
     const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
     const { bucket, prefix } = pathSlice(history.location.pathname);
 
-      return web
-        .PresignedGet({
-          bucket: bucket,
-          object: fileName,
-          expiry: expiry
-        })
-        .then(res => {
-          fetch(res.url)
-            .then(data => {
-              dispatch(setDeviceImage(res.url));
+    return web
+      .PresignedGet({
+        bucket: bucket,
+        object: fileName,
+        expiry: expiry
+      })
+      .then(res => {
+        fetch(res.url)
+          .then(data => {
+            dispatch(setDeviceImage(res.url));
+          })
+          .catch(e => {});
+      })
+      .catch(err => {
+        if (web.LoggedIn()) {
+          dispatch(
+            alertActions.set({
+              type: "danger",
+              message: err.message,
+              autoClear: false
             })
-            .catch(e => {
-            });
-        })
-        .catch(err => {
-          if (web.LoggedIn()) {
-            dispatch(
-              alertActions.set({
-                type: "danger",
-                message: err.message,
-                autoClear: false
-              })
-            );
-          } else {
-            history.push("/login");
-          }
-        })
-  
+          );
+        } else {
+          history.push("/login");
+        }
+      });
   };
 };
 

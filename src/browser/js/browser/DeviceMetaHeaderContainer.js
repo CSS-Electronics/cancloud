@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import history from "../history";
 import { pathSlice } from "../utils";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
-import * as browserActions from "./actions"
+import * as browserActions from "./actions";
 
 import {
   DeviceImage,
@@ -12,8 +12,7 @@ import {
   prepareDeviceData
 } from "./metaHeaderModules";
 
-const imageRegex = new RegExp(/^image\.(jpg|JPG|JPEG|png|PNG)$/,"g");
-
+const imageRegex = new RegExp(/^image\.(jpg|JPG|JPEG|png|PNG)$/, "g");
 
 export class DeviceMetaHeaderContainer extends Component {
   constructor(props) {
@@ -27,19 +26,18 @@ export class DeviceMetaHeaderContainer extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { bucket } = pathSlice(history.location.pathname);
-    
+
     if (
       this.props.deviceFileContents != nextProps.deviceFileContents ||
       this.props.currentBucket != nextProps.currentBucket
     ) {
-
       let deviceFile = nextProps.deviceFileContents.filter(
         obj => obj.id == bucket
       )[0];
       let cfg_name = deviceFile && deviceFile.cfg_name;
       let configObject = [{ deviceId: bucket, name: bucket + "/" + cfg_name }];
 
-      if(!configObject[0].name.includes("undefined")){
+      if (!configObject[0].name.includes("undefined")) {
         this.props.fetchConfigFileContentAll(configObject);
       }
 
@@ -47,12 +45,14 @@ export class DeviceMetaHeaderContainer extends Component {
       this.props.listLogFiles([bucket]);
     }
 
-    if(this.props.list != nextProps.list && nextProps.list.length > 0){
-      this.props.setDeviceImage(undefined)
+    if (this.props.list != nextProps.list && nextProps.list.length > 0) {
+      this.props.setDeviceImage(undefined);
 
-      let imageName = nextProps.list.filter(obj => obj && obj.name && obj.name.match(imageRegex))[0]
-      if(imageName && imageName.name){
-        this.props.fetchDeviceImage(imageName.name)
+      let imageName = nextProps.list.filter(
+        obj => obj && obj.name && obj.name.match(imageRegex)
+      )[0];
+      if (imageName && imageName.name) {
+        this.props.fetchDeviceImage(imageName.name);
       }
     }
   }
@@ -87,30 +87,26 @@ export class DeviceMetaHeaderContainer extends Component {
 
     return (
       <div>
-          <div className="meta-header-height row meta-container" >
-
-             <DeviceImage
-                deviceImage={deviceImage}
-              />
-                        <div className="form-group pl0 field-string">
-
+        <div className="meta-header-height row meta-container">
+          <DeviceImage deviceImage={deviceImage} />
+          <div className="form-group pl0 field-string">
             <DeviceMeta
               device={device}
               deviceFileContents={deviceFileContents}
               configFileCrc32={configFileCrc32}
             />
-              <p className="field-description">
-              Device meta data based on the uploaded Device File. Optionally upload a picture named "image.jpg" or "image.png" in your device folder to display it next to the meta data.
+            <p className="field-description">
+              Device meta data based on the uploaded Device File. Optionally
+              upload a picture named "image.jpg" or "image.png" in your device
+              folder to display it next to the meta data.
             </p>
-            </div>
-            <DeviceMetaLogFileChart
-              dataUploadTime={dataUploadTime}
-              barOptions={barOptions}
-              dashboard={this.dashboard.bind(this)}
-            />
-
-          
           </div>
+          <DeviceMetaLogFileChart
+            dataUploadTime={dataUploadTime}
+            barOptions={barOptions}
+            dashboard={this.dashboard.bind(this)}
+          />
+        </div>
       </div>
     );
   }
@@ -124,8 +120,10 @@ const mapDispatchToProps = dispatch => ({
     dispatch(
       dashboardStatusActions.fetchConfigFileContentAll(configObjectsUnique)
     ),
-  fetchDeviceImage: fileName => dispatch(browserActions.fetchDeviceImage(fileName)),
-  setDeviceImage: deviceImage => dispatch(browserActions.setDeviceImage(deviceImage))
+  fetchDeviceImage: fileName =>
+    dispatch(browserActions.fetchDeviceImage(fileName)),
+  setDeviceImage: deviceImage =>
+    dispatch(browserActions.setDeviceImage(deviceImage))
 });
 
 function mapStateToProps(state) {

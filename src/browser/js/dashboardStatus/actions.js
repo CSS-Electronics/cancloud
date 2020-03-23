@@ -1,10 +1,8 @@
 import web from "../web";
-
 import * as alertActions from "../alert/actions";
-import * as commonActions from "../browser/actions";
-import * as bucketActions from "../buckets/actions"
+import * as bucketActions from "../buckets/actions";
 import _ from "lodash";
-import {demoMode, demoDate} from "../utils";
+import { demoMode } from "../utils";
 
 export const SET_PERIODSTART_BACK = "dashboardStatus/SET_PERIODSTART_BACK";
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
@@ -35,7 +33,6 @@ const loggerConfigRegex = new RegExp(
   /^([0-9A-Fa-f]){8}\/config-[0-9]{2}.[0-9]{2}.json/,
   "g"
 );
-
 
 let lastHour = new Date();
 lastHour.setTime(lastHour.getTime() - 1 * 60 * 60 * 1000);
@@ -317,7 +314,7 @@ export const binarySearchEdges = (
             if (devicesFiles.length == logFileMarkersState.length) {
               dispatch(processLogFiles(devicesFiles, logFileMarkersState));
             }
-          }else {
+          } else {
             // else, proceed to load objects from the first session of the device
             web
               .ListObjects({
@@ -464,7 +461,10 @@ export const binarySearch = (
 
         // when all markers are found, list and process log files with the markers
         let logFileMarkersState = getState().dashboardStatus.logFileMarkers;
-        if (devicesFiles.length == logFileMarkersState.length && devicesFiles.length != 0) {
+        if (
+          devicesFiles.length == logFileMarkersState.length &&
+          devicesFiles.length != 0
+        ) {
           dispatch(processLogFiles(devicesFiles, logFileMarkersState));
         }
       });
@@ -472,7 +472,6 @@ export const binarySearch = (
 };
 
 export const processLogFiles = (devicesFiles, logFileMarkers) => {
-
   let iCount = 0;
 
   let mf4ObjectsHourAry = [];
@@ -489,7 +488,9 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
     // load all log files recursively for each device in devicesFiles
     if (!getState().dashboardStatus.loadedFiles) {
       devicesFiles.map(device => {
-        let marker = logFileMarkers.filter(e => e.deviceId == device)[0] ? logFileMarkers.filter(e => e.deviceId == device)[0].marker : "";
+        let marker = logFileMarkers.filter(e => e.deviceId == device)[0]
+          ? logFileMarkers.filter(e => e.deviceId == device)[0].marker
+          : "";
         if (marker == "SKIP") {
           iCount += 1;
           dispatch(setDevicesFilesCount(iCount));
@@ -639,25 +640,33 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
           fetch(res.url)
             .then(r => r.json().catch(e => {}))
             .then(data => {
-              iDeviceFileCount += 1
+              iDeviceFileCount += 1;
               deviceFileContents.push(data);
 
               if (deviceFileObjects.length == iDeviceFileCount) {
-                dispatch(deviceFileContent(deviceFileContents.filter(obj => obj != undefined)));
-                
+                dispatch(
+                  deviceFileContent(
+                    deviceFileContents.filter(obj => obj != undefined)
+                  )
+                );
+
                 // once all device files are loaded, add meta data to devices
-                dispatch(bucketActions.addBucketMetaData())
+                dispatch(bucketActions.addBucketMetaData());
               }
-            })
+            });
         })
         .catch(e => {
-          iDeviceFileCount += 1
+          iDeviceFileCount += 1;
 
           if (deviceFileObjects.length == iDeviceFileCount) {
-            dispatch(deviceFileContent(deviceFileContents.filter(obj => obj != undefined)));
+            dispatch(
+              deviceFileContent(
+                deviceFileContents.filter(obj => obj != undefined)
+              )
+            );
           }
         })
-    )
+    );
   };
 };
 
@@ -670,9 +679,8 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
     // clear configFileCrc32
     dispatch(setConfigFileCrc32([]));
 
-    configObjectsUnique.map((configObject, i) =>     
-
-        web
+    configObjectsUnique.map((configObject, i) =>
+      web
         .PresignedGet({
           bucket: configObject.deviceId,
           object: configObject.name.split("/")[1],
@@ -682,13 +690,12 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
           fetch(res.url)
             .then(r => r.text())
             .then(data => {
-              
               configFileContents.push(JSON.parse(data));
-              
+
               crc32Val = crc32(data)
                 .toString(16)
                 .toUpperCase()
-                .padStart(8,"0")
+                .padStart(8, "0");
 
               configFileCrc32.push({
                 deviceId: configObject.deviceId,
@@ -702,10 +709,11 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
                 dispatch(configFileContent(configFileContents));
                 dispatch(setConfigFileCrc32(configFileCrc32));
               }
-            }).catch(e => {
-              console.log("No valid config found")
-              configFileContents.push({});
             })
+            .catch(e => {
+              console.log("No valid config found");
+              configFileContents.push({});
+            });
         })
         .catch(e => {
           dispatch(
@@ -716,10 +724,9 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
             })
           );
         })
-      )
+    );
   };
 };
-
 
 export const clearDataDevices = () => ({
   type: CLEAR_DATA_DEVICES

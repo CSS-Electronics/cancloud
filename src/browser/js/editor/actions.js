@@ -77,7 +77,6 @@ export const publicUiSchemaFiles = () => {
   };
 };
 
-
 // load the relevant schema file when a user uploads a config file (based on revision)
 export const publicSchemaFiles = selectedConfig => {
   return function(dispatch) {
@@ -137,7 +136,7 @@ export const fetchSchemaFiles = prefix => {
       .then(data => {
         let allObjects = [];
         allObjects = data.objects.map(object => object.name.split("/")[0]);
-        
+
         // Rule Schemas
         let schemaFiles = allObjects
           .filter(str => str.match(regexSchema))
@@ -145,7 +144,7 @@ export const fetchSchemaFiles = prefix => {
           .reverse();
 
         dispatch(setSchemaFile(schemaFiles));
-        dispatch(fetchSchemaContent(schemaFiles[0])); 
+        dispatch(fetchSchemaContent(schemaFiles[0]));
 
         // Configuration Files
         let configSchema = allObjects
@@ -155,7 +154,6 @@ export const fetchSchemaFiles = prefix => {
 
         dispatch(setConfigFile(configSchema));
         dispatch(fetchConfigContent(configSchema[0], "editor"));
-
 
         // Device File
         const deviceFileName = allObjects.filter(str =>
@@ -323,7 +321,6 @@ export const setDeviceFileLastModified = deviceFileLastModified => ({
   deviceFileLastModified
 });
 
-
 export const updateConfigFile = (content, object) => {
   const { bucket, prefix } = pathSlice(history.location.pathname);
 
@@ -362,7 +359,6 @@ export const updateConfigFile = (content, object) => {
       });
   };
 };
-
 
 export const fetchConfigContent = (fileName, type) => {
   return function(dispatch, getState) {
@@ -459,10 +455,8 @@ export const fetchConfigContent = (fileName, type) => {
   };
 };
 
-
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
-
     const uploadedTest = getState().editor.editorSchemaFiles.filter(file =>
       file.name.includes("local")
     )[0];

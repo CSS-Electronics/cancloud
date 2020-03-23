@@ -187,6 +187,7 @@ class LoadEditorFiles extends React.Component {
       let cfgCrc32EditorPre = crc32(nextProps.configContentPreChange)
         .toString(16)
         .toUpperCase()
+        .padStart(8,"0")
       this.props.setCrc32EditorPre(cfgCrc32EditorPre);
     } else {
       let cfgCrc32EditorPre = `N/A`;

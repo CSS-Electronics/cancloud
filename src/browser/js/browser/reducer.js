@@ -24,6 +24,7 @@ export default (
     serverConfig: {},
     objectName: "",
     serverImage: [],
+    deviceImage: undefined,
     serverConfigModDate: ""
   },
   action
@@ -49,6 +50,11 @@ export default (
       return {
         ...state,
         serverConfig: action.serverConfig
+      };
+    case actionsCommon.SET_DEVICE_IMAGE:
+      return {
+        ...state,
+        deviceImage: action.deviceImage
       };
     case actionsCommon.SET_SERVER_IMAGE:
       return {

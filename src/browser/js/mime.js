@@ -117,6 +117,9 @@ export const getDataType = (name, contentType) => {
   if (fileExt == "MFC" || fileExt == "MFM") {
     return "zip";
   }
+  if (fileExt == "jpg" || fileExt == "JPG" || fileExt == "PNG" || fileExt == "png") {
+    return "image";
+  }
 
   if (fileExt == "bin") {
     return "code";

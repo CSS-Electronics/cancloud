@@ -22,6 +22,7 @@ export const SET_STORAGE_INFO = "common/SET_STORAGE_INFO";
 export const SET_SERVER_INFO = "common/SET_SERVER_INFO";
 export const SET_SERVER_CONFIG_DATA = "common/SET_SERVER_CONFIG_DATA";
 export const SET_SERVER_IMAGE = "common/SET_SERVER_IMAGE";
+export const SET_DEVICE_IMAGE = "common/SET_DEVICE_IMAGE";
 export const SET_SERVER_CONFIG_MOD_DATE = "common/SET_SERVER_CONFIG_MOD_DATE";
 export const SET_BUCKET_ENDPOINT = "common/SET_BUCKET_ENDPOINT";
 import _ from "lodash";
@@ -119,7 +120,6 @@ export const setServerConfigModDate = serverConfigModDate => ({
 
 export const fetchServerConfigContent = fileObject => {
   return function(dispatch, getState) {
-
     const { bucket, prefix } = pathSlice(history.location.pathname);
 
     if (fileObject === undefined) {
@@ -301,4 +301,49 @@ export const fetchServerImage = fileName => {
 export const setServerImage = serverImage => ({
   type: SET_SERVER_IMAGE,
   serverImage
+});
+
+
+// use existing listObjects for device view to extract the name of the image, then parse below (and run if an image is there)
+
+export const fetchDeviceImage = (fileName) => {
+  return function(dispatch, getState) {
+
+    const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
+      return web
+        .PresignedGet({
+          bucket: bucket,
+          object: fileName,
+          expiry: expiry
+        })
+        .then(res => {
+          fetch(res.url)
+            .then(data => {
+              dispatch(setDeviceImage(res.url));
+            })
+            .catch(e => {
+            });
+        })
+        .catch(err => {
+          if (web.LoggedIn()) {
+            dispatch(
+              alertActions.set({
+                type: "danger",
+                message: err.message,
+                autoClear: false
+              })
+            );
+          } else {
+            history.push("/login");
+          }
+        })
+  
+  };
+};
+
+export const setDeviceImage = deviceImage => ({
+  type: SET_DEVICE_IMAGE,
+  deviceImage
 });

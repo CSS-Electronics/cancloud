@@ -109,7 +109,6 @@ export const prepareDataDevices = (
     return { deviceId, lastModifiedDelta, lastModifiedMin };
   });
 
-  console.log("deviceFileContents",deviceFileContents)
   deviceFileContentsFiltered = deviceFileContents.filter(e =>
     e && e.id && deviceIdList.includes(e.id) ? e : null
   );
@@ -293,8 +292,8 @@ export const prepareDataDevices = (
         configFileCrc32.filter(c => c.deviceId == e.id) &&
         configFileCrc32.filter(c => c.deviceId == e.id)[0] &&
         configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32
-          ? configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 ==
-            e.cfg_crc32
+          ? parseInt(configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32,16) ==
+            parseInt(e.cfg_crc32,16)
           : false;
       configCrc32Data[1 - test] += 1;
 

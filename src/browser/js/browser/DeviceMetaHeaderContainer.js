@@ -3,6 +3,8 @@ import { connect } from "react-redux";
 import history from "../history";
 import { pathSlice } from "../utils";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
+import * as browserActions from "./actions"
+
 import {
   DeviceImage,
   DeviceMeta,
@@ -10,6 +12,9 @@ import {
   prepareDeviceData,
   extractMetaDevice
 } from "./metaHeaderModules";
+
+const imageRegex = new RegExp(/^image\.(jpg|JPG|JPEG|png|PNG)$/,"g");
+
 
 export class DeviceMetaHeaderContainer extends Component {
   constructor(props) {
@@ -37,6 +42,15 @@ export class DeviceMetaHeaderContainer extends Component {
       this.props.clearDataFiles();
       this.props.listLogFiles([bucket]);
     }
+
+    if(this.props.list != nextProps.list && nextProps.list.length > 0){
+      this.props.setDeviceImage(undefined)
+
+      let imageName = nextProps.list.filter(obj => obj && obj.name && obj.name.match(imageRegex))[0]
+      if(imageName && imageName.name){
+        this.props.fetchDeviceImage(imageName.name)
+      }
+    }
   }
 
   componentWillMount() {
@@ -58,8 +72,10 @@ export class DeviceMetaHeaderContainer extends Component {
       serverImage,
       mf4Objects,
       deviceFileContents,
-      configFileCrc32
+      configFileCrc32,
+      deviceImage
     } = this.props;
+
 
     let metaDevice = "";
     let dataUploadTime = [];
@@ -89,9 +105,7 @@ export class DeviceMetaHeaderContainer extends Component {
           >
             {metaDevice ? (
               <DeviceImage
-                device={device}
-                metaDevice={metaDevice}
-                serverImage={serverImage}
+                deviceImage={deviceImage}
               />
             ) : null}
 
@@ -122,7 +136,9 @@ const mapDispatchToProps = dispatch => ({
   fetchConfigFileContentAll: configObjectsUnique =>
     dispatch(
       dashboardStatusActions.fetchConfigFileContentAll(configObjectsUnique)
-    )
+    ),
+  fetchDeviceImage: fileName => dispatch(browserActions.fetchDeviceImage(fileName)),
+  setDeviceImage: deviceImage => dispatch(browserActions.setDeviceImage(deviceImage))
 });
 
 function mapStateToProps(state) {
@@ -132,7 +148,9 @@ function mapStateToProps(state) {
     serverImage: state.browser.serverImage,
     mf4Objects: state.dashboardStatus.mf4Objects,
     deviceFileContents: state.dashboardStatus.deviceFileContents,
-    configFileCrc32: state.dashboardStatus.configFileCrc32
+    configFileCrc32: state.dashboardStatus.configFileCrc32,
+    list: state.objects.list,
+    deviceImage: state.browser.deviceImage
   };
 }
 

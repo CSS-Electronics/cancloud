@@ -46,6 +46,7 @@ export class ObjectsListContainer extends React.Component {
       err
     } = this.props;
 
+
     const visibleObjects = objects.slice(0, this.state.page * 100);
     return (
       <div className="feb-container" style={{ position: "relative" }}>

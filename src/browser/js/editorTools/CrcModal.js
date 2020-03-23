@@ -57,7 +57,7 @@ class CrcModal extends React.Component {
 
         {this.props.deviceFileContent &&
         this.props.deviceFileContent["cfg_crc32"] &&
-        this.props.deviceFileContent["cfg_crc32"] == this.props.crc32EditorPre ? (
+        parseInt(this.props.deviceFileContent["cfg_crc32"],16) == parseInt(this.props.crc32EditorPre,16) ? (
           <p className="btn-highlight">
             <i className="fa fa-check" /> &nbsp; The editor/device crc32 values match
           </p>

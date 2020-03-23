@@ -644,7 +644,7 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
               if (deviceFileObjects.length == iDeviceFileCount) {
                 dispatch(deviceFileContent(deviceFileContents.filter(obj => obj != undefined)));
               }
-            });
+            })
         })
         .catch(e => {
           iDeviceFileCount += 1
@@ -653,8 +653,7 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
             dispatch(deviceFileContent(deviceFileContents.filter(obj => obj != undefined)));
           }
         })
-       
-    );
+    )
   };
 };
 
@@ -663,7 +662,6 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
   let configFileContents = [];
   let configFileCrc32 = [];
 
-  console.log("configObjectsUnique",configObjectsUnique)
   return function(dispatch) {
     // clear configFileCrc32
     dispatch(setConfigFileCrc32([]));
@@ -686,6 +684,7 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
               crc32Val = crc32(data)
                 .toString(16)
                 .toUpperCase()
+                .padStart(8,"0")
 
               configFileCrc32.push({
                 deviceId: configObject.deviceId,
@@ -705,8 +704,6 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
             })
         })
         .catch(e => {
-          console.log("Not this?")
-
           dispatch(
             alertActions.set({
               type: "danger",

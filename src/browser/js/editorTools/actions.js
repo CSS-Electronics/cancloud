@@ -78,6 +78,7 @@ export const calcCrc32EditorLive = () => {
       let crc32EditorLive = crc32(JSON.stringify(formData, null, 2))
         .toString(16)
         .toUpperCase()
+        .padStart(8,"0")
 
         dispatch(setCrc32EditorLive(crc32EditorLive));
       } else {

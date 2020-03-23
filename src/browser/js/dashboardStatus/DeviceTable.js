@@ -5,7 +5,6 @@ const DeviceTable = props => {
   const {
     deviceIdListDeltaSort,
     deviceFileContents,
-    serverConfig,
     mf4ObjectsFiltered,
     deviceCrc32Test,
     height,
@@ -43,9 +42,6 @@ const DeviceTable = props => {
     })
   );
 
-  // check if a server config exists and if it includes device meta data
-  let serverConfigTest =
-    serverConfig && serverConfig.devicemeta && serverConfig.devicemeta.devices;
 
   // construct object containing all relevant table data based on sorted device ID list
   const tableData = deviceIdListDeltaSort.map(e => {
@@ -58,15 +54,6 @@ const DeviceTable = props => {
     const lastMf4Meta = deviceLastMf4MetaData.filter(
       meta => meta.name.split("/")[0] == e.deviceId
     )[0];
-
-    // if a server config exists, extract the meta data name
-    const name = serverConfigTest
-      ? serverConfig.devicemeta.devices.filter(o => o.serialno == e.deviceId)[0]
-        ? serverConfig.devicemeta.devices.filter(
-            o => o.serialno == e.deviceId
-          )[0].name
-        : ""
-      : "";
 
     // calculate the delta time since last heartbeat
     const time_since_heartbeat_min = maxDelta
@@ -108,7 +95,6 @@ const DeviceTable = props => {
     return {
       id,
       meta,
-      name,
       lastHeartbeat,
       time_since_heartbeat_min,
       storageUsed,
@@ -125,7 +111,6 @@ const DeviceTable = props => {
     time_since_heartbeat_min: "Time since heartbeat",
     id: "Device ID",
     meta: "Config meta",
-    name: "Server meta",
     fwVer: "Firmware",
     uploadedMb: "MB uploaded",
     storageUsed: "SD storage used",
@@ -152,7 +137,7 @@ const DeviceTable = props => {
         {Object.values(e).map((v, index) => {
           return (
             <td key={"tableCell " + index}>
-              {index == 4 ? (
+              {index == 3 ? (
                 <ul className="chart">
                   <li>
                     <span
@@ -182,7 +167,7 @@ const DeviceTable = props => {
                     </span>
                   </li>
                 </ul>
-              ) : index == 10 ? (
+              ) : index == 9 ? (
                 <ul className="chart">
                   <li>
                     <span
@@ -201,7 +186,7 @@ const DeviceTable = props => {
                     </span>
                   </li>
                 </ul>
-              ) : index == 5 ? (
+              ) : index == 4 ? (
                 <ul className="chart">
                   <li>
                     <span
@@ -229,11 +214,11 @@ const DeviceTable = props => {
                   </li>
                 </ul>
               ) 
-              : index == 6 ? (
+              : index == 5 ? (
                 <span >
                 {v != undefined ? v + " MB" : null}
               </span>
-              ) : index == 8 ? (
+              ) : index == 7 ? (
                 <div>
                   {" "}
                   {v == true ? (

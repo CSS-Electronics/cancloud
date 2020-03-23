@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import { Bar } from "react-chartjs-2";
 var speedDate = require("speed-date");
-import {
-  barOptionsFunc
-} from "../dashboardStatus/prepareData";
-import {demoMode, demoDate} from "../utils";
+import { barOptionsFunc } from "../dashboardStatus/prepareData";
+import { demoMode, demoDate } from "../utils";
 
 export function extractMetaDevice(serverConfig, device) {
   if (serverConfig.devicemeta && serverConfig.devicemeta.devices) {
@@ -15,28 +13,18 @@ export function extractMetaDevice(serverConfig, device) {
 }
 
 export function DeviceImage(props) {
-  const { metaDevice, serverImage } = props;
-
-  // Check if the current device has meta data - and if so, if it has an image name
-  if (metaDevice.imageurl && serverImage) {
-    const deviceImageName = metaDevice.imageurl;
-
-    // Check if the device image name is found in the state array, serverImage, based on a name/URL lookup
-    const deviceImage = serverImage.filter(p => p.name === deviceImageName)[0];
-
-    // If there is no match in the state array, return blank. Also return blank if there's a match, but no result URL fetched
-    if (deviceImage == undefined || deviceImage.url == undefined) {
+  const { deviceImage } = props;
+  
+    if (deviceImage == undefined) {
       return <div />;
     }
-
-    const deviceImageUrl = deviceImage.url;
 
     return (
       <div className="col-sm-2">
         <div className="meta-image">
-          {deviceImageUrl ? (
+          {deviceImage ? (
             <img
-              src={deviceImageUrl}
+              src={deviceImage}
               style={{
                 width: 180,
                 maxHeight: 180,
@@ -50,31 +38,36 @@ export function DeviceImage(props) {
         </div>
       </div>
     );
-  } else {
-    return <div />;
-  }
+  
 }
 
 export function DeviceMeta(props) {
-  const { metaDevice , device, deviceFileContents, configFileCrc32} = props;
- 
-  let deviceFileContentsFiltered = deviceFileContents.filter(object => object != undefined && object.id == device)[0]
+  const { device, deviceFileContents, configFileCrc32 } = props;
 
-  let log_meta = deviceFileContentsFiltered && deviceFileContentsFiltered.log_meta
-  let space_used_mb = deviceFileContentsFiltered && deviceFileContentsFiltered.space_used_mb
-  let cfg_crc32 = deviceFileContentsFiltered && deviceFileContentsFiltered.cfg_crc32
+  let deviceFile = deviceFileContents.filter(
+    object => object != undefined && object.id == device
+  )[0];
 
-  let crcTest = cfg_crc32 && configFileCrc32.length > 0 && configFileCrc32[0].crc32 ? cfg_crc32 == configFileCrc32[0].crc32 : undefined
+  let log_meta = deviceFile && deviceFile.log_meta;
+  let space_used_mb = deviceFile && deviceFile.space_used_mb;
+  let cfg_crc32 = deviceFile && deviceFile.cfg_crc32;
+  let fw_ver = deviceFile && deviceFile.fw_ver; 
 
+  let crcTest =
+    cfg_crc32 && configFileCrc32.length > 0 && configFileCrc32[0].crc32
+      ? parseInt(cfg_crc32,16) == parseInt(configFileCrc32[0].crc32,16)
+      : undefined;
 
-  // console.log("cfg_crc32",cfg_crc32)
-  // console.log("configFileCrc32",configFileCrc32)
-
-  let cfgSync = crcTest == undefined ? null : !crcTest ? <p className="red-text zero-bottom-margin">
-  <i className="fa fa-times" />
-</p> : <p className="blue-text zero-bottom-margin">
-  <i className="fa fa-check" />
-</p>
+  let cfgSync =
+    crcTest == undefined ? null : !crcTest ? (
+      <span className="red-text zero-bottom-margin">
+        <i className="fa fa-times" />
+      </span>
+    ) : (
+      <span className="blue-text zero-bottom-margin">
+        <i className="fa fa-check" />
+      </span>
+    );
 
   return (
     <div className="col-sm-4">
@@ -83,19 +76,34 @@ export function DeviceMeta(props) {
           <br />
           <table className="table table-background">
             <tbody>
-            <tr>
+              <tr>
                 <td className="col-md-2">Meta</td>
                 <td>{log_meta}</td>
               </tr>
+              
               <tr>
-                <td className="col-md-2" style={{whiteSpace:"nowrap"}}>Config sync</td>
+                <td className="col-md-2" style={{ whiteSpace: "nowrap" }}>
+                SD storage used
+                </td>
                 <td>
-                {cfgSync}
+                  {space_used_mb}
+                  {space_used_mb ? " MB" : null}
                 </td>
               </tr>
               <tr>
-                <td className="col-md-2" style={{whiteSpace:"nowrap"}}>Space used</td>
-      <td>{space_used_mb}{space_used_mb ? " MB" : null}</td>
+                <td className="col-sm-1">
+                  Firmware
+                </td>
+                <td>{fw_ver}</td>
+        
+              </tr>
+
+              <tr>
+                <td className="col-sm-1" style={{ whiteSpace: "nowrap" }}>
+                  Config synced
+                </td>
+                <td>{cfgSync}</td>
+        
               </tr>
             </tbody>
           </table>
@@ -128,12 +136,12 @@ export function DeviceMetaLogFileChart(props) {
         </div>
 
         <div>
-        <Bar
-              data={props.dataUploadTime}
-              height={130}
-              options={props.barOptions}
-              key={"bar-chart-logfiles"}
-            />
+          <Bar
+            data={props.dataUploadTime}
+            height={130}
+            options={props.barOptions}
+            key={"bar-chart-logfiles"}
+          />
         </div>
       </div>
     );

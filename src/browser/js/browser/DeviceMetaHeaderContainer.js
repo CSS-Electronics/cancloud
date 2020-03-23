@@ -96,7 +96,7 @@ export class DeviceMetaHeaderContainer extends Component {
               configFileCrc32={configFileCrc32}
             />
             <p className="field-description">
-              Device meta data based on the uploaded Device File. Optionally
+              Device meta data based on the uploaded Device File. You can change the Meta name via your Configuration File. Optionally
               upload a picture named "image.jpg" or "image.png" in your device
               folder to display it next to the meta data.
             </p>

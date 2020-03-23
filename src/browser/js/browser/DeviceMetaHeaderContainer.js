@@ -63,6 +63,7 @@ export class DeviceMetaHeaderContainer extends Component {
     const { bucket } = pathSlice(history.location.pathname);
     this.props.clearDataFiles();
     this.props.listLogFiles([bucket]);
+    this.props.setDeviceImage(undefined);
   }
 
   componentWillUnmount() {

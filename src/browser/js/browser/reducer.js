@@ -19,13 +19,8 @@ import * as actionsCommon from "./actions";
 export default (
   state = {
     sidebarOpen: false,
-    storageInfo: { total: 0, free: 0 },
-    serverInfo: {},
-    serverConfig: {},
     objectName: "",
-    serverImage: [],
-    deviceImage: undefined,
-    serverConfigModDate: ""
+    deviceImage: undefined
   },
   action
 ) => {
@@ -38,36 +33,12 @@ export default (
     /*  return Object.assign({}, state, {
         sidebarOpen: !state.sidebarOpen
       }) */
-    case actionsCommon.SET_STORAGE_INFO:
-      return Object.assign({}, state, {
-        storageInfo: action.storageInfo
-      });
-    case actionsCommon.SET_SERVER_INFO:
-      return { ...state, serverInfo: action.serverInfo };
     default:
       return state;
-    case actionsCommon.SET_SERVER_CONFIG_DATA:
-      return {
-        ...state,
-        serverConfig: action.serverConfig
-      };
     case actionsCommon.SET_DEVICE_IMAGE:
       return {
         ...state,
         deviceImage: action.deviceImage
-      };
-    case actionsCommon.SET_SERVER_IMAGE:
-      return {
-        ...state,
-        serverImage: _.uniqBy(
-          [...state.serverImage, ...action.serverImage],
-          "name"
-        )
-      };
-    case actionsCommon.SET_SERVER_CONFIG_MOD_DATE:
-      return {
-        ...state,
-        serverConfigModDate: action.serverConfigModDate
       };
   }
 };

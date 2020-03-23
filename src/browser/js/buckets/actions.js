@@ -21,7 +21,7 @@ import * as objectsActions from "../objects/actions";
 import * as editorActions from "../editor/actions";
 import * as commonActions from "../browser/actions";
 import * as dashboardStatusActions from "../dashboardStatus/actions"
-import { pathSlice } from "../utils";
+import { pathSlice, isValidDevice } from "../utils";
 import { getCurrentBucket } from "./selectors";
 
 export const SET_LIST = "buckets/SET_LIST";
@@ -38,14 +38,27 @@ export const SET_LIST_META = "buckets/SET_LIST_META";
 export const SET_ENDPOINT_BUCKET_NAME = "buckets/SET_ENDPOINT_BUCKET_NAME";
 
 export const fetchBuckets = () => {
-  return function(dispatch) {
+  return function(dispatch,getState) {
     return web.ListBuckets().then(res => {
       const buckets = res.buckets ? res.buckets.map(bucket => bucket.name) : [];
+      const { bucket, prefix } = pathSlice(history.location.pathname);
+
+      let devices = buckets.filter(bucket => isValidDevice(bucket)).map(bucket => {
+        const deviceId = bucket
+        return {deviceId}
+      })
+
       dispatch(getEndpointAndBucket());
       dispatch(setList(buckets));
-      dispatch(commonActions.fetchServerObjectList());
-      dispatch(addBucketMetaData());
-      const { bucket, prefix } = pathSlice(history.location.pathname);
+
+      
+      // load all device.json files & dispatch meta data
+      dispatch(dashboardStatusActions.fetchDeviceFileContentAll(devices))
+
+      if(bucket == "status-dashboard"){
+        dispatch(dashboardStatusActions.listAllObjects())
+      }
+      
       if (buckets.length > 0) {
         if (
           bucket == "configuration" &&
@@ -74,34 +87,30 @@ export const fetchBuckets = () => {
 };
 
 export const addBucketMetaData = () => {
+
   return function(dispatch, getState) {
-    if (getState().buckets.list.length > 0) {
-      const buckets = getState().buckets.list;
+    let devices = getState().buckets.list.filter(bucket => isValidDevice(bucket))
+
+    if (devices.length > 0) {
       let bucketsMeta = [];
       let deviceName = "";
 
       // extract meta name from Device Files of each bucket
-      let bucketsObject = buckets.filter(bucket => bucket != "server").map(bucket => {
-        const deviceId = bucket
-        return {deviceId}
-      })
-      
-      dispatch(dashboardStatusActions.fetchDeviceFileContentAll(bucketsObject))
       const deviceFilesContents = getState().dashboardStatus.deviceFileContents
       
-      for (let i = 0; i < buckets.length; i++) {
+      for (let i = 0; i < devices.length; i++) {
         deviceName = "";
 
         if(deviceFilesContents.length > 0){
           let deviceFilesContentsFiltered = deviceFilesContents.filter(
-            p => p && p.id == buckets[i]
+            p => p && p.id == devices[i]
           )[0];
 
           deviceName = deviceFilesContentsFiltered && deviceFilesContentsFiltered.log_meta ? deviceFilesContentsFiltered.log_meta : "" 
         }
 
         bucketsMeta[i] =
-          buckets[i] + (deviceName.length ? " " : "") + deviceName 
+        devices[i] + (deviceName.length ? " " : "") + deviceName 
       }
 
       dispatch(setListMeta(bucketsMeta));

@@ -2,6 +2,7 @@ import web from "../web";
 
 import * as alertActions from "../alert/actions";
 import * as commonActions from "../browser/actions";
+import * as bucketActions from "../buckets/actions"
 import _ from "lodash";
 import {demoMode, demoDate} from "../utils";
 
@@ -643,6 +644,9 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
 
               if (deviceFileObjects.length == iDeviceFileCount) {
                 dispatch(deviceFileContent(deviceFileContents.filter(obj => obj != undefined)));
+                
+                // once all device files are loaded, add meta data to devices
+                dispatch(bucketActions.addBucketMetaData())
               }
             })
         })

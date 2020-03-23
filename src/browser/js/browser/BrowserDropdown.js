@@ -31,10 +31,6 @@ export class BrowserDropdown extends React.Component {
     this.logout = this.logout.bind(this);
   }
 
-  componentDidMount() {
-    const { fetchServerInfo } = this.props;
-    fetchServerInfo();
-  }
 
   fullScreen(e) {
     e.preventDefault();
@@ -83,8 +79,6 @@ export class BrowserDropdown extends React.Component {
   }
 
   render() {
-    const { serverInfo } = this.props;
-
     return (
       <li>
         <Dropdown pullRight id="top-right-menu">
@@ -116,14 +110,12 @@ export class BrowserDropdown extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    serverInfo: state.browser.serverInfo,
     editorSchemaSidebarOpen: state.editorTools.editorSchemaSidebarOpen
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    fetchServerInfo: () => dispatch(browserActions.fetchServerInfo()),
     selectBucket: (bucket, prefix) =>
       dispatch(actionsBuckets.selectBucket(bucket)),
     resetFiles: () => dispatch(actionsEditor.resetFiles()),

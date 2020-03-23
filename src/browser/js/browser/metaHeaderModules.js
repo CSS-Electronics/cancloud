@@ -4,41 +4,32 @@ var speedDate = require("speed-date");
 import { barOptionsFunc } from "../dashboardStatus/prepareData";
 import { demoMode, demoDate } from "../utils";
 
-export function extractMetaDevice(serverConfig, device) {
-  if (serverConfig.devicemeta && serverConfig.devicemeta.devices) {
-    return serverConfig.devicemeta.devices.filter(
-      p => p.serialno === device
-    )[0];
-  }
-}
-
 export function DeviceImage(props) {
   const { deviceImage } = props;
-  
-    if (deviceImage == undefined) {
-      return <div />;
-    }
 
-    return (
-      <div className="col-sm-2">
-        <div className="meta-image">
-          {deviceImage ? (
-            <img
-              src={deviceImage}
-              style={{
-                width: 180,
-                maxHeight: 180,
-                bottom: 25,
-                position: "absolute"
-              }}
-            />
-          ) : (
-            <div />
-          )}
-        </div>
+  if (deviceImage == undefined) {
+    return <div />;
+  }
+
+  return (
+    <div className="col-sm-2">
+      <div className="meta-image">
+        {deviceImage ? (
+          <img
+            src={deviceImage}
+            style={{
+              width: 180,
+              maxHeight: 180,
+              bottom: 25,
+              position: "absolute"
+            }}
+          />
+        ) : (
+          <div />
+        )}
       </div>
-    );
-  
+    </div>
+  );
 }
 
 export function DeviceMeta(props) {
@@ -51,11 +42,11 @@ export function DeviceMeta(props) {
   let log_meta = deviceFile && deviceFile.log_meta;
   let space_used_mb = deviceFile && deviceFile.space_used_mb;
   let cfg_crc32 = deviceFile && deviceFile.cfg_crc32;
-  let fw_ver = deviceFile && deviceFile.fw_ver; 
+  let fw_ver = deviceFile && deviceFile.fw_ver;
 
   let crcTest =
     cfg_crc32 && configFileCrc32.length > 0 && configFileCrc32[0].crc32
-      ? parseInt(cfg_crc32,16) == parseInt(configFileCrc32[0].crc32,16)
+      ? parseInt(cfg_crc32, 16) == parseInt(configFileCrc32[0].crc32, 16)
       : undefined;
 
   let cfgSync =
@@ -80,10 +71,10 @@ export function DeviceMeta(props) {
                 <td className="col-md-2">Meta</td>
                 <td>{log_meta}</td>
               </tr>
-              
+
               <tr>
                 <td className="col-md-2" style={{ whiteSpace: "nowrap" }}>
-                SD storage used
+                  SD storage used
                 </td>
                 <td>
                   {space_used_mb}
@@ -91,11 +82,8 @@ export function DeviceMeta(props) {
                 </td>
               </tr>
               <tr>
-                <td className="col-sm-1">
-                  Firmware
-                </td>
+                <td className="col-sm-1">Firmware</td>
                 <td>{fw_ver}</td>
-        
               </tr>
 
               <tr>
@@ -103,7 +91,6 @@ export function DeviceMeta(props) {
                   Config synced
                 </td>
                 <td>{cfgSync}</td>
-        
               </tr>
             </tbody>
           </table>

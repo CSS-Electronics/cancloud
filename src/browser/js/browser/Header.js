@@ -16,7 +16,6 @@
 
 import React from "react";
 import Path from "../objects/Path";
-import StorageInfo from "./StorageInfo";
 import BrowserDropdown from "./BrowserDropdown";
 import web from "../web";
 import history from "../history";
@@ -37,7 +36,6 @@ class Header extends React.Component {
         {!EDITOR.offline ? (
           <div>
             {loggedIn && <Path />}
-            {loggedIn && <StorageInfo />}
             <ul className="feh-actions float-top">
               {loggedIn ? (
                 <BrowserDropdown />

@@ -9,8 +9,7 @@ import {
   DeviceImage,
   DeviceMeta,
   DeviceMetaLogFileChart,
-  prepareDeviceData,
-  extractMetaDevice
+  prepareDeviceData
 } from "./metaHeaderModules";
 
 const imageRegex = new RegExp(/^image\.(jpg|JPG|JPEG|png|PNG)$/,"g");
@@ -28,21 +27,22 @@ export class DeviceMetaHeaderContainer extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { bucket } = pathSlice(history.location.pathname);
-    let deviceFile = this.props.deviceFileContents.filter(
-      obj => obj.id == bucket
-    )[0];
-    let cfg_name = deviceFile && deviceFile.cfg_name;
-    let configObject = [{ deviceId: bucket, name: bucket + "/" + cfg_name }];
-
+    
     if (
       this.props.deviceFileContents != nextProps.deviceFileContents ||
       this.props.currentBucket != nextProps.currentBucket
     ) {
 
+      let deviceFile = nextProps.deviceFileContents.filter(
+        obj => obj.id == bucket
+      )[0];
+      let cfg_name = deviceFile && deviceFile.cfg_name;
+      let configObject = [{ deviceId: bucket, name: bucket + "/" + cfg_name }];
+
       if(!configObject[0].name.includes("undefined")){
         this.props.fetchConfigFileContentAll(configObject);
       }
-      
+
       this.props.clearDataFiles();
       this.props.listLogFiles([bucket]);
     }
@@ -72,16 +72,12 @@ export class DeviceMetaHeaderContainer extends Component {
     const device = bucket;
 
     const {
-      serverConfig,
-      serverImage,
       mf4Objects,
       deviceFileContents,
       configFileCrc32,
       deviceImage
     } = this.props;
 
-
-    let metaDevice = "";
     let dataUploadTime = [];
     let barOptions = [];
 
@@ -89,33 +85,14 @@ export class DeviceMetaHeaderContainer extends Component {
       [dataUploadTime, barOptions] = prepareDeviceData(mf4Objects);
     }
 
-    metaDevice = extractMetaDevice(serverConfig, device);
-    let display =
-      serverConfig &&
-      serverConfig.devicemeta &&
-      serverConfig.devicemeta.display;
-
     return (
       <div>
-        {display == undefined || display == 1 ? (
-          <div
-            className={
-              serverConfig &&
-              serverConfig.deviceMeta &&
-              !serverConfig.devicemeta.display
-                ? "meta-header-height row hidden"
-                : "meta-header-height row meta-container"
-            }
-          >
-            {metaDevice ? (
-              <DeviceImage
+          <div className="meta-header-height row meta-container" >
+             <DeviceImage
                 deviceImage={deviceImage}
               />
-            ) : null}
-
             <DeviceMeta
               device={device}
-              metaDevice={metaDevice}
               deviceFileContents={deviceFileContents}
               configFileCrc32={configFileCrc32}
             />
@@ -125,9 +102,6 @@ export class DeviceMetaHeaderContainer extends Component {
               dashboard={this.dashboard.bind(this)}
             />
           </div>
-        ) : (
-          <div />
-        )}
       </div>
     );
   }
@@ -147,9 +121,7 @@ const mapDispatchToProps = dispatch => ({
 
 function mapStateToProps(state) {
   return {
-    serverConfig: state.browser.serverConfig,
     currentBucket: state.buckets.currentBucket,
-    serverImage: state.browser.serverImage,
     mf4Objects: state.dashboardStatus.mf4Objects,
     deviceFileContents: state.dashboardStatus.deviceFileContents,
     configFileCrc32: state.dashboardStatus.configFileCrc32,

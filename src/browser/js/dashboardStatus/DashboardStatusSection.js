@@ -123,7 +123,6 @@ class DashboardStatusSection extends React.Component {
       deviceFileContents,
       deviceFileObjects,
       configFileCrc32,
-      serverConfig,
       loadedFiles,
       loadedDevice,
       loadedConfig,
@@ -385,7 +384,6 @@ class DashboardStatusSection extends React.Component {
                             deviceIdListDeltaSort={chartDataDevicesArray[1]}
                             deviceFileContents={deviceFileContents}
                             configFileCrc32={configFileCrc32}
-                            serverConfig={serverConfig}
                             mf4ObjectsFiltered={
                               chartDataArray[2] ? chartDataArray[2] : []
                             }
@@ -435,7 +433,6 @@ const mapDispatchToProps = dispatch => ({
     dispatch(dashboardStatusActions.loadedConfig(loadedConfig)),
   loadedDeviceSet: loadedDevice =>
     dispatch(dashboardStatusActions.loadedDevice(loadedDevice)),
-  fetchServerObjectList: () => dispatch(browserActions.fetchServerObjectList()),
   clearDataDevices: () => dispatch(dashboardStatusActions.clearDataDevices()),
   clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles()),
   setPeriodStartBack: periodDelta =>
@@ -449,7 +446,6 @@ const mapStateToProps = state => {
     deviceFileContents: state.dashboardStatus.deviceFileContents,
     deviceFileObjects: state.dashboardStatus.deviceFileObjects,
     configFileCrc32: state.dashboardStatus.configFileCrc32,
-    serverConfig: state.browser.serverConfig,
     configFileContents: state.dashboardStatus.configFileContents,
     loadedFiles: state.dashboardStatus.loadedFiles,
     loadedDevice: state.dashboardStatus.loadedDevice,

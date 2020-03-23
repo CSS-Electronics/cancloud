@@ -46,13 +46,15 @@ export class DeviceMetaHeaderContainer extends Component {
     }
 
     if (this.props.list != nextProps.list && nextProps.list.length > 0) {
-      this.props.setDeviceImage(undefined);
 
       let imageName = nextProps.list.filter(
         obj => obj && obj.name && obj.name.match(imageRegex)
       )[0];
+
       if (imageName && imageName.name) {
         this.props.fetchDeviceImage(imageName.name);
+      } else{
+        this.props.setDeviceImage(undefined);
       }
     }
   }

@@ -78,6 +78,7 @@ export const addBucketMetaData = () => {
     if (getState().buckets.list.length > 0) {
       const buckets = getState().buckets.list;
       let bucketsMeta = [];
+      let deviceName = "";
 
       // extract meta name from Device Files of each bucket
       let bucketsObject = buckets.filter(bucket => bucket != "server").map(bucket => {
@@ -89,46 +90,18 @@ export const addBucketMetaData = () => {
       const deviceFilesContents = getState().dashboardStatus.deviceFileContents
       
       for (let i = 0; i < buckets.length; i++) {
-        let deviceName = "";
-        let deviceNameServer = "";
-        let deviceGroup = "";
-        let deviceSubgroup = "";
-        let deviceMetaFiltered = {};
-
-
-        if (
-          getState().browser.serverConfig &&
-          getState().browser.serverConfig.devicemeta &&
-          getState().browser.serverConfig.devicemeta.devices
-        ) {
-          deviceMetaFiltered = getState().browser.serverConfig.devicemeta.devices.filter(
-            p => p.serialno === buckets[i]
-          )[0];
-        }
+        deviceName = "";
 
         if(deviceFilesContents.length > 0){
           let deviceFilesContentsFiltered = deviceFilesContents.filter(
             p => p && p.id == buckets[i]
           )[0];
 
-          if(deviceFilesContentsFiltered && deviceFilesContentsFiltered.log_meta){
-            deviceName = deviceFilesContentsFiltered.log_meta
-          }
+          deviceName = deviceFilesContentsFiltered && deviceFilesContentsFiltered.log_meta ? deviceFilesContentsFiltered.log_meta : "" 
         }
-
-        if (deviceMetaFiltered && deviceMetaFiltered.name) {
-          deviceNameServer = deviceMetaFiltered.name;
-        }
-        if (deviceMetaFiltered && deviceMetaFiltered.group) {
-          deviceGroup = deviceMetaFiltered.group;
-        }
-        if (deviceMetaFiltered && deviceMetaFiltered.subgroup) {
-          deviceSubgroup = deviceMetaFiltered.subgroup;
-        }
-
 
         bucketsMeta[i] =
-          buckets[i] + (deviceName.length ? " " : "") + deviceName + (deviceNameServer.length ? " | " : "") + deviceNameServer + (deviceGroup.length ? " | " : "") + deviceGroup + (deviceSubgroup.length ? " | " : "") + deviceSubgroup;
+          buckets[i] + (deviceName.length ? " " : "") + deviceName 
       }
 
       dispatch(setListMeta(bucketsMeta));

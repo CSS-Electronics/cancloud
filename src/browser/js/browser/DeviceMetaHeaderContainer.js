@@ -38,7 +38,11 @@ export class DeviceMetaHeaderContainer extends Component {
       this.props.deviceFileContents != nextProps.deviceFileContents ||
       this.props.currentBucket != nextProps.currentBucket
     ) {
-      this.props.fetchConfigFileContentAll(configObject);
+
+      if(!configObject[0].name.includes("undefined")){
+        this.props.fetchConfigFileContentAll(configObject);
+      }
+      
       this.props.clearDataFiles();
       this.props.listLogFiles([bucket]);
     }

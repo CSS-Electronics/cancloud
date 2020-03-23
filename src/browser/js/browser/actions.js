@@ -119,6 +119,7 @@ export const setServerConfigModDate = serverConfigModDate => ({
 });
 
 export const fetchServerConfigContent = fileObject => {
+
   return function(dispatch, getState) {
     const { bucket, prefix } = pathSlice(history.location.pathname);
 

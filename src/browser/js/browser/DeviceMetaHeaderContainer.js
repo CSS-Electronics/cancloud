@@ -88,19 +88,28 @@ export class DeviceMetaHeaderContainer extends Component {
     return (
       <div>
           <div className="meta-header-height row meta-container" >
+
              <DeviceImage
                 deviceImage={deviceImage}
               />
+                        <div className="form-group pl0 field-string">
+
             <DeviceMeta
               device={device}
               deviceFileContents={deviceFileContents}
               configFileCrc32={configFileCrc32}
             />
+              <p className="field-description">
+              Device meta data based on the uploaded Device File. Optionally upload a picture named "image.jpg" or "image.png" in your device folder to display it next to the meta data.
+            </p>
+            </div>
             <DeviceMetaLogFileChart
               dataUploadTime={dataUploadTime}
               barOptions={barOptions}
               dashboard={this.dashboard.bind(this)}
             />
+
+          
           </div>
       </div>
     );

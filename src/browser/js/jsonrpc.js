@@ -59,6 +59,13 @@ export default class JSONrpc {
           options.params.marker
         );
         break;
+      case "ListObjectsV2":
+        result = s3Explorer.listObjectsV2(
+          options.params.bucketName,
+          options.params.prefix,
+          options.params.marker
+        );
+        break;
       case "ListObjectsRecursive":
         result = s3Explorer.listObjectsRecursive(
           options.params.bucketName,
@@ -136,7 +143,8 @@ export default class JSONrpc {
       case "GetPartialObject":
         result = s3Explorer.getPartialObject(
           options.params.bucketName,
-          options.params.objectName
+          options.params.objectName,
+          options.params.byteLength
         );
         break;
       default:

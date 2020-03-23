@@ -16,7 +16,6 @@ import * as alertActions from "../alert/actions";
 import EditorChangesComparison from "./EditorChangesComparison";
 import classNames from "classnames";
 
-
 const { detect } = require("detect-browser");
 const browser = detect();
 
@@ -60,7 +59,7 @@ class LoadEditorFiles extends React.Component {
       selectedUISchema: "",
       selectedSchema: "",
       selectedConfig: "",
-      configReview: {value: "None",label:"None"},
+      configReview: { value: "None", label: "None" },
       revisedConfigFile: {},
       formData: {},
       changeFlag: true,
@@ -182,7 +181,6 @@ class LoadEditorFiles extends React.Component {
       nextProps.configContentPreChange != undefined &&
       crcBrowserSupport == 1
     ) {
-
       const { crc32 } = require("crc");
       let cfgCrc32EditorPre = crc32(nextProps.configContentPreChange)
         .toString(16)
@@ -221,7 +219,7 @@ class LoadEditorFiles extends React.Component {
     }
 
     // Get the initial value for the config review benchmark dropdown
-    if(nextProps.editorConfigFiles.length == 0){
+    if (nextProps.editorConfigFiles.length == 0) {
       this.setState(
         {
           configReview: { value: "None", label: "None" }
@@ -229,7 +227,8 @@ class LoadEditorFiles extends React.Component {
         () => {
           // this.props.fetchConfigContent(configName, "review");
         }
-      );    }
+      );
+    }
     if (
       this.props.editorConfigFiles.length !=
         nextProps.editorConfigFiles.length &&

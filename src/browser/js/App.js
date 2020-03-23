@@ -17,9 +17,9 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
 
+import Editor from "./editor/Editor";
 const Browser = EDITOR.offline ? "" : require("./browser/Browser");
 const Login = EDITOR.offline ? "" : require("./browser/Login");
-import Editor from "./editor/Editor";
 const Dashboard = EDITOR.offline ? "" : require("./dashboard");
 const DashboardStatus = EDITOR.offline ? "" : require("./dashboardStatus");
 

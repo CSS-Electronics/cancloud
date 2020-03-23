@@ -50,7 +50,7 @@ class EditorChangesComparison extends React.Component {
       pastCrc32 = crc32(past)
         .toString(16)
         .toUpperCase()
-        .padStart(8, "0");
+        .padStart(8,"0")
     } else {
       pastCrc32 = "N/A";
     }

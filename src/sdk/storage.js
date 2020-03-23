@@ -1212,6 +1212,7 @@ export class Client {
   //   * `obj.etag` _string_: etag of the object
   //   * `obj.lastModified` _Date_: modified time stamp
   listObjects(bucketName, prefix, marker, recursive) {
+
     if (prefix === undefined) prefix = ''
     if (recursive === undefined) recursive = false
     if (!isValidBucketName(bucketName)) {
@@ -1226,6 +1227,7 @@ export class Client {
     if (!isBoolean(recursive)) {
       throw new TypeError('recursive should be of type "boolean"')
     }
+   
     // if recursive is false set delimiter to '/'
     var delimiter = recursive ? '' : '/'
     var marker = marker ? marker : ""
@@ -1291,6 +1293,7 @@ export class Client {
       delimiter = uriEscape(delimiter)
       queries.push(`delimiter=${delimiter}`)
     }
+    
     // no need to escape maxKeys
     if (maxKeys) {
       if (maxKeys >= 1000) {
@@ -1298,6 +1301,7 @@ export class Client {
       }
       queries.push(`max-keys=${maxKeys}`)
     }
+  
     queries.sort()
     var query = ''
     if (queries.length > 0) {
@@ -1543,7 +1547,6 @@ export class Client {
     if (policy) {
       method = 'PUT'
     }
-
     this.makeRequest({method, bucketName, query}, policy, 204, '', false, cb)
   }
 

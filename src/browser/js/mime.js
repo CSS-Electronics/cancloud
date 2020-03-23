@@ -111,8 +111,14 @@ export const getDataType = (name, contentType) => {
     contentType = mimedb.lookup(name) || "application/octet-stream";
   }
   const fileExt = name.split(".")[name.split(".").length - 1];
-  if (fileExt == "mf4") {
+  if (fileExt.toLowerCase() == "mf4" || fileExt == "MFE") {
     return "text";
+  }
+  if (fileExt == "MFC" || fileExt == "MFM") {
+    return "zip";
+  }
+  if (fileExt == "jpg" || fileExt == "JPG" || fileExt == "PNG" || fileExt == "png") {
+    return "image";
   }
 
   if (fileExt == "bin") {

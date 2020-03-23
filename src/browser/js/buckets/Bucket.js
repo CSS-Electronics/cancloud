@@ -19,26 +19,15 @@ import classNames from "classnames";
 import BucketDropdown from "./BucketDropdown";
 import history from "../history";
 
-export const Bucket = ({ bucket, isActive, selectBucket, serverConfig }) => {
+export const Bucket = ({ bucket, isActive, selectBucket, bucketsMeta, listLogFiles }) => {
   const loggerRegex = new RegExp(/([0-9A-Fa-f]){8}/g);
-  const serverRegex = new RegExp(/server/g);
-  let deviceMeta = {};
   let deviceName = "";
 
-  if (
-    serverConfig &&
-    serverConfig.devicemeta &&
-    serverConfig.devicemeta.devices
-  ) {
-    deviceMeta = serverConfig.devicemeta.devices.filter(
-      p => p.serialno === bucket
-    )[0];
-
-    if (deviceMeta !== undefined && deviceMeta.name !== undefined) {
-      deviceName = " | " + deviceMeta.name;
-    }
+  if(bucketsMeta && bucketsMeta.length > 0){
+    deviceName = bucketsMeta.filter(obj => obj.split(" ")[0] == bucket)[0].split(" | ")[0].replace(" "," | ")
+    deviceName = deviceName.length > 30 ? deviceName.substr(0,30) + " ..." : deviceName
   }
-
+  
   return (
     <li
       className={classNames({
@@ -59,10 +48,9 @@ export const Bucket = ({ bucket, isActive, selectBucket, serverConfig }) => {
         })}
         id={bucket}
       >
-        {bucket}
         {deviceName}
       </a>
-      {bucket.match(loggerRegex) || bucket.match(serverRegex) ? (
+      {bucket.match(loggerRegex) ? (
         <BucketDropdown bucket={bucket} selectBucket={selectBucket} />
       ) : null}
     </li>

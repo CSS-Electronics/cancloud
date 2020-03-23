@@ -1,3 +1,4 @@
+
 .config-editor {
   padding-top: 0px;
   & h1 {
@@ -93,6 +94,18 @@
     .transition-duration(300ms);
     .translate3d((-320px), 0, 0);
   }
+}
+
+.animate-highlight{
+  .animation-name(fadeInDropdown);
+  .animation-duration(1500ms);
+}
+
+@keyframes fadeInDropdown {
+  0% {color:@text-color}
+  50% {color:@text-color}
+  70% {color:@blue;}
+	100% {color:@text-color;}
 }
 
 .btn-highlight {

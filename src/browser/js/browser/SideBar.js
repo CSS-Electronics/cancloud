@@ -25,6 +25,9 @@ import BucketList from "../buckets/BucketList";
 import Host from "./Host";
 import * as actionsCommon from "./actions";
 import web from "../web";
+import history from "../history";
+import { pathSlice } from "../utils";
+import {demoMode, demoDate} from "../utils";
 
 export const SideBar = ({
   sidebarOpen,
@@ -32,6 +35,8 @@ export const SideBar = ({
   endPoint,
   bucketName
 }) => {
+  const { bucket, prefix} = pathSlice(history.location.pathname);
+  
   return (
     <ClickOutHandler onClickOut={clickOutside}>
       <div
@@ -44,12 +49,13 @@ export const SideBar = ({
         <div className="fes-header clearfix hidden-sm hidden-xs">
           <img src={logo} style={{ width: "65%", maxHeight: "70px" }} />
           <div className="version-text sb-custom-version">
-            v03.05.02
+            v04.01.01
+            {demoMode ? <div><br/>DEMO MODE (date fixed at {demoDate.split(" ")[0]})</div>: null}
           </div>
         </div>
         <div className="fes-list">
           {web.LoggedIn() && <BucketSearch />}
-          {!EDITOR.offline && <BucketList />}
+          <BucketList />
         </div>
         <Host endPoint={endPoint} bucketName={bucketName} />
       </div>

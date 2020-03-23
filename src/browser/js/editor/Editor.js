@@ -26,7 +26,7 @@ class Editor extends React.Component {
     selectBucket(prefix);
     if (
       prefix &&
-      (isValidDevice(prefix) || prefix == "server") &&
+      (isValidDevice(prefix)) &&
       !web.LoggedIn()
     ) {
       history.push("/login");
@@ -45,6 +45,9 @@ class Editor extends React.Component {
       deviceFileTableOpen,
       partialConfigLoaderSidebarOpen
     } = this.props;
+
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
     return (
       <div
         className={classNames({

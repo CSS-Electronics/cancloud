@@ -21,7 +21,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const htmlPlugin = new HtmlWebPackPlugin({
   template: "./src/browser/index.html",
   filename: "./index.html",
-  title: "CANcloud-S3 Storage Browser"
+  title: "CANcloud"
 });
 
 const definePlugin = new webpack.DefinePlugin({

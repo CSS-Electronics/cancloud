@@ -41,11 +41,15 @@ export const SET_CONFIG_DATA_LOCAL = "SET_CONFIG_DATA_LOCAL";
 
 // Note: These need to be updated with future firmware revisions
 const uiSchemaAry = [
-  "uischema-00.07.json | Simple",
-  "uischema-00.07.json | Advanced"
+  "uischema-01.02.json | Simple",
+  "uischema-01.02.json | Advanced"
 ];
 
 const schemaAry = [
+  "schema-01.02.json | CANedge2",
+  "schema-01.02.json | CANedge1",
+  "schema-01.02.json | CANedge2",
+  "schema-01.02.json | CANedge1",
   "schema-00.07.json | CANedge2",
   "schema-00.07.json | CANedge1",
   "schema-00.06.json | CANedge2",
@@ -64,7 +68,6 @@ const regexUISchemaPublic = new RegExp(
   "g"
 );
 const regexConfig = new RegExp(/^config-\d{2}\.\d{2}\.json/, "g");
-const regexUiSchema = new RegExp(/^uischema-\d{2}\.\d{2}\.json/, "g");
 const regexDeviceFile = new RegExp(/^device\.json/, "g");
 
 // load the Simple/Advanced default UIschema in the online & offline editor
@@ -115,10 +118,15 @@ export const loadUISchemaSimpleAdvanced = () => {
 };
 
 // Below is triggered when clicking Configure in the sidebar - or refreshing the page
-// It fetches the device specific object list and parses these to the UIschema fetcher below
+// It fetches the device specific object list and fetch the various schema
 export const fetchSchemaFiles = prefix => {
   return function(dispatch) {
     dispatch(resetFiles());
+
+    // load embedded UI schema files
+    dispatch(loadUISchemaSimpleAdvanced());
+
+    // list & load devive specific Rule Schemas and Configuration Files
     return web
       .ListObjects({
         bucketName: prefix,
@@ -128,8 +136,26 @@ export const fetchSchemaFiles = prefix => {
       .then(data => {
         let allObjects = [];
         allObjects = data.objects.map(object => object.name.split("/")[0]);
-        dispatch(fetchUISchemaFiles(allObjects));
 
+        // Rule Schemas
+        let schemaFiles = allObjects
+          .filter(str => str.match(regexSchema))
+          .sort()
+          .reverse();
+
+        dispatch(setSchemaFile(schemaFiles));
+        dispatch(fetchSchemaContent(schemaFiles[0]));
+
+        // Configuration Files
+        let configSchema = allObjects
+          .filter(str => str.match(regexConfig))
+          .sort()
+          .reverse();
+
+        dispatch(setConfigFile(configSchema));
+        dispatch(fetchConfigContent(configSchema[0], "editor"));
+
+        // Device File
         const deviceFileName = allObjects.filter(str =>
           str.match(regexDeviceFile)
         );
@@ -295,71 +321,12 @@ export const setDeviceFileLastModified = deviceFileLastModified => ({
   deviceFileLastModified
 });
 
-export const fetchUISchemaFiles = configObjects => {
-  return function(dispatch) {
-    return web
-      .ListObjects({
-        bucketName: "server",
-        prefix: "",
-        marker: ""
-      })
-      .then(data => {
-        let allObjects = [];
-        allObjects = data.objects.map(object => object.name.split("/")[0]);
-        let UISchemaFiles = allObjects
-          .filter(str => str.match(regexUiSchema))
-          .sort()
-          .reverse();
-
-        if (UISchemaFiles.length > 0) {
-          dispatch(setUiSchemaSource("server"));
-          dispatch(setUISchemaFile(UISchemaFiles));
-          dispatch(fetchUISchemaContent(UISchemaFiles[0]));
-        } else {
-          dispatch(setUiSchemaSource("public"));
-          dispatch(publicUiSchemaFiles());
-        }
-
-        let schemaFiles = configObjects
-          .filter(str => str.match(regexSchema))
-          .sort()
-          .reverse();
-        let configSchema = configObjects
-          .filter(str => str.match(regexConfig))
-          .sort()
-          .reverse();
-
-        dispatch(setConfigFile(configSchema));
-        dispatch(fetchConfigContent(configSchema[0], "editor"));
-
-        dispatch(setSchemaFile(schemaFiles));
-        dispatch(fetchSchemaContent(schemaFiles[0])); 
-      })
-      .catch(err => {
-        if (web.LoggedIn()) {
-          dispatch(
-            alertActions.set({
-              type: "danger",
-              message: err.message,
-              autoClear: true
-            })
-          );
-        } else {
-          history.push("/login");
-        }
-      });
-  };
-};
-
 export const updateConfigFile = (content, object) => {
   const { bucket, prefix } = pathSlice(history.location.pathname);
 
   return function(dispatch) {
     dispatch(setConfigContent(JSON.parse(content)));
     dispatch(setConfigContentPreChange(content));
-    if (prefix == "server") {
-      dispatch(browserActions.setServerConfigContent(JSON.parse(content)));
-    }
 
     return web
       .PutObject({
@@ -488,14 +455,8 @@ export const fetchConfigContent = (fileName, type) => {
   };
 };
 
-export const setUiSchemaSource = uiSchemaSource => ({
-  type: SET_UISCHEMA_SOURCE,
-  uiSchemaSource
-});
-
 export const fetchSchemaContent = fileName => {
   return function(dispatch, getState) {
-
     const uploadedTest = getState().editor.editorSchemaFiles.filter(file =>
       file.name.includes("local")
     )[0];
@@ -566,7 +527,7 @@ export const fetchSchemaContent = fileName => {
 };
 
 export const fetchUISchemaContent = fileName => {
-  return function(dispatch, getState) {
+  return function(dispatch) {
     dispatch(setConfigContentPreSubmit());
     dispatch(resetLocalUISchemaList());
     switch (true) {
@@ -579,54 +540,6 @@ export const fetchUISchemaContent = fileName => {
         }/${fileName.split(" ")[0]}`);
         dispatch(setUISchemaContent(uiSchemaPublic));
         break;
-      default:
-        const { bucket, prefix } = pathSlice(history.location.pathname);
-        const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
-        if (
-          getState().editor.uiSchemaSource == "server" &&
-          prefix &&
-          fileName &&
-          fileName != "Upload"
-        ) {
-          return web
-            .PresignedGet({
-              bucket: "server",
-              object: fileName,
-              expiry: expiry
-            })
-            .then(res => {
-              fetch(res.url)
-                .then(r => r.json())
-                .then(data => {
-                  dispatch(setUISchemaContent(data));
-                })
-                .catch(e => {
-                  dispatch(setUISchemaContent(null));
-                  dispatch(
-                    alertActions.set({
-                      type: "danger",
-                      message: `Warning: UISchema ${fileName} is invalid and was not loaded`,
-                      autoClear: true
-                    })
-                  );
-                });
-            })
-            .catch(err => {
-              if (web.LoggedIn()) {
-                dispatch(
-                  alertActions.set({
-                    type: "danger",
-                    message: err.message,
-                    autoClear: true
-                  })
-                );
-              } else {
-                history.push("/login");
-              }
-            });
-        } else if (getState().editor.uiSchemaSource == "server" && prefix) {
-          dispatch(setUISchemaContent(null));
-        }
     }
   };
 };

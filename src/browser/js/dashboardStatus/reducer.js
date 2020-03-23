@@ -1,9 +1,20 @@
 import * as dashboardStatusActions from "./actions";
+import _ from "lodash";
+import {demoMode, demoDate} from "../utils";
+
+// initialize periodStart for first load
+let periodStart = new Date();
+if(demoMode){
+  periodStart = new Date(demoDate);  // set fixed date for demo purposes
+}
+periodStart.setDate(periodStart.getDate() - 7);
 
 export default (
   state = {
     mf4Objects: [],
+    deviceLastMf4MetaData: [],
     mf4ObjectsMin: [],
+    logFileMarkers: [],
     deviceFileContents: [],
     deviceFileObjects: [],
     configObjectsUnique: [],
@@ -12,7 +23,8 @@ export default (
     loadedFiles: false,
     loadedConfig: false,
     loadedDevice: false,
-    devicesFilesCount: 0
+    devicesFilesCount: 0,
+    periodStart: periodStart
   },
   action
 ) => {
@@ -20,7 +32,6 @@ export default (
     case dashboardStatusActions.CLEAR_DATA_DEVICES:
       return {
         ...state,
-        deviceFileContents: [],
         deviceFileObjects: [],
         configObjectsUnique: [],
         configFileContents: [],
@@ -32,7 +43,9 @@ export default (
       return {
         ...state,
         mf4Objects: [],
+        deviceLastMf4MetaData: [],
         mf4ObjectsMin: [],
+        logFileMarkers: [],
         loadedFiles: false,
         devicesFilesCount: 0
       };
@@ -41,11 +54,31 @@ export default (
         ...state,
         mf4Objects: action.mf4Objects
       };
+    case dashboardStatusActions.SET_PERIODSTART_BACK:
+      let periodStart = new Date();
+      if(demoMode){
+        periodStart = new Date(demoDate);  // set fixed date for demo purposes
+      }
+      periodStart.setDate(periodStart.getDate() - action.periodDelta)
+      return {
+        ...state,
+        periodStart: periodStart
+      };
+    case dashboardStatusActions.SET_LAST_OBJECT_DATA:
+      return {
+        ...state,
+        deviceLastMf4MetaData: action.deviceLastMf4MetaData
+      };
     case dashboardStatusActions.SET_DEVICES_FILES_COUNT:
       return {
         ...state,
         devicesFilesCount: action.devicesFilesCount
       };
+    case dashboardStatusActions.ADD_DEVICE_MARKER:
+       return {
+        ...state,
+        logFileMarkers: [action.logFileMarker, ...state.logFileMarkers]
+    };
     case dashboardStatusActions.SET_OBJECTS_DATA_MIN:
       return {
         ...state,

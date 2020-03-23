@@ -163,6 +163,53 @@ class S3Explorer {
     });
   }
 
+  /**
+   * @description list bucket objects
+   * @param {*} bucketName
+   * @param {*} prefix
+   * @param {*} marker
+   * @param {*} cb
+   */
+  listObjectsV2(bucketName, prefix, marker, cb) {
+    var stream;
+    let updatedPrefix = bucketName + "/" + prefix;
+    if ("Home" == bucketName) {
+      stream = this.s3Client.listObjectsV2(
+        this.bucketName,
+        prefix,
+        marker,
+        false
+      );
+    } else {
+      stream = this.s3Client.listObjectsV2(
+        this.bucketName,
+        updatedPrefix,
+        marker,
+        false
+      );
+    }
+
+    let objectsArray = [];
+    stream.on("data", function(obj) {
+      if ((obj.name && !obj.name.endsWith("/")) || obj.prefix) {
+        obj["name"] = obj.prefix
+          ? removeFirstOccurence(obj.prefix, updatedPrefix)
+          : removeFirstOccurence(obj.name, updatedPrefix);
+        objectsArray.push(obj);
+      }
+    });
+    stream.on("end", function() {
+      let response = StorageResponses.makeDefaultResponse(
+        "objects",
+        objectsArray
+      );
+      cb(null, response);
+    });
+    stream.on("error", function(err) {
+      cb(err);
+    });
+  }
+
   // list bucket objects from S3 compatible storage
   listObjectsRecursive(bucketName, prefix, marker, cb) {
     var stream;
@@ -505,7 +552,7 @@ class S3Explorer {
    * @description: Get object content based on the pre-defined range i.e 10kb
    */
 
-  getPartialObject(bucketName, objectName, cb) {
+  getPartialObject(bucketName, objectName, byteLength, cb) {
     let objectNameWithPrefix;
     if ("Home" == bucketName) {
       objectNameWithPrefix = objectName;
@@ -517,12 +564,12 @@ class S3Explorer {
       this.bucketName,
       objectNameWithPrefix,
       0,
-      10000,
+      byteLength,
       (err, stream) => {
-        if (err) {
-          console.log(err);
-          return cb(err);
-        }
+        // if (err) {
+        //   console.log(err);
+        //   return cb(err);
+        // }
         stream.on("data", function(chunk) {
           partialContent += chunk.toString();
         });
@@ -547,6 +594,8 @@ S3Explorer.prototype.getSessionsObject = promisify(
 );
 S3Explorer.prototype.listBuckets = promisify(S3Explorer.prototype.listBuckets);
 S3Explorer.prototype.listObjects = promisify(S3Explorer.prototype.listObjects);
+S3Explorer.prototype.listObjectsV2 = promisify(S3Explorer.prototype.listObjectsV2);
+
 S3Explorer.prototype.listPublicBucketObject = promisify(
   S3Explorer.prototype.listPublicBucketObject
 );

@@ -3,7 +3,6 @@ import _ from "lodash";
 
 export default (
   state = {
-    uiSchemaSource: "server",
     prevDeviceFileDevice: "",
     editorSchemaFiles: [],
     editorConfigFiles: [],
@@ -48,11 +47,6 @@ export default (
       return {
         ...state,
         deviceFileLastModified: action.deviceFileLastModified
-      };
-    case actionsEditor.SET_UISCHEMA_SOURCE:
-      return {
-        ...state,
-        uiSchemaSource: action.uiSchemaSource
       };
     case actionsEditor.SET_UI_SCHEMA_DATA:
       return {

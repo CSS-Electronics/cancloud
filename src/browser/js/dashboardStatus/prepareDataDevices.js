@@ -1,4 +1,5 @@
 import Moment from "moment";
+import {demoMode, demoDate} from "../utils";
 
 let deviceFileObjectsFiltered = [];
 let deviceFileContentsFiltered = [];
@@ -31,7 +32,6 @@ export const pieMultiOptionsFunc = () => {
         label: function(item, data) {
           return (
             data.datasets[item.datasetIndex].label +
-            // " " + data.labels[item.index] +
             ": " +
             data.datasets[item.datasetIndex].data[item.index]
           );
@@ -41,17 +41,58 @@ export const pieMultiOptionsFunc = () => {
   };
 };
 
+// function for creating dynamic bins for pie charts
+export const createBins = (ary, maxBinsInput) => {
+  let max = Math.max(...ary);
+  let min = Math.min(...ary);
+  let diff = max - min;
+  let bins = [];
+  let binCount = 0;
+  let maxBins = ary.length > 1 && diff > 5 ? maxBinsInput : 1;
+  const interval = diff / maxBins;
+  const numOfBuckets = maxBins;
+
+  // setup Bins
+  for (let i = 0; i < numOfBuckets; i += 1) {
+    bins.push({
+      binNum: binCount,
+      minNum: min + i * interval,
+      maxNum: min + (i + 1) * interval,
+      count: 0
+    });
+    binCount++;
+  }
+
+  // loop through data and add to bin's count
+  for (let i = 0; i < ary.length; i++) {
+    let item = ary[i];
+    for (let j = 0; j < bins.length; j++) {
+      let bin = bins[j];
+      if (item >= bin.minNum && item < bin.maxNum + 1) {
+        bin.count++;
+      }
+    }
+  }
+
+  return bins;
+};
+
 export const prepareDataDevices = (
   periodHours,
   deviceFileObjects,
   deviceFileContents,
   configFileCrc32
 ) => {
- 
-  
   // filter log files & devices based on time period
   let periodStartNew = new Date();
-  periodStartNew.setTime(periodStartNew.getTime() - periodHours * 60 * 60 * 1000);
+
+  if(demoMode){
+    periodStartNew = new Date(demoDate);
+  }
+
+  periodStartNew.setTime(
+    periodStartNew.getTime() - periodHours * 60 * 60 * 1000
+  );
 
   deviceFileObjectsFiltered = deviceFileObjects.filter(
     e => e.lastModified >= periodStartNew
@@ -62,44 +103,128 @@ export const prepareDataDevices = (
   const deviceIdListDelta = deviceFileObjectsFiltered.map(device => {
     const deviceId = device.deviceId;
     const lastModified = Moment(device.lastModified);
-    const lastModifiedDelta = Moment().diff(lastModified, "minutes");
-    const lastModifiedMin = lastModified.format("YYYY-MM-DD HH:mm");
+    const lastModifiedDelta = demoMode ? Moment(demoDate).diff(lastModified, "minutes") : Moment().diff(lastModified, "minutes");
+    const lastModifiedMin = lastModified.format("YY-MM-DD HH:mm");
 
     return { deviceId, lastModifiedDelta, lastModifiedMin };
   });
 
   deviceFileContentsFiltered = deviceFileContents.filter(e =>
-    deviceIdList.includes(e.id) ? e : null
+    e && e.id && deviceIdList.includes(e.id) ? e : null
   );
 
-  // device status pie chart
-  let deviceStatusLabel = [
-    "<5 min",
-    "<1 hours",
-    "<24 hours",
-    "<7 days",
-    ">7 days"
-  ];
+  // device heartbeat pie chart
+  let deviceStatusAry = deviceIdListDelta.map(
+    object => object.lastModifiedDelta
+  );
 
-  let deviceStatusGrouped = _.groupBy(deviceIdListDelta, function(object) {
-    const delta = object.lastModifiedDelta;
-    return delta < 5
-      ? deviceStatusLabel[0]
-      : delta < 60
-      ? deviceStatusLabel[1]
-      : delta < 24 * 60
-      ? deviceStatusLabel[2]
-      : delta < 7 * 24 * 60
-      ? deviceStatusLabel[3]
-      : deviceStatusLabel[4];
+  let deviceStatusbins = createBins(deviceStatusAry, 5);
+  let deviceStatusData = deviceStatusbins.map(bin => bin.count);
+
+  let deviceStatusLabel = deviceStatusbins.map(bin => {
+    let min = bin.minNum;
+    let max = bin.maxNum;
+    let label = "";
+    let unit = " m"
+
+    if (min > 24 * 60) {
+
+      min = Math.round((min / (60 * 24)) * 10) / 10;
+      max = Math.round((max / (60 * 24)) * 10) / 10;
+      unit = " d";
+
+      if (min == max) {
+        label = min.toString() + unit;
+      } else {
+        label = min.toString() + "-" + max.toString() + unit;
+      }
+    } else if (min > 60) {
+      min = Math.round((min / 60) * 10) / 10;
+      max = Math.round((max / 60) * 10) / 10;
+      unit = " h";
+      if (min == max) {
+        label = min.toString() + unit;
+      } else {
+        label = min.toString() + "-" + max.toString() + unit;
+      }
+    } else if (min <= 60){
+      min = Math.round(min);
+      max = Math.round(max);
+
+      if (min == max) {
+        label = min.toString() + unit;
+      } else {
+        label = min.toString() + "-" + max.toString() + unit;
+      }
+    }
+    return label;
   });
 
 
-  let deviceStatusData = deviceStatusLabel.map((counter, i) =>
-    deviceStatusGrouped[deviceStatusLabel[i]]
-      ? deviceStatusGrouped[deviceStatusLabel[i]].length
-      : 0
+  // if empty, clear variables
+  if (
+    deviceStatusData.length == 1 &&
+    deviceStatusData[0] == 0
+  ) {
+    deviceStatusData = [];
+    deviceStatusLabel = [];
+  }
+
+
+
+  // calculate storageUsed average for KPIs
+  let storageUsedAry = deviceFileContentsFiltered.map(
+    object =>
+      object.space_used_mb &&
+      object.space_used_mb.split("/")[0] &&
+      Math.round(
+        (object.space_used_mb.split("/")[0] /
+          object.space_used_mb.split("/")[1]) *
+          10000
+      ) / 100
   );
+
+  storageUsedAry = storageUsedAry.filter(
+    object =>
+      object <= 100  && !isNaN(object) && object != undefined
+  );
+
+  const kpiUsedStorage = storageUsedAry.length
+    ? (
+        Math.round(
+          (storageUsedAry.reduce((a, b) => a + b, 0) / storageUsedAry.length) *
+            10
+        ) / 10
+      ).toString() + "%"
+    : "";
+
+  // storage used pie chart
+  let storageUsedBins = createBins(storageUsedAry, 5);
+
+  let deviceStorageUsedData = storageUsedBins.map(bin => bin.count);
+  let deviceStorageUsedLabel = storageUsedBins.map(bin => {
+    let min = bin.minNum < 10 ? Math.round(bin.minNum*10)/10 : Math.round(bin.minNum);
+    let max = bin.minNum < 10 ? Math.round(bin.maxNum*10)/10 : Math.round(bin.maxNum);
+    let unit = " %";
+    let label = "";
+
+    if (!isNaN(min) && !isNaN(max) && min != max) {
+      label = min.toString() + "-" + max.toString() + unit;
+    } else if (!isNaN(min) && !isNaN(max) && min == max) {
+      label = min.toString() + unit;
+    }
+
+    return label;
+  });
+
+  // if empty, ensure fully empty
+  if (
+    deviceStorageUsedData.length == 1 &&
+    deviceStorageUsedData[0] == 0
+  ) {
+    deviceStorageUsedData = [];
+    deviceStorageUsedLabel = [];
+  }
 
   // firmware pie chart
   const deviceFWUnsorted = _.countBy(
@@ -134,26 +259,22 @@ export const prepareDataDevices = (
       iColorCnt += 1;
     }
   }
-  
-    deviceFWLabel.push("config synced");
-    deviceFWLabel.push("config not synced");
-    deviceFWColor.push(deviceFWColorFull[3]);
-    deviceFWColor.push(deviceFWColorFull[4]);
-  
+
+  deviceFWLabel.push("config synced");
+  deviceFWLabel.push("config not synced");
+  deviceFWColor.push(deviceFWColorFull[3]);
+  deviceFWColor.push(deviceFWColorFull[4]);
 
   while (deviceFWData.length < 5) {
     deviceFWData.push(0);
     deviceFWData.push(0);
   }
 
-
-
-
   // kpi data
   const kpiConnectedVal = deviceFileObjectsFiltered
     .map(item => item.deviceId)
     .filter((value, index, self) => self.indexOf(value) === index).length;
-  
+
   const deviceIdListDeltaSort = deviceIdListDelta
     .sort(function(a, b) {
       return a.lastModifiedDelta - b.lastModifiedDelta;
@@ -163,29 +284,27 @@ export const prepareDataDevices = (
   // config pie chart
   let configCrc32Data = [0, 0];
   let test = false;
-  let deviceCrc32Test = []
+  let deviceCrc32Test = [];
 
   if (configFileCrc32 && configFileCrc32[0] && configFileCrc32[0].crc32) {
-    
     deviceCrc32Test = deviceFileContentsFiltered.map(e => {
       test =
         configFileCrc32.filter(c => c.deviceId == e.id) &&
         configFileCrc32.filter(c => c.deviceId == e.id)[0] &&
         configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32
-          ? configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32 ==
-            e.cfg_crc32
+          ? parseInt(configFileCrc32.filter(c => c.deviceId == e.id)[0].crc32,16) ==
+            parseInt(e.cfg_crc32,16)
           : false;
       configCrc32Data[1 - test] += 1;
 
-      const name = e.id 
-      const testCrc32 = test
-      return {name,testCrc32}
+      const name = e.id;
+      const testCrc32 = test;
+      return { name, testCrc32 };
     });
   } else {
     configCrc32Data = [0, kpiConnectedVal]; // all configs set to not synced in this case
   }
 
-  // if(Object.keys(deviceFWSorted).length != 0){
   chartDataDevices = {
     kpiConnected: kpiConnectedVal,
     deviceStatus: {
@@ -214,14 +333,21 @@ export const prepareDataDevices = (
         }
       ],
       labels: deviceFWLabel
-    }
+    },
+    deviceStorage: {
+      datasets: [
+        {
+          data: deviceStorageUsedData,
+          backgroundColor: "#ff9900 #f6b26b #f9cb9c #fce1c5 #fff2e6 #fffbf7".split(
+            " "
+          ),
+          label: "#devices"
+        }
+      ],
+      labels: deviceStorageUsedLabel
+    },
+    kpiUsedStorage: kpiUsedStorage
   };
 
-// }
-
-  return [
-    chartDataDevices,
-    deviceIdListDeltaSort,
-    deviceCrc32Test
-  ];
+  return [chartDataDevices, deviceIdListDeltaSort, deviceCrc32Test];
 };

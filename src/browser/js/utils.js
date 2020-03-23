@@ -18,6 +18,9 @@ import { minioBrowserPrefix } from "./constants.js";
 import xml2js from "xml2js";
 import _ from "lodash";
 
+export const demoMode = false 
+export const demoDate = '2020.03.25 13:46:32'
+
 export const sortObjectsByName = (objects, order) => {
   let folders = objects.filter(object => object.name.endsWith("/"));
   let files = objects.filter(object => !object.name.endsWith("/"));

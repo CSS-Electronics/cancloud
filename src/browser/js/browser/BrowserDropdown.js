@@ -20,7 +20,7 @@ import { Dropdown } from "react-bootstrap";
 import * as browserActions from "./actions";
 import * as actionsBuckets from "../buckets/actions";
 import * as actionsEditor from "../editor/actions";
-import * as actionsEditorTools from "../editorTools/actions"
+import * as actionsEditorTools from "../editorTools/actions";
 import web from "../web";
 import history from "../history";
 
@@ -31,10 +31,6 @@ export class BrowserDropdown extends React.Component {
     this.logout = this.logout.bind(this);
   }
 
-  componentDidMount() {
-    const { fetchServerInfo } = this.props;
-    fetchServerInfo();
-  }
 
   fullScreen(e) {
     e.preventDefault();
@@ -67,10 +63,14 @@ export class BrowserDropdown extends React.Component {
     history.push("/configuration/");
 
     this.props.publicUiSchemaFiles();
-    if(!this.props.editorSchemaSidebarOpen){
-      this.props.toggleEditorSchemaSideBar()
+    if (!this.props.editorSchemaSidebarOpen) {
+      this.props.toggleEditorSchemaSideBar();
     }
+  }
 
+  homeView(e) {
+    e.preventDefault();
+    history.push("Home");
   }
 
   dashboard(e) {
@@ -79,7 +79,6 @@ export class BrowserDropdown extends React.Component {
   }
 
   render() {
-    const { serverInfo } = this.props;
     return (
       <li>
         <Dropdown pullRight id="top-right-menu">
@@ -94,15 +93,9 @@ export class BrowserDropdown extends React.Component {
             </li>
             <li>
               <a href="" onClick={this.dashboard.bind(this)}>
-                Status dashboard <i className="pie-icon"/>
+                Status dashboard <i className="pie-icon" />
               </a>
             </li>
-            <li>
-              <a href="" onClick={this.configureGeneral.bind(this)}>
-                Simple editor <i className="fa fa-cog" />
-              </a>
-            </li>
-          
             <li>
               <a href="" id="logout" onClick={this.logout}>
                 Sign out <i className="fa fa-sign-out" />
@@ -117,24 +110,20 @@ export class BrowserDropdown extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    serverInfo: state.browser.serverInfo,
     editorSchemaSidebarOpen: state.editorTools.editorSchemaSidebarOpen
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    fetchServerInfo: () => dispatch(browserActions.fetchServerInfo()),
     selectBucket: (bucket, prefix) =>
       dispatch(actionsBuckets.selectBucket(bucket)),
     resetFiles: () => dispatch(actionsEditor.resetFiles()),
     publicUiSchemaFiles: () => dispatch(actionsEditor.publicUiSchemaFiles()),
-    toggleEditorSchemaSideBar: () => dispatch(actionsEditorTools.toggleEditorSchemaSideBar()),
+    toggleEditorSchemaSideBar: () =>
+      dispatch(actionsEditorTools.toggleEditorSchemaSideBar()),
     userLogout: () => dispatch(actionsBuckets.userLogout())
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(BrowserDropdown);
+export default connect(mapStateToProps, mapDispatchToProps)(BrowserDropdown);

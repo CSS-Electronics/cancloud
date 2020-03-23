@@ -20,9 +20,7 @@ import {
 import DeviceTable from "./DeviceTable";
 import PeriodMenu from "./PeriodMenu";
 
-// https://stackoverflow.com/questions/42394429/aws-sdk-s3-best-way-to-list-all-keys-with-listobjectsv2
-
-const resWide = window.innerWidth > 2000 ? 1 : 0;
+const resWide = window.innerWidth > 2000 ? 2 : window.innerWidth > 1800 ? 1 : 0;
 const statusConfig = require(`../../schema/status-config-03.01.json`);
 const confDash = statusConfig.dashboard;
 const chDefaults = confDash.default_settings;
@@ -52,6 +50,12 @@ class DashboardStatusSection extends React.Component {
   }
 
   handleChange(event) {
+    if (event.target.value == 24 * 30) {
+      this.props.clearDataFiles();
+      this.props.setPeriodStartBack(30);
+      this.props.listLogFiles(this.state.devicesFilesInput.map(e => e.value));
+    }
+
     this.setState({
       periodHours: event.target.value
     });
@@ -109,6 +113,7 @@ class DashboardStatusSection extends React.Component {
   componentWillUnmount() {
     this.props.clearDataDevices();
     this.props.clearDataFiles();
+    this.props.setPeriodStartBack(7);
   }
 
   render() {
@@ -118,12 +123,12 @@ class DashboardStatusSection extends React.Component {
       deviceFileContents,
       deviceFileObjects,
       configFileCrc32,
-      serverConfig,
       loadedFiles,
       loadedDevice,
       loadedConfig,
       deviceList,
-      devicesFilesCount
+      devicesFilesCount,
+      deviceLastMf4MetaData
     } = this.props;
 
     const { periodHours, devicesDevicesInput, devicesFilesInput } = this.state;
@@ -334,7 +339,11 @@ class DashboardStatusSection extends React.Component {
                         ) : null}
 
                         {widget.widget_type == "pie" &&
-                        chartDataReady &&
+                        chartData[widget.dataset] &&
+                        chartData[widget.dataset].datasets[0].data.reduce(
+                          (a, b) => a + b,
+                          0
+                        ) &&
                         widget.dependency == "files" ? (
                           <Doughnut
                             data={chartData[widget.dataset]}
@@ -371,22 +380,17 @@ class DashboardStatusSection extends React.Component {
 
                         {widget.widget_type == "table" &&
                         deviceFileContents.length ? (
-                          <div
-                            style={{
-                              height: widget.height + (resWide ? 100 : 0)
-                            }}
-                          >
-                            <DeviceTable
-                              deviceIdListDeltaSort={chartDataDevicesArray[1]}
-                              deviceFileContents={deviceFileContents}
-                              configFileCrc32={configFileCrc32}
-                              serverConfig={serverConfig}
-                              mf4ObjectsFiltered={
-                                chartDataArray[2] ? chartDataArray[2] : []
-                              }
-                              deviceCrc32Test={chartDataDevicesArray[2]}
-                            />
-                          </div>
+                          <DeviceTable
+                            deviceIdListDeltaSort={chartDataDevicesArray[1]}
+                            deviceFileContents={deviceFileContents}
+                            configFileCrc32={configFileCrc32}
+                            mf4ObjectsFiltered={
+                              chartDataArray[2] ? chartDataArray[2] : []
+                            }
+                            deviceCrc32Test={chartDataDevicesArray[2]}
+                            height={widget.height - 50 + (resWide ? 100 : 0)}
+                            deviceLastMf4MetaData={deviceLastMf4MetaData}
+                          />
                         ) : null}
                       </div>
                     ) : !loadedFiles ? (
@@ -429,9 +433,10 @@ const mapDispatchToProps = dispatch => ({
     dispatch(dashboardStatusActions.loadedConfig(loadedConfig)),
   loadedDeviceSet: loadedDevice =>
     dispatch(dashboardStatusActions.loadedDevice(loadedDevice)),
-  fetchServerObjectList: () => dispatch(browserActions.fetchServerObjectList()),
   clearDataDevices: () => dispatch(dashboardStatusActions.clearDataDevices()),
-  clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles())
+  clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles()),
+  setPeriodStartBack: periodDelta =>
+    dispatch(dashboardStatusActions.setPeriodStartBack(periodDelta))
 });
 
 const mapStateToProps = state => {
@@ -441,13 +446,13 @@ const mapStateToProps = state => {
     deviceFileContents: state.dashboardStatus.deviceFileContents,
     deviceFileObjects: state.dashboardStatus.deviceFileObjects,
     configFileCrc32: state.dashboardStatus.configFileCrc32,
-    serverConfig: state.browser.serverConfig,
     configFileContents: state.dashboardStatus.configFileContents,
     loadedFiles: state.dashboardStatus.loadedFiles,
     loadedDevice: state.dashboardStatus.loadedDevice,
     loadedConfig: state.dashboardStatus.loadedConfig,
     devicesFilesCount: state.dashboardStatus.devicesFilesCount,
-    deviceList: state.buckets.bucketsMeta
+    deviceList: state.buckets.bucketsMeta,
+    deviceLastMf4MetaData: state.dashboardStatus.deviceLastMf4MetaData
   };
 };
 

@@ -254,25 +254,6 @@ export const selectPrefix = prefix => {
       history.replace(path);
     }
 
-    let loggerName = currentBucket;
-
-    if (prefix.split("/")[0].match(loggerRegex) !== null) {
-      loggerName = prefix.split("/")[0].match(loggerRegex)[0];
-    }
-
-    if (
-      loggerName.match(loggerRegex) &&
-      getState().browser.serverConfig.devicemeta &&
-      getState().browser.serverConfig.devicemeta.devices
-    ) {
-      let imageName = getState().browser.serverConfig.devicemeta.devices.filter(
-        p => p.serialno === loggerName
-      )[0];
-
-      if (imageName !== undefined && imageName.imageurl !== undefined) {
-        dispatch(commonActions.fetchServerImage(imageName.imageurl));
-      }
-    }
   };
 };
 
@@ -425,11 +406,11 @@ export const previewObject = object => {
     const currentBucket = getCurrentBucket(getState());
     const currentPrefix = getCurrentPrefix(getState());
     const objectName = `${currentPrefix}${object.name}`;
-    console.log("Preview object", objectName);
     return web
       .GetPartialObject({
         bucketName: currentBucket,
-        objectName: objectName
+        objectName: objectName,
+        byteLength: 10000
       })
       .then(objContent => {
         dispatch(showPreviewObject(object, objContent));

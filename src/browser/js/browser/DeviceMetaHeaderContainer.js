@@ -25,7 +25,7 @@ export class DeviceMetaHeaderContainer extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { bucket } = pathSlice(history.location.pathname);
+    const { bucket,prefix } = pathSlice(history.location.pathname);
 
     if (
       this.props.deviceFileContents != nextProps.deviceFileContents ||
@@ -45,7 +45,7 @@ export class DeviceMetaHeaderContainer extends Component {
       this.props.listLogFiles([bucket]);
     }
 
-    if (this.props.list != nextProps.list && nextProps.list.length > 0) {
+    if (this.props.list != nextProps.list && nextProps.list.length > 0 && prefix == "") {
 
       let imageName = nextProps.list.filter(
         obj => obj && obj.name && obj.name.match(imageRegex)

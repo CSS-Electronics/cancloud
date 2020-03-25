@@ -26,7 +26,16 @@ import { Redirect } from "react-router-dom";
 import history from "../history";
 import {demoMode} from "../utils";
 
+let news = ""
+
+try{
+  let newsJson = require("../../schema/news.json")
+  news = newsJson.news
+  }catch(err){
+  }
+
 export class Login extends React.Component {
+ 
   constructor(props) {
     super(props);
 
@@ -52,10 +61,9 @@ export class Login extends React.Component {
       };
     }
 
-
-    // LIVE DEMO
   }
 
+  
   configureGeneral(e) {
     e.preventDefault();
     history.push("/configuration");
@@ -218,6 +226,8 @@ export class Login extends React.Component {
               <i className="fa fa-sign-in" />
             </button>
           </form>
+          <br/><br/>
+          <div className="login-news">{news}</div>
         </div>
         <div className="l-footer">
           <a className="lf-logo" href="">

@@ -50,7 +50,7 @@ export const SideBar = ({
           <img src={logo} style={{ width: "65%", maxHeight: "70px" }} />
           <div className="version-text sb-custom-version">
             v04.01.03
-            {demoMode ? <div><br/>DEMO MODE (date fixed at {demoDate.split(" ")[0]})</div>: null}
+{demoMode ? <div><br/>DEMO MODE (date fixed at {demoDate.split(" ")[0]})</div>: null}
           </div>
         </div>
         <div className="fes-list">

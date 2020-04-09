@@ -1,0 +1,161 @@
+{
+  "general": {
+    "device": {},
+    "security": {},
+    "debug": {
+      "syslog": 0
+    }
+  },
+  "log": {
+    "file": {
+      "split_size": 50,
+      "split_time_period": 0,
+      "split_time_offset": 0,
+      "cyclic": 1
+    },
+    "compression": {
+      "level": 0
+    },
+    "encryption": {
+      "state": 0
+    }
+  },
+  "rtc": {
+    "sync": 0,
+    "timezone": 0,
+    "adjustment": 0
+  },
+  "secondaryport": {
+    "power_schedule": []
+  },
+  "can_1": {
+    "general": {
+      "rx_state": 1,
+      "tx_state": 1
+    },
+    "phy": {
+      "mode": 1,
+      "retransmission": 1,
+      "fd_spec": 0,
+      "bit_rate_cfg_mode": 0
+    },
+    "filter": [
+      {
+        "name": "Ch1AllStandard",
+        "state": 1,
+        "type": 0,
+        "id_format": 0,
+        "method": 1,
+        "f1": "7FF",
+        "f2": "0",
+        "prescaler_type": 0
+      },
+      {
+        "name": "Ch1AllExtended",
+        "state": 1,
+        "type": 0,
+        "id_format": 1,
+        "method": 1,
+        "f1": "1FFFFFFF",
+        "f2": "0",
+        "prescaler_type": 0
+      }
+    ],
+    "heartbeat": {
+      "state": 0,
+      "id_format": 1,
+      "id": "00435353"
+    },
+    "control": {
+      "control_rx_state": 0,
+      "control_tx_state": 0,
+      "start": {
+        "id_format": 1,
+        "id": "00435354",
+        "id_mask": "1FFFFFFF",
+        "data_mask": "FFFFFFFFFFFFFFFF",
+        "data_high": "0100000000000000",
+        "data_low": "0100000000000000"
+      },
+      "stop": {
+        "id_format": 1,
+        "id": "00435354",
+        "id_mask": "1FFFFFFF",
+        "data_mask": "FFFFFFFFFFFFFFFF",
+        "data_high": "0000000000000000",
+        "data_low": "0000000000000000"
+      }
+    }
+  },
+  "can_2": {
+    "general": {
+      "rx_state": 1,
+      "tx_state": 1
+    },
+    "phy": {
+      "mode": 1,
+      "retransmission": 1,
+      "fd_spec": 0,
+      "bit_rate_cfg_mode": 0
+    },
+    "filter": [
+      {
+        "name": "Ch2AllStandard",
+        "state": 1,
+        "type": 0,
+        "id_format": 0,
+        "method": 1,
+        "f1": "7FF",
+        "f2": "0",
+        "prescaler_type": 0
+      },
+      {
+        "name": "Ch2AllExtended",
+        "state": 1,
+        "type": 0,
+        "id_format": 1,
+        "method": 1,
+        "f1": "1FFFFFFF",
+        "f2": "0",
+        "prescaler_type": 0
+      }
+    ],
+    "heartbeat": {
+      "state": 0,
+      "id_format": 1,
+      "id": "00435353"
+    },
+    "control": {
+      "control_rx_state": 0,
+      "control_tx_state": 0,
+      "start": {
+        "id_format": 1,
+        "id": "00435354",
+        "id_mask": "1FFFFFFF",
+        "data_mask": "FFFFFFFFFFFFFFFF",
+        "data_high": "0100000000000000",
+        "data_low": "0100000000000000"
+      },
+      "stop": {
+        "id_format": 1,
+        "id": "00435354",
+        "id_mask": "1FFFFFFF",
+        "data_mask": "FFFFFFFFFFFFFFFF",
+        "data_high": "0000000000000000",
+        "data_low": "0000000000000000"
+      }
+    }
+  },
+  "lin_1": {
+    "phy": {
+      "mode": 0,
+      "bit_rate": 19200
+    }
+  },
+  "lin_2": {
+    "phy": {
+      "mode": 0,
+      "bit_rate": 19200
+    }
+  }
+}

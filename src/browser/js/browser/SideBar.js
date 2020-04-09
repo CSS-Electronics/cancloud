@@ -49,8 +49,8 @@ export const SideBar = ({
         <div className="fes-header clearfix hidden-sm hidden-xs">
           <img src={logo} style={{ width: "65%", maxHeight: "70px" }} />
           <div className="version-text sb-custom-version">
-            v04.01.02
-            {demoMode ? <div><br/>DEMO MODE (date fixed at {demoDate.split(" ")[0]})</div>: null}
+            v04.01.03
+{demoMode ? <div><br/>DEMO MODE (date fixed at {demoDate.split(" ")[0]})</div>: null}
           </div>
         </div>
         <div className="fes-list">

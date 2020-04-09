@@ -20,7 +20,6 @@ import { Route, Switch } from "react-router-dom";
 import Editor from "./editor/Editor";
 const Browser = EDITOR.offline ? "" : require("./browser/Browser");
 const Login = EDITOR.offline ? "" : require("./browser/Login");
-const Dashboard = EDITOR.offline ? "" : require("./dashboard");
 const DashboardStatus = EDITOR.offline ? "" : require("./dashboardStatus");
 
 export const App = () => {
@@ -34,7 +33,6 @@ export const App = () => {
     return (
       <Switch>
         <Route path={"/login"} component={Login} />
-        <Route path={"/dashboard"} component={Dashboard} />
         <Route path={"/status-dashboard"} component={DashboardStatus} />
         <Route path={"/configuration/:device?"} component={Editor} />
         <Route path={"/:bucket?/*"} component={Browser} />

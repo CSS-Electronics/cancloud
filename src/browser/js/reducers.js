@@ -34,7 +34,6 @@ const rootReducer = combineReducers({
   objects,
   uploads,
   editor,
-  dashboard,
   dashboardStatus,
   editorTools,
   alertModals

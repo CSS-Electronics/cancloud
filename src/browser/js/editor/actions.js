@@ -10,7 +10,8 @@ import {
   isValidUISchema,
   isValidSchema,
   isValidConfig,
-  pathSlice
+  pathSlice,
+  demoMode
 } from "../utils";
 import { getCurrentBucket } from "../buckets/selectors";
 
@@ -74,6 +75,11 @@ const regexDeviceFile = new RegExp(/^device\.json/, "g");
 export const publicUiSchemaFiles = () => {
   return function(dispatch) {
     dispatch(loadUISchemaSimpleAdvanced());
+
+    // If demoMode, load the Rule Schema by default for use in the online simple editor
+    if(demoMode){
+      dispatch(publicSchemaFiles("config-01.02.json"))
+    }
   };
 };
 
@@ -83,11 +89,17 @@ export const publicSchemaFiles = selectedConfig => {
     dispatch(resetSchemaFiles());
 
     if (selectedConfig) {
-      const schemaAryFiltered = schemaAry.filter(e =>
+      let schemaAryFiltered = schemaAry.filter(e =>
         e.includes(selectedConfig.substr(7, 5))
       );
 
-      const defaultSchema = schemaAryFiltered[0];
+      if(demoMode){
+      schemaAryFiltered = schemaAry.filter(e =>
+        e.includes("CANedge1")
+      );
+      }
+      
+      let defaultSchema = schemaAryFiltered[0];
 
       if (defaultSchema) {
         const schemaPublic = require(`../../schema/${
@@ -97,6 +109,7 @@ export const publicSchemaFiles = selectedConfig => {
         dispatch(setSchemaFile(schemaAryFiltered));
         dispatch(setSchemaContent(schemaPublic));
       }
+
     }
   };
 };

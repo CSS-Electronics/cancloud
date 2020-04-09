@@ -3,6 +3,7 @@ node_modules
 dist
 
 demo-credentials.json
+news.json
 
 site
 

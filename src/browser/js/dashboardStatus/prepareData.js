@@ -271,12 +271,13 @@ export const prepareData = (
   const kpiUploadedVal = mf4ObjectsFiltered.length
     ? Math.round((kpiUploadedValMB / 1000) * 10) / 10
     : "";
-  const kpiDataPerDeviceDayVal =
+  const kpiDataPerDeviceVal =
     mf4ObjectsFiltered.length && devicesFilesCount
       ? Math.round(
-          (kpiUploadedValMB / devicesFilesCount / (periodHours / 24)) * 10
-        ) / 10
+          (kpiUploadedValMB / devicesFilesCount)
+        )
       : "";
+
   const kpiFilesVal = mf4ObjectsFiltered.length
     ? mf4ObjectsFiltered.reduce((a, b) => +a + +b.count, 0)
     : "";
@@ -291,7 +292,7 @@ export const prepareData = (
 
   chartData = {
     kpiUploaded: kpiUploadedVal,
-    kpiDataPerDeviceDay: kpiDataPerDeviceDayVal,
+    kpiDataPerDevice: kpiDataPerDeviceVal,
     kpiFiles: kpiFilesVal,
     kpiAvgFileSize: kpiAvgFileSize,
     dataUploadTime: {

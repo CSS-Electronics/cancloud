@@ -62,8 +62,10 @@ export class ObjectItem extends React.Component {
     } = this.props;
 
     let regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
-    const regexLogFile = new RegExp("^\\d{8}-[a-zA-Z0-9]{64}\\.mf4$", "g");
-    const regexLogFileCrc = new RegExp("-[a-zA-Z0-9]{64}\\.mf4", "g");
+    const regexLogFile0007 = new RegExp("^\\d{8}-[a-zA-Z0-9]{64}\\.mf4$", "g");
+    const regexLogFile0007Crc = new RegExp("-[a-zA-Z0-9]{64}", "g");
+    const regexLogFile0102 = new RegExp("^\\d{8}-[a-zA-Z0-9]{8}\\.(MF4|MFM|MFE|MFC)$", "g");
+    const regexLogFile0102Epoch = new RegExp("-[a-zA-Z0-9]{8}", "g");
 
     return (
       <HoverIntent
@@ -99,9 +101,8 @@ export class ObjectItem extends React.Component {
                 }
               }}
             >
-              {name.match(regexLogFile) == null
-                ? name
-                : name.replace(name.match(regexLogFileCrc), ".mf4")}
+              {name.match(regexLogFile0007) ? name.replace(name.match(regexLogFile0007Crc), "") : name.match(regexLogFile0102) ? name.replace(name.match(regexLogFile0102Epoch), "") : name }
+            
             </a>
           </div>
           {regexFileExt.test(name.split(".").slice(-1)[0]) ? (
@@ -117,7 +118,6 @@ export class ObjectItem extends React.Component {
           <div className="fesl-item fesl-item-actions">{actionButtons}</div>
         </div>
       </HoverIntent>
-      //name.match(regexLogFile) == null ? name : name.replace(name.match(regexLogFileCrc),".mf4")
     );
   }
 }

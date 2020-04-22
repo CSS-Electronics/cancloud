@@ -50,14 +50,14 @@
 		"comment": "Log file data uploaded in GB"
       },
       {
-        "title": "MB/device/day",
+        "title": "MB/device",
 		"dependency": "files",
         "widget_type": "kpi",
-        "dataset": "kpiDataPerDeviceDay",
+        "dataset": "kpiDataPerDevice",
         "class_name": "col-sm-2",
         "height": 105,
         "colors": "",
-		"comment": "MB uploaded per device per day"
+		"comment": "MB uploaded per device"
       },
       {
         "title": "Files uploaded",
@@ -82,7 +82,7 @@
 	    {
         "title": "Device latest heartbeat",
 		"dependency": "devices",
-        "widget_type": "pie",
+        "widget_type": "horizontal-bar",
         "dataset": "deviceStatus",
         "class_name": "col-sm-2",
         "height": 210,
@@ -92,7 +92,7 @@
 	  {
         "title": "SD storage used",
 		"dependency": "devices",
-        "widget_type": "pie",
+        "widget_type": "horizontal-bar",
         "dataset": "deviceStorage",
         "class_name": "col-sm-2",
         "aspect_ratio": 0,

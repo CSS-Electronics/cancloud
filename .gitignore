@@ -10,3 +10,4 @@ site
 .eslintrc.json
 
 simple/*
+*.bat

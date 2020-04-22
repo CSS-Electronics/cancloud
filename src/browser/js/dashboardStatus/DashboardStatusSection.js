@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import * as dashboardStatusActions from "./actions";
 import * as browserActions from "../browser/actions";
 import { defaults } from "react-chartjs-2";
-import { Bar, Doughnut } from "react-chartjs-2";
+import { Bar, Doughnut, HorizontalBar } from "react-chartjs-2";
 import ReactMultiSelectCheckboxes from "react-multiselect-checkboxes";
 import {
   prepareData,
@@ -15,6 +15,7 @@ import {
 import {
   prepareDataDevices,
   pieOptionsFunc,
+  horizontalBarOptionsFunc,
   pieMultiOptionsFunc
 } from "./prepareDataDevices";
 import DeviceTable from "./DeviceTable";
@@ -375,6 +376,14 @@ class DashboardStatusSection extends React.Component {
                             }
                             height={widget.height - 60 + (resWide ? 100 : 0)}
                             options={barOptions}
+                          />
+                        ) : null}
+
+                      {widget.widget_type == "horizontal-bar" ? (
+                          <HorizontalBar
+                            data={chartDataDevices[widget.dataset]}
+                            height={widget.height - 60 + (resWide ? 100 : 0)}
+                            options={horizontalBarOptionsFunc(chartDataDevices.kpiConnected)}
                           />
                         ) : null}
 

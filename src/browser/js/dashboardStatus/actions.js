@@ -204,7 +204,7 @@ export const listLogFiles = devicesFilesInput => {
   return function(dispatch, getState) {
     let devices = getState().buckets.list ? getState().buckets.list : [];
     devices = devices.filter(e => e.match(loggerRegex));
-    const devicesFilesDefaultMax = demoMode ? 15 : 5;
+    const devicesFilesDefaultMax = demoMode ? 15 : 10;
 
     // if the user selects specific devices (devicesFilesInput) show these. If no selection, show up to X devices by default
     let devicesFiles =
@@ -494,7 +494,6 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
         if (marker == "SKIP") {
           iCount += 1;
           dispatch(setDevicesFilesCount(iCount));
-
           if (
             getState().dashboardStatus.devicesFilesCount == devicesFiles.length
           ) {

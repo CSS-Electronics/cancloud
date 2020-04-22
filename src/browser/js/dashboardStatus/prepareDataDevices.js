@@ -24,6 +24,56 @@ export const pieOptionsFunc = () => {
   };
 };
 
+export const horizontalBarOptionsFunc = (devices) => {
+  return {
+    maintainAspectRatio: false,
+    legend: {
+      display: false,
+  },
+    tooltips: {
+      callbacks: {
+        label: function(item, data) {
+          return (
+            data.datasets[item.datasetIndex].label +
+            " " +
+            data.labels[item.index] +
+            ": " +
+            data.datasets[item.datasetIndex].data[item.index]
+          );
+        }
+      }
+    },
+    scales: {
+      yAxes: [
+        {
+          maxBarThickness: 15,
+          display: true,
+          gridLines: { display: false },
+          ticks: {
+            beginAtZero: true
+          }
+        }
+      ],
+      xAxes: [
+        {
+          maxBarThickness: 5,
+          gridLines: { display: false },
+          ticks: {
+            beginAtZero: true,
+            maxRotation: 0,
+            max: devices ? devices : 0
+          },
+          scaleLabel: {
+            display: true,
+            labelString: '# devices',
+            lineHeight: 0
+          }
+        }
+      ]
+    }
+  };
+};
+
 export const pieMultiOptionsFunc = () => {
   return {
     maintainAspectRatio: false,
@@ -42,9 +92,11 @@ export const pieMultiOptionsFunc = () => {
 };
 
 // function for creating dynamic bins for pie charts
-export const createBins = (ary, maxBinsInput) => {
+export const createBins = (ary, maxBinsInput, minDiff) => {
   let max = Math.max(...ary);
+  max = Math.ceil(max/minDiff)*minDiff
   let min = Math.min(...ary);
+  min = Math.floor(min/minDiff)*minDiff
   let diff = max - min;
   let bins = [];
   let binCount = 0;
@@ -68,7 +120,7 @@ export const createBins = (ary, maxBinsInput) => {
     let item = ary[i];
     for (let j = 0; j < bins.length; j++) {
       let bin = bins[j];
-      if (item >= bin.minNum && item < bin.maxNum + 1) {
+      if (item >= bin.minNum && item < bin.maxNum + 0.000001) {
         bin.count++;
       }
     }
@@ -118,7 +170,7 @@ export const prepareDataDevices = (
     object => object.lastModifiedDelta
   );
 
-  let deviceStatusbins = createBins(deviceStatusAry, 5);
+  let deviceStatusbins = createBins(deviceStatusAry, 5, 5);
   let deviceStatusData = deviceStatusbins.map(bin => bin.count);
 
   let deviceStatusLabel = deviceStatusbins.map(bin => {
@@ -136,7 +188,7 @@ export const prepareDataDevices = (
       if (min == max) {
         label = min.toString() + unit;
       } else {
-        label = min.toString() + "-" + max.toString() + unit;
+        label = min.toString() + " - " + max.toString() + unit;
       }
     } else if (min > 60) {
       min = Math.round((min / 60) * 10) / 10;
@@ -145,7 +197,7 @@ export const prepareDataDevices = (
       if (min == max) {
         label = min.toString() + unit;
       } else {
-        label = min.toString() + "-" + max.toString() + unit;
+        label = min.toString() + " - " + max.toString() + unit;
       }
     } else if (min <= 60){
       min = Math.round(min);
@@ -154,7 +206,7 @@ export const prepareDataDevices = (
       if (min == max) {
         label = min.toString() + unit;
       } else {
-        label = min.toString() + "-" + max.toString() + unit;
+        label = min.toString() + " - " + max.toString() + unit;
       }
     }
     return label;
@@ -189,6 +241,7 @@ export const prepareDataDevices = (
       object <= 100  && !isNaN(object) && object != undefined
   );
 
+
   const kpiUsedStorage = storageUsedAry.length
     ? (
         Math.round(
@@ -199,9 +252,10 @@ export const prepareDataDevices = (
     : "";
 
   // storage used pie chart
-  let storageUsedBins = createBins(storageUsedAry, 5);
+  let storageUsedBins = createBins(storageUsedAry, 5, 5);
 
   let deviceStorageUsedData = storageUsedBins.map(bin => bin.count);
+
   let deviceStorageUsedLabel = storageUsedBins.map(bin => {
     let min = bin.minNum < 10 ? Math.round(bin.minNum*10)/10 : Math.round(bin.minNum);
     let max = bin.minNum < 10 ? Math.round(bin.maxNum*10)/10 : Math.round(bin.maxNum);
@@ -209,7 +263,7 @@ export const prepareDataDevices = (
     let label = "";
 
     if (!isNaN(min) && !isNaN(max) && min != max) {
-      label = min.toString() + "-" + max.toString() + unit;
+      label = min.toString() + " - " + max.toString() + unit;
     } else if (!isNaN(min) && !isNaN(max) && min == max) {
       label = min.toString() + unit;
     }
@@ -275,11 +329,6 @@ export const prepareDataDevices = (
     .map(item => item.deviceId)
     .filter((value, index, self) => self.indexOf(value) === index).length;
 
-  const deviceIdListDeltaSort = deviceIdListDelta
-    .sort(function(a, b) {
-      return a.lastModifiedDelta - b.lastModifiedDelta;
-    })
-    .reverse();
 
   // config pie chart
   let configCrc32Data = [0, 0];
@@ -349,5 +398,5 @@ export const prepareDataDevices = (
     kpiUsedStorage: kpiUsedStorage
   };
 
-  return [chartDataDevices, deviceIdListDeltaSort, deviceCrc32Test];
+  return [chartDataDevices, deviceIdListDelta, deviceCrc32Test];
 };

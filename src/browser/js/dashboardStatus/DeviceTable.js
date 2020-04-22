@@ -1,14 +1,14 @@
 import React from "react";
 import Moment from "moment";
 
-const DeviceTable = props => {
+const DeviceTable = (props) => {
   const {
     deviceIdListDeltaSort,
     deviceFileContents,
     mf4ObjectsFiltered,
     deviceCrc32Test,
     height,
-    deviceLastMf4MetaData
+    deviceLastMf4MetaData,
   } = props;
 
   // return empty div if no devices to list
@@ -37,22 +37,21 @@ const DeviceTable = props => {
 
   let maxDelta = Math.max.apply(
     Math,
-    deviceIdListDeltaSort.map(function(o) {
+    deviceIdListDeltaSort.map(function (o) {
       return o.lastModifiedDelta;
     })
   );
 
-
   // construct object containing all relevant table data based on sorted device ID list
-  const tableData = deviceIdListDeltaSort.map(e => {
+  const tableData = deviceIdListDeltaSort.map((e) => {
     // extract the device.json content related to the device
     const deviceFile = deviceFileContents.filter(
-      devFile => devFile.id == e.deviceId
+      (devFile) => devFile.id == e.deviceId
     )[0];
 
     // extract object with meta data on last log file uploaded for the device
     const lastMf4Meta = deviceLastMf4MetaData.filter(
-      meta => meta.name.split("/")[0] == e.deviceId
+      (meta) => meta.name.split("/")[0] == e.deviceId
     )[0];
 
     // calculate the delta time since last heartbeat
@@ -71,13 +70,14 @@ const DeviceTable = props => {
         : NaN;
     const configSync =
       deviceCrc32Test[0] &&
-      deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0] &&
-      deviceCrc32Test.filter(obj => obj.name == e.deviceId)[0].testCrc32;
-   
-   let storageUsedAbs =
-    deviceFile &&
-    deviceFile.space_used_mb && deviceFile.space_used_mb.replace("/"," / ")
-  
+      deviceCrc32Test.filter((obj) => obj.name == e.deviceId)[0] &&
+      deviceCrc32Test.filter((obj) => obj.name == e.deviceId)[0].testCrc32;
+
+    let storageUsedAbs =
+      deviceFile &&
+      deviceFile.space_used_mb &&
+      deviceFile.space_used_mb.replace("/", " / ");
+
     let storageUsed =
       deviceFile &&
       deviceFile.space_used_mb &&
@@ -102,7 +102,7 @@ const DeviceTable = props => {
       fwVer,
       configSync,
       lastLogUpload,
-      uploadedMb
+      uploadedMb,
     };
   });
 
@@ -116,7 +116,7 @@ const DeviceTable = props => {
     storageUsed: "SD storage used",
     storageUsedAbs: "SD used vs total",
     configSync: "Config synced",
-    lastLogUpload: "Last log upload"
+    lastLogUpload: "Last log upload",
   };
 
   const tableHeader = (
@@ -145,25 +145,33 @@ const DeviceTable = props => {
                         width: v ? (v / maxDelta) * 100 : 0,
                         height: "100%",
                         backgroundColor: "#3d85c6",
-                        color: v / maxDelta > 0.2 ? "white" : "#8e8e8e"
+                        color: v / maxDelta > 0.4 ? "white" : "#8e8e8e",
                       }}
                     >
-                      {v / maxDelta > 0.1 && v / maxDelta < 0.2
-                        ? "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0"
-                        : null}
-                      &nbsp;
-                      {v < 60
-                        ? Math.round(v) + "\u00A0" + "min"
-                        : v < 24 * 60
-                        ? Math.round((v / 60) * 10) / 10 + "\u00A0" + "hours"
-                        : Math.round((v / (60 * 24)) * 10) / 10 +
-                          "\u00A0" +
-                          "days"}
+                      {v != undefined && !isNaN(v) ? (
+                        <div
+                          style={{
+                            marginLeft: v
+                              ? v / maxDelta > 0.4
+                                ? 0
+                                : (v / maxDelta) * 100
+                              : 0,
+                          }}
+                        >
+                          &nbsp;&nbsp;
+                          {v < 60
+                            ? Math.round(v) + "\u00A0" + "min"
+                            : v < 24 * 60
+                            ? Math.round((v / 60) * 10) / 10 +
+                              "\u00A0" +
+                              "hours"
+                            : Math.round((v / (60 * 24)) * 10) / 10 +
+                              "\u00A0" +
+                              "days"}
+                        </div>
+                      ) : (
+                        ""
+                      )}
                     </span>
                   </li>
                 </ul>
@@ -175,14 +183,18 @@ const DeviceTable = props => {
                         width: v ? v * 100 : 0,
                         height: "100%",
                         backgroundColor: "#3d85c6",
-                        color: v > 0.2 ? "white" : "#8e8e8e"
+                        color: v > 0.4 ? "white" : "#8e8e8e",
                       }}
                     >
-                      {v ? (
-                        <div>&nbsp;{Math.round(v * maxUploaded)}&nbsp;MB</div>
-                      ) : (
-                        <div>&nbsp;{Math.round(v * maxUploaded)}</div>
-                      )}
+                      <div
+                        style={{
+                          marginLeft: v ? (v > 0.4 ? 0 : v * 100) : 0,
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        &nbsp;{Math.round(v * maxUploaded)}
+                        {v ? "\u00A0 MB" : null}
+                      </div>
                     </span>
                   </li>
                 </ul>
@@ -194,30 +206,25 @@ const DeviceTable = props => {
                         width: v ? v : 0,
                         height: "100",
                         backgroundColor: "#FF9900",
-                        color: v > 25 ? "white" : "#8e8e8e"
+                        color: v > 40 ? "white" : "#8e8e8e",
                       }}
                     >
-                      
-                      {v != undefined && !isNaN(v) ? <div>{v < 25
-                        ? "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0" +
-                          "\u00A0"
-                        : null}&nbsp;{v}&nbsp;%</div> : ""}
+                      {v != undefined && !isNaN(v) ? (
+                        <div
+                          style={{
+                            marginLeft: v ? (v > 40 ? 0 : v) : 0,
+                          }}
+                        >
+                          &nbsp;&nbsp;{v}&nbsp;%
+                        </div>
+                      ) : (
+                        ""
+                      )}
                     </span>
                   </li>
                 </ul>
-              ) 
-              : index == 5 ? (
-                <span >
-                {v != undefined ? v + " MB" : null}
-              </span>
+              ) : index == 5 ? (
+                <span>{v != undefined ? v + " MB" : null}</span>
               ) : index == 7 ? (
                 <div>
                   {" "}

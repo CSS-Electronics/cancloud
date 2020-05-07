@@ -90,7 +90,7 @@ export class DeviceMetaHeaderContainer extends Component {
 
     return (
       <div>
-        <div className="meta-header-height row meta-container">
+        <div className="row meta-container">
           <DeviceImage deviceImage={deviceImage} />
           <div className="form-group pl0 field-string">
             <DeviceMeta

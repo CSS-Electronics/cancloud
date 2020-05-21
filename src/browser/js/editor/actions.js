@@ -491,6 +491,7 @@ export const fetchSchemaContent = fileName => {
           fileName.split(" | ")[1]
         }/${fileName.split(" ")[0]}`);
         dispatch(setSchemaContent(schemaPublic));
+        dispatch(setUpdatedFormData(getState().editor.configContent));
         break;
       default:
         const currentBucket = getCurrentBucket(getState());

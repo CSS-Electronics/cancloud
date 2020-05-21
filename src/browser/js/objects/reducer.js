@@ -67,7 +67,8 @@ export default (
     },
     files: {},
     showAbortModal: false,
-    checkedList: []
+    checkedList: [],
+    sessionMeta: []
   },
   action
 ) => {
@@ -101,6 +102,11 @@ export default (
         list: removeObject(state.list, action.object, object => object.name)
       };
     case actionsObjects.SET_SORT_BY:
+      return {
+        ...state,
+        sortBy: action.sortBy
+      };
+        case actionsObjects.SET_SORT_BY:
       return {
         ...state,
         sortBy: action.sortBy
@@ -158,6 +164,11 @@ export default (
       return {
         ...state,
         checkedList: []
+      };
+    case actionsObjects.SET_SESSION_META:
+      return {
+        ...state,
+        sessionMeta: action.sessionMeta
       };
     case actionsObjects.SHOW_MANAGE_DEVICE_EDITOR:
       return {

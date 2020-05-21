@@ -17,6 +17,8 @@ import axios from "axios";
 import JSZip from "jszip";
 import saveAs from "file-saver";
 import _ from "lodash";
+import Moment from "moment";
+
 
 import web from "../web";
 import history from "../history";
@@ -56,6 +58,7 @@ export const ADD = "objects/ADD";
 export const UPDATE_PROGRESS = "objects/UPDATE_PROGRESS";
 export const STOP = "objects/STOP";
 export const SHOW_ABORT_MODAL = "objects/SHOW_ABORT_MODAL";
+export const SET_SESSION_META = "objects/SET_SESSION_META";
 
 let source;
 
@@ -287,6 +290,136 @@ export const setPrefixWritable = prefixWritable => ({
   type: SET_PREFIX_WRITABLE,
   prefixWritable
 });
+
+
+export const listSessionMeta = (bucket,prefix) => {
+  return function(dispatch, getState) {
+
+     let objectMetaAry = []
+    return web
+      .ListObjectsRecursive({
+        bucketName: bucket,
+        prefix: prefix,
+        marker: ""
+      })
+      .then(res => {
+        let objects = [];
+
+        if (res.objects) {
+          objects = res.objects.map(object => {
+            return object.name;
+          });
+        }
+
+        let objectsFirstLast = []
+        let sessionMetaAry = []
+
+        // get summary data across objects based on standard meta data (count, size range, lastModified range)
+        let count = objects.length
+
+        let lowest = Number.POSITIVE_INFINITY;
+        let highest = Number.NEGATIVE_INFINITY;
+        let tmp;
+        let totalSize = 0
+        for (var i=res.objects.length-1; i>=0; i--) {
+            tmp = res.objects[i].size;
+            totalSize += tmp
+            if (tmp < lowest) lowest = tmp;
+            if (tmp > highest) highest = tmp;
+        }
+
+        highest = (Math.round((highest/(1024*1024))*10)/10).toFixed(1).toString()
+        lowest = (Math.round((lowest/(1024*1024))*10)/10).toFixed(1).toString()   
+        totalSize = (Math.round((totalSize/(1024*1024))*10)/10).toFixed(1).toString()   
+
+        let lowestDate = Moment("2200/01/01 12:00")
+        let highestDate = Moment("1900/01/01 12:00")
+        for (var i=res.objects.length-1; i>=0; i--) {
+            tmp = Moment(res.objects[i].lastModified);
+            if (tmp < lowestDate) lowestDate = tmp;
+            if (tmp > highestDate) highestDate = tmp;
+        }
+
+        let lastModifiedDelta = (highestDate == lowestDate) ? 0 : highestDate.diff(lowestDate, "minutes")
+        lastModifiedDelta = lastModifiedDelta == 0 ? null : lastModifiedDelta > 60 ? (Math.round((lastModifiedDelta/60)*10)/10).toString() + " hours" : (Math.round(lastModifiedDelta*10)/10).toString() + " min"
+        
+        highestDate = highestDate.format("YY-MM-DD HH:mm")
+        lowestDate = lowestDate.format("YY-MM-DD HH:mm")
+
+
+        let sizeRange = res.objects.length == 1 ? highest + " MB": lowest + "-" + highest + " MB"
+        let lastModifiedRange = res.objects.length == 1 ? highestDate : lowestDate + " - " + highestDate
+        
+        // get custom S3 meta data for first (and last object, if there are more than one)
+        if(objects.length > 1){
+          objectsFirstLast = [objects[0] , objects[objects.length - 1] ]
+        }else{
+          objectsFirstLast = [objects[0]]
+        }
+
+        objectsFirstLast.map((object, index) => {
+
+          return web
+          .getObjectStat({
+            bucketName: "",
+            objectName: object
+          })
+          .then(res => {
+            
+            sessionMetaAry.push({object: object, meta: res.metaInfo})
+
+            if(sessionMetaAry.length == objectsFirstLast.length){
+              sessionMetaAry.sort((a, b) => (a.object > b.object) ? 1 : -1)
+
+              let timestampStart = sessionMetaAry[0].meta.metaData && sessionMetaAry[0].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[0].meta.metaData.timestamp,"YYYYMMDDTHHmmssZ", true).local() : null
+              let timestampEnd = sessionMetaAry.length == 1 ? null : sessionMetaAry[1].meta.metaData && sessionMetaAry[1].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[1].meta.metaData.timestamp,"YYYYMMDDTHHmmssZ", true).local() : null             
+              let timestampRange = timestampStart != null ? timestampStart.format("YY-MM-DD HH:mm") + (timestampEnd != null ? " - " + timestampEnd.format("YY-MM-DD HH:mm") : "") : null
+              let timestampDelta = (timestampStart != null && timestampEnd != null) ? timestampEnd.diff(timestampStart, "minutes") : 0
+              timestampDelta = timestampDelta == 0 ? null : timestampDelta > 60 ? ((Math.round((timestampDelta/60)*10)/10).toString() + " hours") : Math.round((timestampDelta*10)/10).toString() + " min"
+
+              let sessionMeta = [{count: count, totalSize: totalSize, sizeRange: sizeRange, lastModifiedRange: lastModifiedRange, lastModifiedDelta: lastModifiedDelta, timestampRange: timestampRange, timestampDelta: timestampDelta }]
+
+              dispatch(setSessionMeta(sessionMeta))
+            }
+          })
+          .catch(err => {
+            if (web.LoggedIn()) {
+              dispatch(
+                alertActions.set({
+                  type: "danger",
+                  message: err.message,
+                  autoClear: true
+                })
+              );
+            } else {
+              history.push("/login");
+            }
+          });
+        }) 
+        
+      })
+      .catch(err => {
+        if (web.LoggedIn()) {
+          dispatch(
+            alertActions.set({
+              type: "danger",
+              message: err.message,
+              autoClear: true
+            })
+          );
+        } else {
+          history.push("/login");
+        }
+      });
+  };
+};
+
+export const setSessionMeta = sessionMeta => ({
+  type: SET_SESSION_META,
+  sessionMeta
+});
+
+
 
 export const directoryObjects = prefix => {
   return function(dispatch, getState) {
@@ -739,6 +872,7 @@ export const HideManageDeviceEditor = () => ({
 });
 
 export const fetchObjectStat = object => {
+
   return function(dispatch, getState) {
     // dispatch(resetMetaInformation())
     const currentBucket = getCurrentBucket(getState());

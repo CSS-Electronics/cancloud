@@ -75,6 +75,7 @@ class BrowseField extends React.Component {
         "success",
         "Merged partial Configuration File with editor Configuration File"
       );
+      this.props.setUpdatedFormData(this.state.mergedConfig);
     });
 
   }
@@ -167,7 +168,9 @@ const mapDispatchToProps = dispatch => {
     showAlert: (type, message) =>
       dispatch(actionsAlert.set({ type: type, message: message })),
     setConfigContent: content =>
-      dispatch(actionsEditor.setConfigContent(content))
+      dispatch(actionsEditor.setConfigContent(content)),
+    setUpdatedFormData: (formData) =>
+      dispatch(actionsEditor.setUpdatedFormData(formData))
   };
 };
 

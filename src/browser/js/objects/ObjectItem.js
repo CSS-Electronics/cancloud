@@ -21,7 +21,11 @@ import { getDataType } from "../mime";
 import * as actions from "./actions";
 import { getCheckedList } from "./selectors";
 import ObjectMetaDropdown from "./ObjectMetaDropdown";
+import SessionMetaDropdown  from "./SessionMetaDropdown"
 import HoverIntent from "react-hoverintent";
+import history from "../history";
+import {pathSlice} from "../utils";
+
 
 export class ObjectItem extends React.Component {
   constructor(props) {
@@ -35,14 +39,27 @@ export class ObjectItem extends React.Component {
     this.setState({
       openDropdown: true
     });
+
     let regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
+
+    // reset sessionMeta first
+    this.props.setSessionMeta([])
+
     if (this.props.name.split(".").slice(-1)[0].match(regexFileExt)) {
       this.props.fetchState(this.props.name);
+    }
+
+    const { bucket } = pathSlice(history.location.pathname);
+    let regexSession = new RegExp(/([0-9]){8}\/$/, "g");
+
+    if(this.props.name.match(regexSession) != null && bucket != ""){
+      this.props.listSessionMeta(bucket, this.props.name)
     }
   }
 
   hideMetaInfo() {
     this.props.resetMetaInfo();
+    this.props.setSessionMeta([])
     this.setState({
       openDropdown: false
     });
@@ -58,7 +75,8 @@ export class ObjectItem extends React.Component {
       checkObject,
       uncheckObject,
       actionButtons,
-      onClick
+      onClick,
+      sessionMeta
     } = this.props;
 
     let regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
@@ -113,6 +131,14 @@ export class ObjectItem extends React.Component {
           ) : (
             ""
           )}
+           {sessionMeta.length ? (
+            <SessionMetaDropdown
+              sessionMeta={sessionMeta}
+              openDropdown={this.state.openDropdown}
+            />
+          ) : (
+            ""
+          )}
           <div className="fesl-item fesl-item-size">{size}</div>
           <div className="fesl-item fesl-item-modified">{lastModified}</div>
           <div className="fesl-item fesl-item-actions">{actionButtons}</div>
@@ -124,7 +150,8 @@ export class ObjectItem extends React.Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    checked: getCheckedList(state).indexOf(ownProps.name) >= 0
+    checked: getCheckedList(state).indexOf(ownProps.name) >= 0,
+    sessionMeta: state.objects.sessionMeta
   };
 };
 
@@ -133,7 +160,9 @@ const mapDispatchToProps = dispatch => {
     checkObject: name => dispatch(actions.checkObject(name)),
     uncheckObject: name => dispatch(actions.uncheckObject(name)),
     fetchState: name => dispatch(actions.fetchObjectStat(name)),
-    resetMetaInfo: () => dispatch(actions.resetMetaInfo())
+    resetMetaInfo: () => dispatch(actions.resetMetaInfo()),
+    listSessionMeta: (bucket, prefix) => dispatch(actions.listSessionMeta(bucket, prefix)),
+    setSessionMeta: (sessionMeta) => dispatch(actions.setSessionMeta(sessionMeta))
   };
 };
 

@@ -27,7 +27,8 @@ import {
   sortObjectsBySize,
   sortObjectsByDate,
   removeFirstOccurence,
-  pathSlice
+  pathSlice,
+  isValidLogfile
 } from "../utils";
 import { getCurrentBucket } from "../buckets/selectors";
 import { getCurrentPrefix, getCheckedList } from "./selectors";
@@ -305,8 +306,13 @@ export const listSessionMeta = (bucket,prefix) => {
       .then(res => {
         let objects = [];
 
+        let objectsLogfiles = []
         if (res.objects) {
-          objects = res.objects.map(object => {
+
+          // filter to only include log files
+          objectsLogfiles = res.objects.filter(object => isValidLogfile(object.name))
+
+          objects = objectsLogfiles.map(object => {
             return object.name;
           });
         }
@@ -321,8 +327,8 @@ export const listSessionMeta = (bucket,prefix) => {
         let highest = Number.NEGATIVE_INFINITY;
         let tmp;
         let totalSize = 0
-        for (var i=res.objects.length-1; i>=0; i--) {
-            tmp = res.objects[i].size;
+        for (var i=objectsLogfiles.length-1; i>=0; i--) {
+            tmp = objectsLogfiles[i].size;
             totalSize += tmp
             if (tmp < lowest) lowest = tmp;
             if (tmp > highest) highest = tmp;
@@ -332,10 +338,11 @@ export const listSessionMeta = (bucket,prefix) => {
         lowest = (Math.round((lowest/(1024*1024))*10)/10).toFixed(1).toString()   
         totalSize = (Math.round((totalSize/(1024*1024))*10)/10).toFixed(1).toString()   
 
+        console.log(objectsLogfiles)
         let lowestDate = Moment("2200/01/01 12:00")
         let highestDate = Moment("1900/01/01 12:00")
-        for (var i=res.objects.length-1; i>=0; i--) {
-            tmp = Moment(res.objects[i].lastModified);
+        for (var i=objectsLogfiles.length-1; i>=0; i--) {
+            tmp = Moment(objectsLogfiles[i].lastModified);
             if (tmp < lowestDate) lowestDate = tmp;
             if (tmp > highestDate) highestDate = tmp;
         }
@@ -347,8 +354,8 @@ export const listSessionMeta = (bucket,prefix) => {
         lowestDate = lowestDate.format("YY-MM-DD HH:mm")
 
 
-        let sizeRange = res.objects.length == 1 ? highest + " MB": lowest + "-" + highest + " MB"
-        let lastModifiedRange = res.objects.length == 1 ? highestDate : lowestDate + " - " + highestDate
+        let sizeRange = objectsLogfiles.length == 1 ? highest + " MB": lowest + "-" + highest + " MB"
+        let lastModifiedRange = objectsLogfiles.length == 1 ? highestDate : lowestDate + " - " + highestDate
         
         // get custom S3 meta data for first (and last object, if there are more than one)
         if(objects.length > 1){
@@ -361,8 +368,8 @@ export const listSessionMeta = (bucket,prefix) => {
 
           return web
           .getObjectStat({
-            bucketName: "",
-            objectName: object
+            bucketName: bucket,
+            objectName: prefix + object.split("/")[2]
           })
           .then(res => {
             

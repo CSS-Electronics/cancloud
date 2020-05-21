@@ -39,7 +39,7 @@ export class SessionMetaDropdown extends React.Component {
                 </thead>
                 <tbody>
                   <tr>
-                    <td scope="col">Object count</td>
+                    <td scope="col">Log file count</td>
                     <td scope="col">{sessionMeta[0].count}</td>
                   </tr>
 

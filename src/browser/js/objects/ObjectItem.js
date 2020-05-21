@@ -24,7 +24,8 @@ import ObjectMetaDropdown from "./ObjectMetaDropdown";
 import SessionMetaDropdown  from "./SessionMetaDropdown"
 import HoverIntent from "react-hoverintent";
 import history from "../history";
-import {pathSlice} from "../utils";
+import {pathSlice, isValidCanedgefile} from "../utils";
+
 
 
 export class ObjectItem extends React.Component {
@@ -40,12 +41,10 @@ export class ObjectItem extends React.Component {
       openDropdown: true
     });
 
-    let regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
-
     // reset sessionMeta first
     this.props.setSessionMeta([])
 
-    if (this.props.name.split(".").slice(-1)[0].match(regexFileExt)) {
+    if (isValidCanedgefile(this.props.name.split(".").slice(-1)[0])) {
       this.props.fetchState(this.props.name);
     }
 

@@ -111,6 +111,16 @@ export const isValidUISchema = file => {
   return regexUiSchema.test(file);
 };
 
+export const isValidCanedgefile = file => {
+  const regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
+  return regexFileExt.test(file);
+}
+
+export const isValidLogfile = file => {
+  const regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM)\b/, "g");
+  return regexFileExt.test(file);
+}
+
 export const isValidSchema = file => {
   const regexSchema = new RegExp(
     "(^([0-9A-Fa-f]){8}_|server_|^)schema-\\d{2}\\.\\d{2}\\.json",

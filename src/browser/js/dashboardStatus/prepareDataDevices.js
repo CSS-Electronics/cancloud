@@ -155,7 +155,7 @@ export const prepareDataDevices = (
   const deviceIdListDelta = deviceFileObjectsFiltered.map(device => {
     const deviceId = device.deviceId;
     const lastModified = Moment(device.lastModified);
-    const lastModifiedDelta = demoMode ? Moment(demoDate).diff(lastModified, "minutes") : Moment().diff(lastModified, "minutes");
+    const lastModifiedDelta = demoMode ? Moment(demoDate).diff(lastModified, "seconds")/60 : Moment().diff(lastModified, "seconds")/60;
     const lastModifiedMin = lastModified.format("YY-MM-DD HH:mm");
 
     return { deviceId, lastModifiedDelta, lastModifiedMin };

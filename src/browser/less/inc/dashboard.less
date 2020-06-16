@@ -53,10 +53,14 @@
 .multi-select {
   vertical-align: top;
   margin-top: 4px;
-  padding-bottom: 16px;
+  padding-bottom: 0px !important;
   height: 15px;
   background-color: white;
   border-radius: 4px;
+}
+
+div[class="check-box-container multi-select"] > div > button[class*="css-"]{
+  margin-top:-8px !important;
 }
 
 .devices-list {

@@ -338,7 +338,6 @@ export const listSessionMeta = (bucket,prefix) => {
         lowest = (Math.round((lowest/(1024*1024))*10)/10).toFixed(1).toString()   
         totalSize = (Math.round((totalSize/(1024*1024))*10)/10).toFixed(1).toString()   
 
-        console.log(objectsLogfiles)
         let lowestDate = Moment("2200/01/01 12:00")
         let highestDate = Moment("1900/01/01 12:00")
         for (var i=objectsLogfiles.length-1; i>=0; i--) {

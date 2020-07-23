@@ -1,0 +1,63 @@
+/* You can edit the below classes to customize the color scheme of the sidebar.
+  Similarly, you can add your own favicon.ico, logo.png and logo-sidebar.png to the images folder */
+
+
+/* Sidebar background color */
+/* .sb-custom {
+  background-color: #32393F !important;
+} */
+
+/* Sidebar selected device background color */
+/* .sb-custom-select {
+  background-color: #e28c2f !important;
+} */
+
+/*Color of search bar icon*/
+/* .sb-custom-search-icon {
+  color: rgba(255, 255, 255, 0.58) !important;
+} */
+
+/*Color of search field placeholder text*/
+/* .sb-custom-search-text::placeholder {
+  color: rgba(255, 255, 255, 0.58) !important;
+} */
+
+/*Color of non-selected device text*/
+/* .sb-custom a {
+  color: rgba(255, 255, 255, 0.58) !important;
+} */
+
+/*Color of selected device text*/
+/* .sb-custom-select a {
+  color: #ffffff !important;
+} */
+
+/*Color of device dropdown text*/
+/* .sb-custom .dropdown-menu-right a {
+  color: #8e8e8e !important;
+} */
+
+/*Color version text in the sidebar*/
+/* .sb-custom-version {
+  color: rgba(255, 255, 255, 0.58) !important;
+} */
+
+/*Background color of login screen*/
+/* .login-custom {
+  background-color: rgb(50, 57, 63) !important;
+} */
+
+/*Host text*/
+/* #sb-host-text {
+  color: #32393F !important;
+} */
+
+/*Host globe icon*/
+/* #sb-globe {
+  color: #32393F !important;
+} */
+
+/*Change background color of mobile header*/
+/* .mobile-header-custom {
+  background-color: #303030 !important;
+} */

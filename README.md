@@ -32,6 +32,13 @@ For more details on CANcloud and the CANedge2 see below:
 - [CANedge2 CAN logger](https://www.csselectronics.com/screen/product/can-lin-logger-wifi-canedge2/language/en)  
 
 ---
+### Simple self-hosting
+You can easily host CANcloud on your own web server by unzipping the latest release contents to your target folder. 
+
+#### Style customization 
+If you wish to customize your self-hosted version of CANcloud, you can do so without building the tool. To add your own logo, simply replace the logo files in the `images/` folder. Further, in the `customize-css` folder you'll find a `customize.css` file that lets you easily modify the most relevant styles to create custom branding for your self-hosted CANcloud solution.
+
+---
 
 ### Installation
 

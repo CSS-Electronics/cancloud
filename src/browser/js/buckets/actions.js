@@ -169,6 +169,10 @@ export const selectBucket = (bucket, prefix) => {
     dispatch(alertActions.clear());
     dispatch(setCurrentBucket(bucket));
     dispatch(objectsActions.selectPrefix(prefix || ""));
+    // fetch the device file for the selected bucket for use in meta data
+    if(bucket != "Home"){
+    dispatch(editorActions.fetchDeviceFile(bucket))
+    }
   };
 };
 

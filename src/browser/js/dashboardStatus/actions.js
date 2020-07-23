@@ -673,8 +673,10 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
   const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
   let configFileContents = [];
   let configFileCrc32 = [];
+  
 
   return function(dispatch) {
+    
     // clear configFileCrc32
     dispatch(setConfigFileCrc32([]));
 

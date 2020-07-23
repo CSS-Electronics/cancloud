@@ -33,11 +33,9 @@ export function DeviceImage(props) {
 }
 
 export function DeviceMeta(props) {
-  const { device, deviceFileContents, configFileCrc32 } = props;
+  const { deviceFileContent, configFileCrc32 } = props;
 
-  let deviceFile = deviceFileContents.filter(
-    object => object != undefined && object.id == device
-  )[0];
+  let deviceFile = deviceFileContent
 
   let log_meta = deviceFile && deviceFile.log_meta;
   let space_used_mb = deviceFile && deviceFile.space_used_mb;

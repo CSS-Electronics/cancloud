@@ -4,6 +4,7 @@ import history from "../history";
 import { pathSlice } from "../utils";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
 import * as browserActions from "./actions";
+import * as editorActions from "../editor/actions";
 
 import {
   DeviceImage,
@@ -25,35 +26,25 @@ export class DeviceMetaHeaderContainer extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { bucket,prefix } = pathSlice(history.location.pathname);
+    const { bucket, prefix } = pathSlice(history.location.pathname);
 
-    if (
-      this.props.deviceFileContents != nextProps.deviceFileContents ||
-      this.props.currentBucket != nextProps.currentBucket
-    ) {
-      let deviceFile = nextProps.deviceFileContents.filter(
-        obj => obj.id == bucket
-      )[0];
-      let cfg_name = deviceFile && deviceFile.cfg_name;
-      let configObject = [{ deviceId: bucket, name: bucket + "/" + cfg_name }];
-
-      if (!configObject[0].name.includes("undefined")) {
-        this.props.fetchConfigFileContentAll(configObject);
-      }
-
+    if (this.props.currentBucket != nextProps.currentBucket) {
       this.props.clearDataFiles();
       this.props.listLogFiles([bucket]);
     }
 
-    if (this.props.list != nextProps.list && nextProps.list.length > 0 && prefix == "") {
-
+    if (
+      this.props.list != nextProps.list &&
+      nextProps.list.length > 0 &&
+      prefix == ""
+    ) {
       let imageName = nextProps.list.filter(
-        obj => obj && obj.name && obj.name.match(imageRegex)
+        (obj) => obj && obj.name && obj.name.match(imageRegex)
       )[0];
 
       if (imageName && imageName.name) {
         this.props.fetchDeviceImage(imageName.name);
-      } else{
+      } else {
         this.props.setDeviceImage(undefined);
       }
     }
@@ -72,13 +63,12 @@ export class DeviceMetaHeaderContainer extends Component {
 
   render() {
     const { bucket } = pathSlice(history.location.pathname);
-    const device = bucket;
 
     const {
       mf4Objects,
-      deviceFileContents,
+      deviceFileContent,
       configFileCrc32,
-      deviceImage
+      deviceImage,
     } = this.props;
 
     let dataUploadTime = [];
@@ -94,14 +84,14 @@ export class DeviceMetaHeaderContainer extends Component {
           <DeviceImage deviceImage={deviceImage} />
           <div className="form-group pl0 field-string">
             <DeviceMeta
-              device={device}
-              deviceFileContents={deviceFileContents}
+              deviceFileContent={deviceFileContent}
               configFileCrc32={configFileCrc32}
             />
             <p className="field-description">
-              Device meta data based on the uploaded Device File. You can change the Meta name via your Configuration File. Optionally
-              upload a picture named "image.jpg" or "image.png" in your device
-              folder to display it next to the meta data.
+              Device meta data based on the uploaded Device File. You can change
+              the Meta name via your Configuration File. Optionally upload a
+              picture named "image.jpg" or "image.png" in your device folder to
+              display it next to the meta data.
             </p>
           </div>
           <DeviceMetaLogFileChart
@@ -115,28 +105,29 @@ export class DeviceMetaHeaderContainer extends Component {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  listLogFiles: devicesFilesInput =>
+const mapDispatchToProps = (dispatch) => ({
+  listLogFiles: (devicesFilesInput) =>
     dispatch(dashboardStatusActions.listLogFiles(devicesFilesInput)),
   clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles()),
-  fetchConfigFileContentAll: configObjectsUnique =>
+  fetchConfigFileContentAll: (configObjectsUnique) =>
     dispatch(
       dashboardStatusActions.fetchConfigFileContentAll(configObjectsUnique)
     ),
-  fetchDeviceImage: fileName =>
+  fetchDeviceFile: (device) => dispatch(editorActions.fetchDeviceFile(device)),
+  fetchDeviceImage: (fileName) =>
     dispatch(browserActions.fetchDeviceImage(fileName)),
-  setDeviceImage: deviceImage =>
-    dispatch(browserActions.setDeviceImage(deviceImage))
+  setDeviceImage: (deviceImage) =>
+    dispatch(browserActions.setDeviceImage(deviceImage)),
 });
 
 function mapStateToProps(state) {
   return {
     currentBucket: state.buckets.currentBucket,
     mf4Objects: state.dashboardStatus.mf4Objects,
-    deviceFileContents: state.dashboardStatus.deviceFileContents,
+    deviceFileContent: state.editor.deviceFileContent,
     configFileCrc32: state.dashboardStatus.configFileCrc32,
     list: state.objects.list,
-    deviceImage: state.browser.deviceImage
+    deviceImage: state.browser.deviceImage,
   };
 }
 

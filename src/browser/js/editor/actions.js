@@ -6,6 +6,7 @@ import history from "../history";
 import * as alertActions from "../alert/actions";
 import * as browserActions from "../browser/actions";
 import * as actionsEditorTools from "../editorTools/actions";
+import * as dashboardStatusActions from "../dashboardStatus/actions"
 import {
   isValidUISchema,
   isValidSchema,
@@ -224,6 +225,14 @@ export const fetchDeviceFileContent = (fileName, device) => {
               .then(data => {
                 dispatch(setDeviceFileContent(data));
                 dispatch(setPrevDeviceFileDevice(device));
+
+                // get the Configuration File content matching the device.json for use in crc32 comparison
+                let cfg_name = data.cfg_name;
+                let configObject = [{ deviceId: device, name: device + "/" + cfg_name }];
+      
+                if (!configObject[0].name.includes("undefined")) {
+                  dispatch(dashboardStatusActions.fetchConfigFileContentAll(configObject))
+                }
               })
               .catch(e => {
                 dispatch(setDeviceFileContent(null));
@@ -262,6 +271,7 @@ export const fetchDeviceFileIfNew = device => {
   return function(dispatch, getState) {
     if (
       getState().buckets.currentBucket == getState().editor.prevDeviceFileDevice
+      || device == "Home"
     ) {
       return;
     } else {

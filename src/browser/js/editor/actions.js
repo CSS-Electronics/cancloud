@@ -304,13 +304,13 @@ export const fetchDeviceFile = device => {
           dispatch(fetchDeviceFileContent(deviceFileName, device));
           dispatch(setDeviceFileLastModified(deviceFileLastModified));
         } else {
-          dispatch(
-            alertActions.set({
-              type: "info",
-              message: `The device does not have an uploaded device.json file`,
-              autoClear: true
-            })
-          );
+          // dispatch(
+          //   alertActions.set({
+          //     type: "info",
+          //     message: `The device does not have an uploaded device.json file`,
+          //     autoClear: true
+          //   })
+          // );
         }
       })
       .catch(err => {

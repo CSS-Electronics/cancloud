@@ -106,6 +106,8 @@ const DeviceTable = (props) => {
     };
   });
 
+  tableData.sort((a, b) => (a.deviceId > b.deviceId) ? -1 : 1)
+
   const stringHeader = {
     lastHeartbeat: "Last heartbeat",
     time_since_heartbeat_min: "Time since heartbeat",

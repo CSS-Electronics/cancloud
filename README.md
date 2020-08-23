@@ -1,6 +1,6 @@
 # CANcloud - Open Source Telematics Platform
 
-CANcloud is an open source portal for managing CAN bus data recorded via the [CANedge2](https://www.csselectronics.com/screen/product/can-lin-logger-wifi-canedge2/language/en). 
+CANcloud is an open source portal for managing your [CANedge2](https://www.csselectronics.com/screen/product/can-lin-logger-wifi-canedge2/language/en) IoT CAN loggers and data. 
 
 The tool is a simple front-end that can be hosted on a web server and accessed via your browser. 
 
@@ -71,7 +71,7 @@ bucket: aws-cancloud-bucket
 ```
 
 Note the following:  
-- When logging into a MinIO server the port should be included (e.g. `https://5.103.118.41:9000`)  
+- When logging into a MinIO server the port should be included (e.g. `http://5.123.138.42:9000`)  
 - You need to create your bucket before you can login (i.e. outside of CANcloud, e.g. in your AWS console)  
 - For some S3 servers (e.g. AWS), you may need to change the CORS config - see the [getting started docs](https://canlogger.csselectronics.com/canedge-getting-started/transfer-data/s3-server/)  
 
@@ -85,7 +85,7 @@ Each version is assigned three two digit numbers: `MAJOR`, `MINOR`, `PATCH`:
 - `MINOR`: New backwards-compatible functionality (e.g. new features)
 - `PATCH`: Backwards-compatible bug fixes (e.g. minor patches)
 
-Example: `version 03.05.01`
+Example: `version 04.01.01`
 
 ---
 ### Contribution & support 

@@ -1,0 +1,1430 @@
+{
+  "type": "object",
+  "definitions": {
+    "control_signal": {
+      "type": "object",
+      "properties": {
+        "id_format": {
+          "title": "ID Format",
+          "description": "ID format of the control message.",
+          "type": "integer",
+          "default": 1,
+          "oneOf": [
+            {
+              "type": "integer",
+              "title": "Standard (11-bit)",
+              "enum": [
+                0
+              ]
+            },
+            {
+              "type": "integer",
+              "title": "Extended (29-bit)",
+              "enum": [
+                1
+              ]
+            }
+          ]
+        },
+        "id": {
+          "title": "Message ID (hex)",
+          "description": "ID of the control message in hex. Example: 00435354.",
+          "default": "00435354",
+          "type": "string"
+        },
+        "id_mask": {
+          "title": "Message ID mask (hex)",
+          "description": "ID mask of the control message in hex. Example: 1FFFFFFF.",
+          "type": "string",
+          "default": "1FFFFFFF"
+        },
+        "data_mask": {
+          "title": "Data mask (hex)",
+          "description": "Data trigger mask (byte 0 to the left). Shall match the length of the control signal message.",
+          "type": "string",
+          "pattern": "^([a-fA-F0-9]{2}){0,8}$",
+          "maxLength": 16,
+          "default": "FFFFFFFFFFFFFFFF"
+        },
+        "data_high": {
+          "title": "Data trigger high (hex)",
+          "description": "Data trigger high range (byte 0 to the left)",
+          "type": "string",
+          "pattern": "^([a-fA-F0-9]{2}){0,8}$",
+          "maxLength": 16,
+          "default": "0100000000000000"
+        },
+        "data_low": {
+          "title": "Data trigger low (hex)",
+          "description": "Dat trigger low range (byte 0 to the left)",
+          "type": "string",
+          "pattern": "^([a-fA-F0-9]{2}){0,8}$",
+          "maxLength": 16,
+          "default": "0000000000000000"
+        }
+      },
+      "dependencies": {
+        "id_format": {
+          "oneOf": [
+            {
+              "properties": {
+                "id_format": {
+                  "enum": [
+                    0
+                  ]
+                },
+                "id": {
+                  "pattern": "^([0-7][a-fA-F0-9]{2}|[a-fA-F0-9]{1,2})$",
+                  "maxLength": 3
+                },
+                "id_mask": {
+                  "pattern": "^([0-7][a-fA-F0-9]{2}|[a-fA-F0-9]{1,2})$",
+                  "maxLength": 3
+                }
+              }
+            },
+            {
+              "properties": {
+                "id_format": {
+                  "enum": [
+                    1
+                  ]
+                },
+                "id": {
+                  "pattern": "^([0-1][a-fA-F0-9]{7}|[a-fA-F0-9]{1,7})$",
+                  "maxLength": 8
+                },
+                "id_mask": {
+                  "pattern": "^([0-1][a-fA-F0-9]{7}|[a-fA-F0-9]{1,7})$",
+                  "maxLength": 8
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id_format",
+        "id",
+        "id_mask",
+        "data_mask",
+        "data_high",
+        "data_low"
+      ]
+    },
+    "can": {
+      "type": "object",
+      "properties": {
+        "general": {
+          "title": "General",
+          "description": "CAN bus general configuration",
+          "type": "object",
+          "properties": {
+            "rx_state": {
+              "title": "Reception (rx) initial state",
+              "description": "The initial state of CAN-bus reception. Can be changed using the control signal.",
+              "type": "integer",
+              "default": 1,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Disable",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Enable",
+                  "enum": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "tx_state": {
+              "title": "Transmission (tx) initial state",
+              "description": "The initial state of CAN-bus transmissions. Can be changed using the control signal.",
+              "type": "integer",
+              "default": 1,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Disable",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Enable",
+                  "enum": [
+                    1
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "rx_state",
+            "tx_state"
+          ]
+        },
+        "phy": {
+          "title": "Physical (CAN bus low-level)",
+          "description": "CAN bus low-level configuration",
+          "type": "object",
+          "properties": {
+            "mode": {
+              "title": "Mode",
+              "description": "Device CAN bus mode. Configures how the device interacts with the bus. In Normal mode, the device can receive, acknowledge and transmit frames. In Restricted mode, the device can receive and acknowledge, but not transmit frames. In Bus Monitoring mode, the device can receive, but not acknowledge or transmit frames. It is recommended to always use the most restrictive mode possible.",
+              "type": "integer",
+              "default": 1,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Normal (receive, acknowledge and transmit)",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Restricted (receive and acknowledge)",
+                  "enum": [
+                    1
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Monitoring (receive only)",
+                  "enum": [
+                    2
+                  ]
+                }
+              ]
+            },
+            "retransmission": {
+              "title": "Automatic retransmission",
+              "description": "Retransmission of frames that have lost arbitration or that have been disturbed by errors during transmission.",
+              "type": "integer",
+              "default": 1,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Disable",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Enable",
+                  "enum": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "fd_spec": {
+              "title": "CAN FD specification",
+              "description": "Configures the CAN FD specification used by the device. Shall match the specification used by the CAN bus network.",
+              "type": "integer",
+              "default": 0,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": " ISO CAN FD (11898-1)",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "non-ISO CAN FD (Bosch V1.0.)",
+                  "enum": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "bit_rate_cfg_mode": {
+              "title": "Bit-rate configuration mode",
+              "description": "Configures how the CAN bus bit-rate is set. Modes Auto-detect and Bit-rate support all standard bit-rates. Non-standard bit-rate configuration can be set using Bit-timing. It is recommended to set the bit-rate manually if it is known.",
+              "type": "integer",
+              "default": 0,
+              "anyOf": [
+                {
+                  "title": "Auto-detect",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "title": "Bit-rate (simple)",
+                  "enum": [
+                    1
+                  ]
+                },
+                {
+                  "title": "Bit-timing (advanced)",
+                  "enum": [
+                    2
+                  ]
+                }
+              ]
+            }
+          },
+          "dependencies": {
+            "bit_rate_cfg_mode": {
+              "oneOf": [
+                {
+                  "properties": {
+                    "bit_rate_cfg_mode": {
+                      "enum": [
+                        0
+                      ]
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "bit_rate_cfg_mode": {
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "bit_rate_std": {
+                      "title": "Bit-rate standard",
+                      "type": "integer",
+                      "default": 250000,
+                      "anyOf": [
+                        {
+                          "title": "5K",
+                          "enum": [
+                            5000
+                          ]
+                        },
+                        {
+                          "title": "10K",
+                          "enum": [
+                            10000
+                          ]
+                        },
+                        {
+                          "title": "20K",
+                          "enum": [
+                            20000
+                          ]
+                        },
+                        {
+                          "title": "33.333K",
+                          "enum": [
+                            33333
+                          ]
+                        },
+                        {
+                          "title": "47.619K",
+                          "enum": [
+                            47619
+                          ]
+                        },
+                        {
+                          "title": "50K",
+                          "enum": [
+                            50000
+                          ]
+                        },
+                        {
+                          "title": "83.333K",
+                          "enum": [
+                            83333
+                          ]
+                        },
+                        {
+                          "title": "95.238K",
+                          "enum": [
+                            95238
+                          ]
+                        },
+                        {
+                          "title": "100K",
+                          "enum": [
+                            100000
+                          ]
+                        },
+                        {
+                          "title": "125K",
+                          "enum": [
+                            125000
+                          ]
+                        },
+                        {
+                          "title": "250K",
+                          "enum": [
+                            250000
+                          ]
+                        },
+                        {
+                          "title": "500K",
+                          "enum": [
+                            500000
+                          ]
+                        },
+                        {
+                          "title": "800K",
+                          "enum": [
+                            800000
+                          ]
+                        },
+                        {
+                          "title": "1M",
+                          "enum": [
+                            1000000
+                          ]
+                        }
+                      ]
+                    },
+                    "bit_rate_fd": {
+                      "title": "Bit-rate FD",
+                      "type": "integer",
+                      "default": 1000000,
+                      "anyOf": [
+                        {
+                          "title": "1M",
+                          "enum": [
+                            1000000
+                          ]
+                        },
+                        {
+                          "title": "2M",
+                          "enum": [
+                            2000000
+                          ]
+                        },
+                        {
+                          "title": "4M",
+                          "enum": [
+                            4000000
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "bit_rate_std",
+                    "bit_rate_fd"
+                  ]
+                },
+                {
+                  "properties": {
+                    "bit_rate_cfg_mode": {
+                      "enum": [
+                        2
+                      ]
+                    },
+                    "bit_rate_std": {
+                      "title": "Bit-timing standard",
+                      "type": "object",
+                      "properties": {
+                        "brp": {
+                          "title": "BRP (Bit Rate Prescaler)",
+                          "type": "integer",
+                          "default": 2,
+                          "minimum": 1
+                        },
+                        "seg1": {
+                          "title": "SEG1 (Time Segment 1 )",
+                          "type": "integer",
+                          "default": 63,
+                          "minimum": 1
+                        },
+                        "seg2": {
+                          "title": "SEG2 (Time Segment 2)",
+                          "type": "integer",
+                          "default": 16,
+                          "minimum": 2
+                        },
+                        "sjw": {
+                          "title": "SJW (Synchronization Jump Width)",
+                          "type": "integer",
+                          "default": 4,
+                          "minimum": 0,
+                          "maximum": 4
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "brp",
+                        "seg1",
+                        "seg2",
+                        "sjw"
+                      ]
+                    },
+                    "bit_rate_fd": {
+                      "title": "Bit-timing FD",
+                      "type": "object",
+                      "properties": {
+                        "brp": {
+                          "title": "BRP (Bit Rate Prescaler)",
+                          "type": "integer",
+                          "default": 1,
+                          "minimum": 1
+                        },
+                        "seg1": {
+                          "title": "SEG1 (Time Segment 1)",
+                          "type": "integer",
+                          "default": 31,
+                          "minimum": 1
+                        },
+                        "seg2": {
+                          "title": "SEG2 (Time Segment 2)",
+                          "type": "integer",
+                          "default": 8,
+                          "minimum": 2
+                        },
+                        "sjw": {
+                          "title": "SJW (Synchronization Jump Width)",
+                          "type": "integer",
+                          "default": 4,
+                          "minimum": 0,
+                          "maximum": 4
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "brp",
+                        "seg1",
+                        "seg2",
+                        "sjw"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "bit_rate_std",
+                    "bit_rate_fd"
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "patternProperties": {
+            "bit_rate_std": {},
+            "bit_rate_fd": {}
+          },
+          "required": [
+            "mode",
+            "retransmission",
+            "fd_spec",
+            "bit_rate_cfg_mode"
+          ]
+        },
+        "filter": {
+          "title": "Receive Filters",
+          "description": "Filters are checked sequentially, execution stops with the first matching filter element. Max 128 11-bit filters and 64 29-bit filters.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 192,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "title": "Name",
+                "description": "Optional filter name.",
+                "type": "string",
+                "pattern": "^[ -~]*$",
+                "maxLength": 16,
+                "default": "FilterName"
+              },
+              "state": {
+                "title": "State",
+                "description": "Disabled filters are ignored.",
+                "type": "integer",
+                "default": 1,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "title": "Disable",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "type": "integer",
+                    "title": "Enable",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ]
+              },
+              "type": {
+                "title": "Type",
+                "description": "Action on match, accept or reject message.",
+                "type": "integer",
+                "default": 0,
+                "anyOf": [
+                  {
+                    "title": "Acceptance",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "title": "Rejection",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ]
+              },
+              "id_format": {
+                "title": "ID format",
+                "description": "Filter ID format. Filters apply to messages with matching ID format.",
+                "type": "integer",
+                "default": 0,
+                "anyOf": [
+                  {
+                    "title": "Standard (11-bit)",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "title": "Extended (29-bit)",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ]
+              },
+              "method": {
+                "title": "Filter method",
+                "description": "The filter ID matching mechanism.",
+                "type": "integer",
+                "default": 0,
+                "anyOf": [
+                  {
+                    "title": "Range",
+                    "enum": [
+                      0
+                    ],
+                    "description": "ID ranges"
+                  },
+                  {
+                    "title": "Mask",
+                    "enum": [
+                      1
+                    ],
+                    "description": "ID masking"
+                  }
+                ]
+              },
+              "f1": {
+                "title": "From (range) / ID (mask) (HEX)",
+                "description": "If filter method is Range, this field defines the start of range. If filter method is Mask, this field defines the filter ID.",
+                "type": "string",
+                "pattern": "^[a-fA-F0-9]+$",
+                "maxLength": 8,
+                "default": "0"
+              },
+              "f2": {
+                "title": "To (range) / mask (mask) (HEX)",
+                "description": "If filter method is Range, this field defines the end of range. If filter method is Mask, this field defines the filter mask.",
+                "type": "string",
+                "pattern": "^[a-fA-F0-9]+$",
+                "maxLength": 8,
+                "default": "7FF"
+              }
+            },
+            "dependencies": {
+              "type": {
+                "oneOf": [
+                  {
+                    "properties": {
+                      "type": {
+                        "enum": [
+                          0
+                        ]
+                      },
+                      "prescaler": {
+                        "title": "Prescaler (1 = disable)",
+                        "description": "Acceptance messages prescaling. Can be used to scale the number of messages accepted by the filter. In total 100 unique message IDs can be prescaled (additional unique IDs are assigned prescaler 1)",
+                        "type": "integer",
+                        "default": 1,
+                        "minimum": 1,
+                        "maximum": 256
+                      }
+                    },
+                    "required": [
+                      "prescaler"
+                    ]
+                  },
+                  {
+                    "properties": {
+                      "type": {
+                        "enum": [
+                          1
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "patternProperties": {
+              "prescaler": {}
+            },
+            "required": [
+              "state",
+              "type",
+              "id_format",
+              "method",
+              "f1",
+              "f2"
+            ]
+          }
+        },
+        "transmit": {
+          "title": "Transmit Messages",
+          "description": "List of CAN bus messages transmitted by the device. Requires a CAN-bus physical mode supporting transmissions.",
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "title": "Name",
+                "description": "Optional transmit message name.",
+                "type": "string",
+                "pattern": "^[ -~]*$",
+                "maxLength": 16
+              },
+              "state": {
+                "title": "State",
+                "description": "Disabled transmit messages are ignored.",
+                "type": "integer",
+                "default": 1,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "title": "Disable",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "type": "integer",
+                    "title": "Enable",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ]
+              },
+              "id_format": {
+                "title": "ID Format",
+                "description": "ID format of the transmit message.",
+                "type": "integer",
+                "default": 0,
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "title": "Standard (11-bit)",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "type": "integer",
+                    "title": "Extended (29-bit)",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ]
+              },
+              "frame_format": {
+                "title": "Frame format",
+                "description": "Frame format of the transmit message.",
+                "type": "integer",
+                "default": 0,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "title": "Standard",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "type": "integer",
+                    "title": "FD",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ]
+              },
+              "brs": {
+                "title": "Bit-Rate Switch",
+                "description": "Determines if an FD message is transmitted using a switched bit-rate.",
+                "type": "integer",
+                "default": 0,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "title": "Disable",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "type": "integer",
+                    "title": "Enable",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ]
+              },
+              "log": {
+                "title": "Include in log",
+                "description": "Determines if the transmitted message is included in the log file.",
+                "type": "integer",
+                "default": 0,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "title": "Disable",
+                    "enum": [
+                      0
+                    ]
+                  },
+                  {
+                    "type": "integer",
+                    "title": "Enable",
+                    "enum": [
+                      1
+                    ]
+                  }
+                ]
+              },
+              "period": {
+                "title": "Period (10 ms steps)",
+                "description": "Time period of the message transmission. 0: single shot, >0: periodic. Unit is ms.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967290,
+                "multipleOf": 10
+              },
+              "delay": {
+                "title": "Delay (10 ms steps)",
+                "description": "Offset message within the period or delay a single shot message. If multiple messages are transmitted by the device, it is recommended to offset each separately to reduce peak load on bus. If period > 0, delay < period. If single-shot, delay can be up to max value. Unit is ms.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967290,
+                "multipleOf": 10
+              },
+              "id": {
+                "title": "Message ID (hex)",
+                "description": "ID of message to transmit in hex. Example: 1FF.",
+                "type": "string"
+              },
+              "data": {
+                "title": "Messages Data (hex)",
+                "description": "Data bytes of message to transmit. Example: 01020304 or 0102030405060708.",
+                "type": "string",
+                "pattern": "^([a-fA-F0-9]{2}){0,64}$",
+                "maxLength": 128
+              }
+            },
+            "dependencies": {
+              "id_format": {
+                "oneOf": [
+                  {
+                    "properties": {
+                      "id_format": {
+                        "enum": [
+                          0
+                        ]
+                      },
+                      "id": {
+                        "pattern": "^([0-7][a-fA-F0-9]{2}|[a-fA-F0-9]{1,2})$",
+                        "maxLength": 3
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "id_format": {
+                        "enum": [
+                          1
+                        ]
+                      },
+                      "id": {
+                        "pattern": "^([0-1][a-fA-F0-9]{7}|[a-fA-F0-9]{1,7})$",
+                        "maxLength": 8
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "state",
+              "id_format",
+              "frame_format",
+              "brs",
+              "log",
+              "period",
+              "delay",
+              "id",
+              "data"
+            ]
+          }
+        },
+        "heartbeat": {
+          "title": "Heartbeat",
+          "description": "Periodic heartbeat (1 second period time). Requires a CAN-bus physical mode supporting transmissions.",
+          "type": "object",
+          "properties": {
+            "state": {
+              "title": "State",
+              "description": "Enable to periodically transmit heartbeat signal. ",
+              "type": "integer",
+              "default": 0,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Disable",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Enable",
+                  "enum": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "id_format": {
+              "title": "ID Format",
+              "description": "ID format of heartbeat message.",
+              "type": "integer",
+              "default": 1,
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "title": "Standard (11-bit)",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Extended (29-bit)",
+                  "enum": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "id": {
+              "title": "ID (hex)",
+              "description": "ID of heartbeat message in hex. Example: 1FF.",
+              "type": "string",
+              "default": "00435353"
+            }
+          },
+          "dependencies": {
+            "id_format": {
+              "oneOf": [
+                {
+                  "properties": {
+                    "id_format": {
+                      "enum": [
+                        0
+                      ]
+                    },
+                    "id": {
+                      "pattern": "^([0-7][a-fA-F0-9]{2}|[a-fA-F0-9]{1,2})$",
+                      "maxLength": 3
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "id_format": {
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "id": {
+                      "pattern": "^([0-1][a-fA-F0-9]{7}|[a-fA-F0-9]{1,7})$",
+                      "maxLength": 8
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "state",
+            "id_format",
+            "id"
+          ]
+        },
+        "control": {
+          "title": "Control",
+          "description": "Control signal",
+          "type": "object",
+          "properties": {
+            "control_rx_state": {
+              "title": "Control reception (rx) state",
+              "description": "Control CAN-bus reception state (including logging) ",
+              "type": "integer",
+              "default": 0,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Disable",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Enable",
+                  "enum": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "control_tx_state": {
+              "title": "Control transmission (tx) state",
+              "description": "Control CAN-bus transmission state (including logging) ",
+              "type": "integer",
+              "default": 0,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Disable",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Enable",
+                  "enum": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "start": {
+              "title": "Start signal",
+              "$ref": "#/definitions/control_signal"
+            },
+            "stop": {
+              "title": "Stop signal",
+              "$ref": "#/definitions/control_signal"
+            }
+          },
+          "required": [
+            "control_rx_state",
+            "control_tx_state",
+            "start",
+            "stop"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "phy",
+        "filter"
+      ]
+    },
+    "lin": {
+      "type": "object",
+      "properties": {
+        "phy": {
+          "title": "Physical (LIN bus low-level)",
+          "description": "LIN bus low-level configuration",
+          "type": "object",
+          "properties": {
+            "mode": {
+              "title": "Mode",
+              "description": "Device LIN bus mode.",
+              "type": "integer",
+              "default": 0,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Slave",
+                  "enum": [
+                    0
+                  ]
+                }
+              ]
+            },
+            "bit_rate": {
+              "title": "Bit-rate",
+              "type": "integer",
+              "default": 19200,
+              "anyOf": [
+                {
+                  "title": "2400",
+                  "enum": [
+                    2400
+                  ]
+                },
+                {
+                  "title": "9600",
+                  "enum": [
+                    10000
+                  ]
+                },
+                {
+                  "title": "10400",
+                  "enum": [
+                    10400
+                  ]
+                },
+                {
+                  "title": "19200",
+                  "enum": [
+                    19200
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "bit_rate"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "phy"
+      ]
+    }
+  },
+  "properties": {
+    "general": {
+      "title": "General",
+      "type": "object",
+      "properties": {
+        "device": {
+          "title": "Device",
+          "type": "object",
+          "properties": {
+            "meta": {
+              "title": "Meta data",
+              "description": "Optional meta data string. Displayed in device file and log file headers. Example: Site1; Truck4; ConfigRev12",
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 30,
+              "pattern": "^[a-zA-Z0-9; ]*$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "security": {
+          "title": "Security",
+          "type": "object",
+          "properties": {
+            "kpub": {
+              "title": "Server public key",
+              "description": "Server / user ECC public key in base64 format. Shall match the encryption used for all protected fields.",
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 100,
+              "pattern": "^[a-zA-Z0-9+/=]*$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "debug": {
+          "title": "Debug",
+          "description": "Debug functionality for use during installation and troubleshooting.",
+          "type": "object",
+          "properties": {
+            "syslog": {
+              "title": "System log",
+              "description": "System events logged to the SD-card. The log levels are listed in order of increasing amount of information logged. Should only be enabled if needed during installation or troubleshooting.",
+              "type": "integer",
+              "default": 0,
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "title": "Disable (0)",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Error (1)",
+                  "enum": [
+                    1
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Warning (2)",
+                  "enum": [
+                    2
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "title": "Info (3)",
+                  "enum": [
+                    3
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "device",
+        "security",
+        "debug"
+      ]
+    },
+    "log": {
+      "title": "Logging",
+      "type": "object",
+      "properties": {
+        "split_size": {
+          "title": "File split size (1 to 512 MB)",
+          "description": "Log file split size in MB. When the file split size is reached a new file is created and the logging continues. Closed log files can be pushed to a server if WiFi is available. Small split sizes may reduce performance.",
+          "type": "integer",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 512
+        },
+        "split_time_period": {
+          "title": "File split time period (0 to 86400 seconds, 0 = disable)",
+          "description": "Log file split time period in seconds relative to midnight (00:00:00). When a split time is reached a new file is created and the logging continues. Closed log files can be pushed to a server if WiFi is available. Small split time periods may reduce performance.",
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 86400,
+          "multipleOf": 10
+        },
+        "split_time_offset": {
+          "title": "File split time offset (0 to 86400 seconds)",
+          "description": "Log file split time offset in seconds. This value offsets the split_time_period relative to midnight (00:00:00). The set value shall be less than the split_time_period value.",
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 86400,
+          "multipleOf": 10
+        },
+        "cyclic": {
+          "title": "Cyclic logging",
+          "description": "With cycling logging mode enabled the oldest log file is deleted when the memory card becomes full, allowing the logging to continue.",
+          "type": "integer",
+          "default": 1,
+          "anyOf": [
+            {
+              "type": "integer",
+              "title": "Disable",
+              "enum": [
+                0
+              ]
+            },
+            {
+              "type": "integer",
+              "title": "Enable",
+              "enum": [
+                1
+              ]
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "split_size",
+        "split_time_period",
+        "split_time_offset",
+        "cyclic"
+      ]
+    },
+    "rtc": {
+      "title": "Real-Time Clock (RTC)",
+      "type": "object",
+      "properties": {
+        "sync": {
+          "title": "Time synchronization method",
+          "description": "Internal real-time-clock synchronization method. The real-time-clock is maintained when the device is off.",
+          "type": "integer",
+          "default": 0,
+          "anyOf": [
+            {
+              "title": "Retain current time",
+              "description": "The current internal time is not changed.",
+              "type": "integer",
+              "enum": [
+                0
+              ]
+            },
+            {
+              "title": "Manual update",
+              "description": "The internal time is updated with the manually set UTC time when the device powers on. The manual time is set using the manual_date_time field",
+              "type": "integer",
+              "enum": [
+                1
+              ]
+            }
+          ]
+        },
+        "timezone": {
+          "title": "Time zone (UTC−12 to UTC+14)",
+          "description": "Adjustment in full hours to the UTC time. Includes daylight savings time if applicable.",
+          "type": "integer",
+          "default": 0,
+          "minimum": -12,
+          "maximum": 14
+        },
+        "adjustment": {
+          "title": "Adjustment (-129600 to 129600 seconds)",
+          "description": "Adjustment in seconds to the UTC time. Can be used for fine tuning the internal time. ",
+          "type": "integer",
+          "default": 0,
+          "minimum": -129600,
+          "maximum": 129600
+        }
+      },
+      "dependencies": {
+        "sync": {
+          "oneOf": [
+            {
+              "properties": {
+                "sync": {
+                  "enum": [
+                    0
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "sync": {
+                  "enum": [
+                    1
+                  ]
+                },
+                "manual_date_time": {
+                  "title": "Time (UTC)",
+                  "description": "Manually set UTC date and time value.",
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "manual_date_time"
+              ]
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "patternProperties": {
+        "manual_date_time": {}
+      },
+      "required": [
+        "sync",
+        "timezone",
+        "adjustment"
+      ]
+    },
+     "secondaryport": {
+      "title": "Secondary Port",
+      "description": "Control of power-out (5V) on Channel 2 (CH2) connector.",
+      "type": "object",
+      "properties": {
+        "power_schedule": {
+          "title": "Power schedule",
+          "description": "The daily power schedule is defined by a number of power-on from/to intervals. Define no power-on intervals to keep always off. Define one interval with from/to both set to 00:00 to keep always on. Time format is HH:MM (1 minute resolution)",
+          "type": "array",
+          "default": [],
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "title": "From",
+                "description": "Power-on FROM time in format HH:MM. Shall be before power-on TO time. E.g. at midnight 00:00",
+                "type": "string",
+                "default": "00:00",
+                "pattern": "^([0-1][0-9]|2[0-4]):([0-5][0-9])$"
+              },
+              "to": {
+                "title": "To",
+                "description": "Power-on TO time in format HH:MM. Shall be after power-on FROM time. E.g. at midday 12:00.",
+                "type": "string",
+                "default": "00:00",
+                "pattern": "^([0-1][0-9]|2[0-4]):([0-5][0-9])$"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "to"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "power_schedule"
+      ]
+    },
+    "can_1": {
+      "title": "CAN Channel 1",
+      "$ref": "#/definitions/can"
+    },
+    "can_2": {
+      "title": "CAN Channel 2",
+      "$ref": "#/definitions/can"
+    },
+    "lin_1": {
+      "title": "LIN Channel 1",
+      "$ref": "#/definitions/lin"
+    },
+    "lin_2": {
+      "title": "LIN Channel 2",
+      "$ref": "#/definitions/lin"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "general",
+    "log",
+    "rtc",
+    "secondaryport",
+    "can_1",
+    "can_2"
+  ]
+}

@@ -33,7 +33,6 @@ class Header extends React.Component {
     const loggedIn = web.LoggedIn();
     return (
       <header className="fe-header top-header">
-        {!EDITOR.offline ? (
           <div>
             {loggedIn && <Path />}
             <ul className="feh-actions float-top">
@@ -49,7 +48,6 @@ class Header extends React.Component {
               )}
             </ul>
           </div>
-        ) : null}
       </header>
     );
   }

@@ -21,9 +21,7 @@ import buckets from "./buckets/reducer";
 import objects from "./objects/reducer";
 import uploads from "./uploads/reducer";
 import editor from "./editor/reducer";
-import editorTools from "./editorTools/reducer";
 import alertModals from "./alertModals/reducer";
-import dashboard from "./dashboard/reducer";
 import dashboardStatus from "./dashboardStatus/reducer";
 
 
@@ -35,7 +33,6 @@ const rootReducer = combineReducers({
   uploads,
   editor,
   dashboardStatus,
-  editorTools,
   alertModals
 });
 

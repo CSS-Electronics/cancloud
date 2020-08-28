@@ -2,8 +2,9 @@ import React from "react";
 
 import MobileHeader from "../browser/MobileHeader";
 import Header from "../browser/Header";
-import EditorSection from "./EditorSection";
 import web from "../web";
+
+import EditorSection from "./EditorSection";
 import { pathSlice } from "../utils";
 import history from "../history";
 

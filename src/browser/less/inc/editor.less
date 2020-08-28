@@ -35,6 +35,24 @@
   }
 }
 
+.config-bar-background{
+  background-color: @white;
+  border-top: @border-color;
+  border-bottom: @white;
+  border-left: @white;
+  border-right: @white;
+  border-top-width: 1px;
+  border-style: solid;
+  padding-bottom: 40px;
+  padding-top: 15px;
+  padding-left: 0px;
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  height: 30px;
+  z-index: 0;
+}
+
 .editor-schema-modal-hide {
   display: none;
 }
@@ -119,6 +137,9 @@
   font-size: 14px !important;
 }
 
+.config-padding{
+  padding-left: 15px;
+}
 .config-bar {
   background-color: @white;
   border-top: @border-color;
@@ -129,11 +150,12 @@
   border-style: solid;
   padding-bottom: 40px;
   padding-top: 15px;
-  padding-left: 40px;
+  padding-left: 0px;
   position: fixed;
   bottom: 0px;
   width: 100%;
   height: 30px;
+  z-index: 15;
 }
 
 .simple-editor-btn-position {
@@ -151,7 +173,7 @@
   -webkit-text-security: disc;
 }
 .encryption-padding {
-  padding-right: 320px !important;
+  padding-right: 340px !important;
 }
 
 .text-area-hover {
@@ -298,6 +320,18 @@
   height: 52px;
 }
 
+.top-header-offline {
+  position: fixed !important;
+  top: 0px;
+  padding-bottom: 0px !important;
+  padding-top: 15px !important;
+  border-bottom: 1px solid @border-color;
+  background-color: @white;
+  z-index: 6;
+  width: 100%;
+  height: 52px;
+}
+
 .meta-header {
   padding-top: 80px;
   padding-left: 40px;
@@ -367,16 +401,16 @@
 
   .config-bar {
     z-index: 15;
-    height: 100px;
+    // height: 100px;
   }
 
   .tools-side-bar {
     z-index: 14;
   }
 
-  .top-header {
-    top: 60px;
-  }
+  // .top-header {
+  //    top: 60px;
+  // }
 }
 
 .field-object .field-description {

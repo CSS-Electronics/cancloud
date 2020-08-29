@@ -21,6 +21,7 @@ import buckets from "./buckets/reducer";
 import objects from "./objects/reducer";
 import uploads from "./uploads/reducer";
 import editor from "./editor/reducer";
+// import editor from "./editorNew/editorBase/reducer";
 import alertModals from "./alertModals/reducer";
 import dashboardStatus from "./dashboardStatus/reducer";
 

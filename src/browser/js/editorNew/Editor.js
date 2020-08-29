@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import classNames from 'classnames'
+import classNames from "classnames";
 
 import {
   EncryptionModal,
@@ -14,15 +14,27 @@ import EditorSection from "./editorBase/EditorSection";
 import * as actionsAlert from "../alert/actions";
 import AlertContainer from "../alert/AlertContainer";
 
-
-
-// NEW: *** 
+// NEW: ***
 import SideBar from "../browser/SideBar";
 import MobileHeader from "../browser/MobileHeader";
 import Header from "../browser/Header";
 import web from "../web";
 
+import * as actionsEditor from "../editor/actions";
+import history from "../history";
+
+import { pathSlice, isValidDevice } from "../utils";
+
+
 class Editor extends React.Component {
+
+  componentWillMount(){
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
+    this.props.fetchSchemaFiles(prefix)
+  }
+
+
   render() {
     let editorTools = [
       {
@@ -47,19 +59,19 @@ class Editor extends React.Component {
 
     return (
       <div className="file-explorer">
-     
-        <SideBar/>
-        <div className={classNames({"fe-body ": true, "fe-body-offline": false})}>
-        {web.LoggedIn() && <MobileHeader />}
-        <Header />
+        <SideBar />
+        <div
+          className={classNames({ "fe-body ": true, "fe-body-offline": false })}
+        >
+          {web.LoggedIn() && <MobileHeader />}
+          <Header />
 
-        <AlertContainer />
-        <EditorSection
-          editorTools={editorTools}
-          showAlert={this.props.showAlert}
-          sideBarPadding={true}
-        />
-
+          <AlertContainer />
+          <EditorSection
+            editorTools={editorTools}
+            showAlert={this.props.showAlert}
+            sideBarPadding={true}
+          />
         </div>
       </div>
     );
@@ -70,6 +82,8 @@ const mapDispatchToProps = (dispatch) => {
   return {
     showAlert: (type, message) =>
       dispatch(actionsAlert.set({ type: type, message: message })),
+    fetchSchemaFiles: (prefix) =>
+      dispatch(actionsEditor.fetchSchemaFiles(prefix)),
   };
 };
 

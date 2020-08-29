@@ -10,13 +10,11 @@ export const TOGGLE_ENCRYPTION_SIDEBAR =
   "editorTools/TOGGLE_ENCRYPTION_SIDEBAR";
 export const TOGGLE_SCHEMA_SIDEBAR = "editorTools/TOGGLE_SCHEMA_SIDEBAR";
 export const TOGGLE_FILTER_SIDEBAR = "editorTools/TOGGLE_FILTER_SIDEBAR";
-export const TOGGLE_DEVICE_FILE_TABLE = "editorTools/TOGGLE_DEVICE_FILE_TABLE";
 export const TOGGLE_CRC_SIDEBAR = "editorTools/TOGGLE_CRC_SIDEBAR";
 export const TOGGLE_BITRATE_SIDEBAR = "editorTools/TOGGLE_BITRATE_SIDEBAR";
 export const TOGGLE_PARTIAL_CONFIG_LOADER_SIDEBAR = "editorTools/TOGGLE_PARTIAL_CONFIG_LOADER_SIDEBAR";
 export const SET_CRC32_EDITOR_LIVE = "editorTools/SET_CRC32_EDITOR_LIVE";
 export const SET_CRC32_EDITOR_PRE = "editorTools/SET_CRC32_EDITOR_PRE";
-export const OPEN_DEVICE_FILE_TABLE = "editorTools/OPEN_DEVICE_FILE_TABLE";
 export const CLOSE_EDITOR_SIDEBARS = " editorTools/CLOSE_EDITOR_SIDEBARS";
 
 const { detect } = require("detect-browser");
@@ -36,9 +34,6 @@ if (
   crcBrowserSupport = 1;
 }
 
-export const toggleDeviceFileTable = () => ({
-  type: TOGGLE_DEVICE_FILE_TABLE
-});
 
 export const toggleEditorSchemaSideBar = () => ({
   type: TOGGLE_SCHEMA_SIDEBAR
@@ -62,10 +57,6 @@ export const toggleFilterSideBar = () => ({
 
 export const toggleCrcSideBar = () => ({
   type: TOGGLE_CRC_SIDEBAR
-});
-
-export const openDeviceFileTable = () => ({
-  type: OPEN_DEVICE_FILE_TABLE
 });
 
 export const calcCrc32EditorLive = () => {

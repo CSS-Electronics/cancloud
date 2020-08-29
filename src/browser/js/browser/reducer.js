@@ -20,7 +20,11 @@ export default (
   state = {
     sidebarOpen: false,
     objectName: "",
-    deviceImage: undefined
+    deviceImage: undefined,
+    prevDeviceFileDevice: "",
+    deviceFileContent: {},
+    deviceFileLastModified: "",
+    deviceFileTableOpen: false,
   },
   action
 ) => {
@@ -40,5 +44,28 @@ export default (
         ...state,
         deviceImage: action.deviceImage
       };
+    case actionsCommon.SET_PREV_DEVICE_FILE_DEVICE:
+      return {
+        ...state,
+        prevDeviceFileDevice: action.prevDeviceFileDevice
+      };
+    case actionsCommon.SET_DEVICE_FILE_DATA:
+      return {
+        ...state,
+        deviceFileContent: action.deviceFileContent
+      };
+    case actionsCommon.SET_DEVICE_FILE_LAST_MODIFIED:
+      return {
+        ...state,
+        deviceFileLastModified: action.deviceFileLastModified
+      };
+    case actionsCommon.OPEN_DEVICE_FILE_TABLE:
+      return Object.assign({}, state, {
+        deviceFileTableOpen: true
+      });
+    case actionsCommon.TOGGLE_DEVICE_FILE_TABLE:
+      return Object.assign({}, state, {
+        deviceFileTableOpen: !state.deviceFileTableOpen
+      });
   }
 };

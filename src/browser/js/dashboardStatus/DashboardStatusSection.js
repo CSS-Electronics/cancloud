@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import * as dashboardStatusActions from "./actions";
-import * as browserActions from "../browser/actions";
 import { defaults } from "react-chartjs-2";
 import { Bar, Doughnut, HorizontalBar } from "react-chartjs-2";
 import ReactMultiSelectCheckboxes from "react-multiselect-checkboxes";

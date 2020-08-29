@@ -8,7 +8,6 @@ export default (
     partialConfigLoaderSidebarOpen: false,
     crc32EditorLive: "",
     crc32EditorPre: "",
-    deviceFileTableOpen: false,
     editorSchemaSidebarOpen: false,
     crcSidebarOpen: false,
     devicePublicKey: "",
@@ -22,7 +21,6 @@ export default (
   switch (action.type) {
     case actionsEditorTools.CLOSE_EDITOR_SIDEBARS:
       return Object.assign({}, state, {
-        deviceFileTableOpen: false,
         encryptionSidebarOpen: false,
         crcSidebarOpen: false,
         editorSchemaSidebarOpen: false,
@@ -42,10 +40,7 @@ export default (
       return Object.assign({}, state, {
         partialConfigLoaderSidebarOpen: !state.partialConfigLoaderSidebarOpen
       });
-    case actionsEditorTools.TOGGLE_DEVICE_FILE_TABLE:
-      return Object.assign({}, state, {
-        deviceFileTableOpen: !state.deviceFileTableOpen
-      });
+ 
     case actionsEditorTools.TOGGLE_CRC_SIDEBAR:
       return Object.assign({}, state, {
         crcSidebarOpen: !state.crcSidebarOpen
@@ -57,10 +52,6 @@ export default (
     case actionsEditorTools.TOGGLE_FILTER_SIDEBAR:
       return Object.assign({}, state, {
         filterSidebarOpen: !state.filterSidebarOpen
-      });
-    case actionsEditorTools.OPEN_DEVICE_FILE_TABLE:
-      return Object.assign({}, state, {
-        deviceFileTableOpen: true
       });
     case actionsEditorTools.SET_CRC32_EDITOR_LIVE:
       return {

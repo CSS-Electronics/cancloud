@@ -18,6 +18,7 @@ import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
 import * as objectsActions from "../objects/actions";
+import * as browserActions from "../browser/actions";
 import * as editorActions from "../editor/actions";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
 import { pathSlice, isValidDevice } from "../utils";
@@ -171,7 +172,7 @@ export const selectBucket = (bucket, prefix) => {
     dispatch(objectsActions.selectPrefix(prefix || ""));
     // fetch the device file for the selected bucket for use in meta data
     if(bucket != "Home"){
-    dispatch(editorActions.fetchDeviceFile(bucket))
+    dispatch(browserActions.fetchDeviceFile(bucket))
     }
   };
 };

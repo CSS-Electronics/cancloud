@@ -4,9 +4,9 @@ import Moment from "moment";
 import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
-import * as browserActions from "../browser/actions";
 import * as actionsEditorTools from "../editorTools/actions";
-import * as dashboardStatusActions from "../dashboardStatus/actions"
+import * as browserEditorTools from "../browser/actions";
+
 import {
   isValidUISchema,
   isValidSchema,
@@ -35,10 +35,8 @@ export const SET_CONFIG_DATA_PRE_CHANGE = "editor/SET_CONFIG_DATA_PRE_CHANGE";
 export const SET_UPDATED_FORM_DATA = "editor/SET_UPDATED_FORM_DATA";
 export const SET_ACTIVE_NAV = "editor/SET_ACTIVE_NAV";
 export const SET_UISCHEMA_SOURCE = "editor/SET_UISCHEMA_SOURCE";
-export const SET_DEVICE_FILE_DATA = "editor/SET_DEVICE_FILE_DATA";
-export const SET_PREV_DEVICE_FILE_DEVICE = "editor/SET_PREV_DEVICE_FILE_DEVICE";
-export const SET_DEVICE_FILE_LAST_MODIFIED =
-  "editor/SET_DEVICE_FILE_LAST_MODIFIED";
+
+
 export const SET_CONFIG_DATA_LOCAL = "SET_CONFIG_DATA_LOCAL";
 
 // Note: These need to be updated with future firmware revisions
@@ -183,8 +181,8 @@ export const fetchSchemaFiles = prefix => {
             )
           : "";
 
-        dispatch(fetchDeviceFileContent(deviceFileName[0], prefix));
-        dispatch(setDeviceFileLastModified(deviceFileLastModified));
+        dispatch(browserEditorTools.fetchDeviceFileContent(deviceFileName[0], prefix));
+        dispatch(browserEditorTools.setDeviceFileLastModified(deviceFileLastModified));
       })
       .catch(err => {
         if (web.LoggedIn()) {
@@ -201,148 +199,6 @@ export const fetchSchemaFiles = prefix => {
       });
   };
 };
-
-// below fetches content of device.json file
-export const fetchDeviceFileContent = (fileName, device) => {
-  return function(dispatch, getState) {
-    if (fileName == "") {
-      dispatch(setDeviceFileContent(null));
-    } else {
-      const { bucket, prefix } = pathSlice(history.location.pathname);
-      const currentBucket = getCurrentBucket(getState());
-      const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
-
-      if (currentBucket && fileName) {
-        return web
-          .PresignedGet({
-            bucket: currentBucket,
-            object: fileName,
-            expiry: expiry
-          })
-          .then(res => {
-            fetch(res.url)
-              .then(r => r.json())
-              .then(data => {
-                dispatch(setDeviceFileContent(data));
-                dispatch(setPrevDeviceFileDevice(device));
-
-                // get the Configuration File content matching the device.json for use in crc32 comparison
-                let cfg_name = data.cfg_name;
-                let configObject = [{ deviceId: device, name: device + "/" + cfg_name }];
-      
-                if (!configObject[0].name.includes("undefined")) {
-                  dispatch(dashboardStatusActions.fetchConfigFileContentAll(configObject))
-                }
-              })
-              .catch(e => {
-                dispatch(setDeviceFileContent(null));
-                dispatch(
-                  alertActions.set({
-                    type: "danger",
-                    message: `Warning: The file ${fileName} is invalid and was not loaded`,
-                    autoClear: true
-                  })
-                );
-              });
-          })
-          .catch(err => {
-            if (web.LoggedIn()) {
-              dispatch(
-                alertActions.set({
-                  type: "danger",
-                  message: err.message,
-                  autoClear: true
-                })
-              );
-            } else {
-              history.push("/login");
-            }
-          });
-      } else if (prefix) {
-        dispatch(setDeviceFileContent(null));
-      } else {
-        dispatch(setDeviceFileContent(null));
-      }
-    }
-  };
-};
-
-export const fetchDeviceFileIfNew = device => {
-  return function(dispatch, getState) {
-    if (
-      getState().buckets.currentBucket == getState().editor.prevDeviceFileDevice
-      || device == "Home"
-    ) {
-      return;
-    } else {
-      dispatch(fetchDeviceFile(device));
-    }
-  };
-};
-
-export const fetchDeviceFile = device => {
-  return function(dispatch) {
-    dispatch(setDeviceFileContent(null));
-    return web
-      .ListObjects({
-        bucketName: device,
-        prefix: "",
-        marker: ""
-      })
-      .then(data => {
-        const deviceFileObject = data.objects.filter(
-          p => p.name === "device.json"
-        )[0];
-        const deviceFileName = deviceFileObject ? deviceFileObject.name : null;
-        const deviceFileLastModified = deviceFileObject
-          ? Moment(deviceFileObject.lastModified).format(
-              "MMMM Do YYYY, h:mm:ss a"
-            )
-          : "";
-
-        if (deviceFileObject) {
-          dispatch(fetchDeviceFileContent(deviceFileName, device));
-          dispatch(setDeviceFileLastModified(deviceFileLastModified));
-        } else {
-          // dispatch(
-          //   alertActions.set({
-          //     type: "info",
-          //     message: `The device does not have an uploaded device.json file`,
-          //     autoClear: true
-          //   })
-          // );
-        }
-      })
-      .catch(err => {
-        if (web.LoggedIn()) {
-          dispatch(
-            alertActions.set({
-              type: "danger",
-              message: err.message,
-              autoClear: true
-            })
-          );
-        } else {
-          history.push("/login");
-        }
-      });
-  };
-};
-
-export const setDeviceFileContent = deviceFileContent => ({
-  type: SET_DEVICE_FILE_DATA,
-  deviceFileContent
-});
-
-export const setPrevDeviceFileDevice = prevDeviceFileDevice => ({
-  type: SET_PREV_DEVICE_FILE_DEVICE,
-  prevDeviceFileDevice
-});
-
-export const setDeviceFileLastModified = deviceFileLastModified => ({
-  type: SET_DEVICE_FILE_LAST_MODIFIED,
-  deviceFileLastModified
-});
 
 export const updateConfigFile = (content, object) => {
   const { bucket, prefix } = pathSlice(history.location.pathname);

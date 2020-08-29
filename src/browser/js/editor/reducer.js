@@ -3,14 +3,11 @@ import _ from "lodash";
 
 export default (
   state = {
-    prevDeviceFileDevice: "",
     editorSchemaFiles: [],
     editorConfigFiles: [],
     editorUISchemaFiles: [],
     configContentPreChange: "",
     configContentLocal: {},
-    deviceFileContent: {},
-    deviceFileLastModified: "",
     formData: {}
   },
   action
@@ -27,26 +24,10 @@ export default (
         ...state,
         configContent: action.configContent
       };
-    case actionsEditor.SET_PREV_DEVICE_FILE_DEVICE:
-      return {
-        ...state,
-        prevDeviceFileDevice: action.prevDeviceFileDevice
-      };
-
     case actionsEditor.SET_SCHEMA_DATA:
       return {
         ...state,
         schemaContent: action.schemaContent
-      };
-    case actionsEditor.SET_DEVICE_FILE_DATA:
-      return {
-        ...state,
-        deviceFileContent: action.deviceFileContent
-      };
-    case actionsEditor.SET_DEVICE_FILE_LAST_MODIFIED:
-      return {
-        ...state,
-        deviceFileLastModified: action.deviceFileLastModified
       };
     case actionsEditor.SET_UI_SCHEMA_DATA:
       return {

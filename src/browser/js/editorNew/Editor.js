@@ -47,23 +47,18 @@ class Editor extends React.Component {
 
     return (
       <div className="file-explorer">
-        {/* NEW: ***  */}
-       
-        <SideBar/>
      
+        <SideBar/>
         <div className={classNames({"fe-body ": true, "fe-body-offline": false})}>
         {web.LoggedIn() && <MobileHeader />}
         <Header />
-
 
         <AlertContainer />
         <EditorSection
           editorTools={editorTools}
           showAlert={this.props.showAlert}
           sideBarPadding={true}
-          
         />
-                
 
         </div>
       </div>

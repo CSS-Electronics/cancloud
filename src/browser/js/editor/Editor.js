@@ -11,12 +11,12 @@ import web from "../web";
 
 import * as actionsEditor from "./actions";
 import * as actionsBuckets from "../buckets/actions";
-import EncryptionModal from "../editorTools/EncryptionModal";
-import CrcModal from "../editorTools/CrcModal";
+// import EncryptionModal from "../editorTools/EncryptionModal";
+// import CrcModal from "../editorTools/CrcModal";
 import DeviceFileModal from "../browser/DeviceFileModal";
-import FilterModal from "../editorTools/FilterModal";
-import BitRateModal from "../editorTools/BitRateModal";
-import PartialConfigLoader from "../editorTools/PartialConfigLoader";
+// import FilterModal from "../editorTools/FilterModal";
+// import BitRateModal from "../editorTools/BitRateModal";
+// import PartialConfigLoader from "../editorTools/PartialConfigLoader";
 
 class Editor extends React.Component {
   componentWillMount() {

@@ -4,7 +4,7 @@ import Moment from "moment";
 import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
-import * as actionsEditorTools from "../editorTools/actions";
+// import * as actionsEditorTools from "../editorTools/actions";
 import * as browserEditorTools from "../browser/actions";
 
 import {

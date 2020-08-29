@@ -19,7 +19,6 @@ import history from "../history";
 import * as alertActions from "../alert/actions";
 import * as objectsActions from "../objects/actions";
 import * as browserActions from "../browser/actions";
-import * as editorActions from "../editor/actions";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
 import { pathSlice, isValidDevice } from "../utils";
 
@@ -67,7 +66,6 @@ export const fetchBuckets = () => {
         ) {
           // Device editor mode
           dispatch(selectBucket(prefix));
-          dispatch(editorActions.fetchSchemaFiles(prefix));
         } else if (bucket && buckets.indexOf(bucket) > -1) {
           // Device browser mode
           dispatch(selectBucket(bucket, prefix));

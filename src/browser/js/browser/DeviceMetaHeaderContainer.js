@@ -4,7 +4,6 @@ import history from "../history";
 import { pathSlice } from "../utils";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
 import * as browserActions from "./actions";
-import * as editorActions from "../editor/actions";
 
 import {
   DeviceImage,

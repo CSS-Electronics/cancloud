@@ -13,6 +13,7 @@ class DeviceFileModal extends React.Component {
       deviceFileLastModified,
       toggleDeviceFileTable
     } = this.props;
+
     return (
       <div>
         {deviceFileContent ? (

@@ -420,6 +420,7 @@ class LoadEditorFiles extends React.Component {
       ? editorConfigFiles[0].name.replace(".json", "")
       : "None";
 
+    
     return (
       <div className="fe-header config-editor">
         <div

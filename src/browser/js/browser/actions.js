@@ -86,13 +86,14 @@ export const fetchDeviceFileContent = (fileName, device) => {
                 ];
 
 
-                if (!configObject[0].name.includes("undefined")) {
-                  dispatch(
-                    dashboardStatusActions.fetchConfigFileContentAll(
-                      configObject
-                    )
-                  );
-                }
+                // if (!configObject[0].name.includes("undefined")) {
+                //   console.log("so we get here..")
+                //   dispatch(
+                //     dashboardStatusActions.fetchConfigFileContentAll(
+                //       configObject
+                //     )
+                //   );
+                // }
                 
               })
               .catch((e) => {

@@ -61,9 +61,9 @@ class EditorChangesComparison extends React.Component {
       enableDownload,
     } = this.props;
 
-    let pastCleaned = past ? JSON.stringify(JSON.parse(past), null, 2) : "";
+    let pastCleaned = "" // past && Object.keys(past).length ? JSON.stringify(JSON.parse(past), null, 2) : "";
 
-    if (crcBrowserSupport == 1 && past) {
+    if (crcBrowserSupport == 1 && past && Object.keys(past).length) {
       const { crc32 } = require("crc");
       pastCrc32 = crc32(past).toString(16).toUpperCase().padStart(8, "0");
     } else {

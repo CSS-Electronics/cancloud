@@ -21,19 +21,19 @@ import Header from "../browser/Header";
 import web from "../web";
 
 import * as actionsEditor from "../editor/actions";
+import * as actionsEditorS3 from "./actions";
+
 import history from "../history";
 
 import { pathSlice, isValidDevice } from "../utils";
 
-
 class Editor extends React.Component {
-
-  componentWillMount(){
+  componentWillMount() {
     const { bucket, prefix } = pathSlice(history.location.pathname);
 
-    this.props.fetchSchemaFiles(prefix)
+    // this.props.fetchSchemaFiles(prefix);
+    this.props.fetchFilesS3(prefix);
   }
-
 
   render() {
     let editorTools = [
@@ -84,6 +84,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(actionsAlert.set({ type: type, message: message })),
     fetchSchemaFiles: (prefix) =>
       dispatch(actionsEditor.fetchSchemaFiles(prefix)),
+    fetchFilesS3: (prefix) => dispatch(actionsEditorS3.fetchFilesS3(prefix)),
   };
 };
 

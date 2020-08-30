@@ -241,6 +241,7 @@ export const setSchemaFile = (schemaFiles) => ({
   })),
 });
 
+
 export const resetSchemaFiles = () => ({
   type: RESET_SCHEMA_LIST,
   schemaFiles: [],

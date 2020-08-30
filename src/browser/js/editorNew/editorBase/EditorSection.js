@@ -315,8 +315,9 @@ export class EditorSection extends React.Component {
         >
          <header className="top-header-offline" />
 
-          {editorToolsFull.map((modal) => (
+          {editorToolsFull.map((modal,idx) => (
             <div
+              key={idx}
               style={{
                 display: modal.name == this.state.activeSideBar ? "" : "none",
               }}
@@ -370,8 +371,9 @@ export class EditorSection extends React.Component {
                     </button>
                   </div>
                   <div className="col-xs-7" style={{ float: "left" }}>
-                    {editorToolsFull.map((modal) => (
+                    {editorToolsFull.map((modal,idx) => (
                       <EditorToolButton
+                        key={idx}
                         onClick={() => this.subMenuBtnClick(modal.name)}
                         comment={modal.comment}
                         className={modal.class}

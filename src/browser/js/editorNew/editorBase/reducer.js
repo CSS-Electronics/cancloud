@@ -58,6 +58,7 @@ export default (
         )
       };
     case actionsEditor.SET_CONFIG_LIST:
+      console.log("action.configFiles",action.configFiles)
       return {
         ...state,
         editorConfigFiles: _.uniqBy(

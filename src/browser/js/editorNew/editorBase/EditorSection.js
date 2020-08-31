@@ -81,7 +81,11 @@ export class EditorSection extends React.Component {
         [fileType + "Review"]: selection,
       },
       () => {
-        this.props.fetchFileContent(selection, fileType);
+        if(this.props.fetchFileContentS3 && fileType != "uischema" && !selection.includes("(local)")){
+          this.props.fetchFileContentS3(selection, fileType);
+        }else{
+          // this.props.fetchFileContent(selection, fileType)
+        }
       }
     );
   }
@@ -116,13 +120,6 @@ export class EditorSection extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // ensure that if there's a new schema file list, the selection returns to the default value
-    if (this.props.editorSchemaFiles != nextProps.editorSchemaFiles) {
-      this.setState({
-        schema: "",
-        selectedschema: "",
-      });
-    }
 
     let uiLocal = nextProps.editorUISchemaFiles.filter((file) =>
       file.name.includes("(local)")

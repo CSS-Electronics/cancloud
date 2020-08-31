@@ -14,7 +14,6 @@ export const SET_UI_SCHEMA_DATA = "editor/SET_UI_SCHEMA_DATA";
 export const SET_SCHEMA_DATA = "editor/SET_SCHEMA_DATA";
 export const SET_UPDATED_CONFIG = "editor/SET_UPDATED_CONFIG";
 export const RESET_SCHEMA_FILES = "editor/RESET_SCHEMA_FILES";
-export const RESET_UPLOADED_SCHEMA_LIST = "editor/RESET_UPLOADED_SCHEMA_LIST";
 export const SET_CONFIG_DATA_PRE_CHANGE = "editor/SET_CONFIG_DATA_PRE_CHANGE";
 export const SET_UPDATED_FORM_DATA = "editor/SET_UPDATED_FORM_DATA";
 export const SET_ACTIVE_NAV = "editor/SET_ACTIVE_NAV";
@@ -82,6 +81,8 @@ export const publicUiSchemaFiles = () => {
 export const fetchFileContent = (fileName, type) => {
   return function (dispatch, getState) {
 
+    console.log("we get here (non S3)")
+
     // Remove existing "uploaded" files from dropdown and set Schema to loaded file from schema/ folder
     // Note that for cases where files are uploaded, the below is handled as part of the upload function
     switch (true) {
@@ -97,6 +98,7 @@ export const fetchFileContent = (fileName, type) => {
 
         break;
       case type == "schema":
+        dispatch(resetLocalSchemaList());
         if (fileName.match(regexSchemaPublic) != null) {
           dispatch(setSchemaContent(loadFile(fileName)));
         } else {
@@ -160,9 +162,11 @@ export const handleUploadedFile = (file, dropdown) => {
             // load the matching schema files if a schema file is not already uploaded
             const localLoaded =
               getState().editor.editorSchemaFiles[0] &&
-              getState().editor.editorSchemaFiles[0].name.includes("local");
+              getState().editor.editorSchemaFiles[0].name.includes("None");
+            console.log("File",file)
+            console.log("editorSchemaFiles",getState().editor.editorSchemaFiles[0].name)
 
-            if (file && file.name && file.name.length && !localLoaded) {
+            if (file && file.name && file.name.length && localLoaded) {
               dispatch(publicSchemaFiles(file.name));
             }
 
@@ -259,10 +263,6 @@ export const resetFiles = () => ({
 
 export const resetLocalSchemaList = () => ({
   type: RESET_LOCAL_SCHEMA_LIST,
-});
-
-export const resetUploadedSchemaList = () => ({
-  type: RESET_UPLOADED_SCHEMA_LIST,
 });
 
 // -------------------------------------------------------

@@ -16,6 +16,7 @@ const selectOptions = Files => {
     value: File.name,
     label: File.name
   }));
+
 };
 
 class EditorDropDown extends React.Component {

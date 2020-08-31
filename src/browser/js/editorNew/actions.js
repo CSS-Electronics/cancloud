@@ -76,8 +76,31 @@ export const fetchFilesS3 = (prefix) => {
 
 
 // fetch file contents from S3 for Rule Schema or Configuration Files
+// This should only be triggered by non UIschema dropdowns
 export const fetchFileContentS3 = (fileName, type) => {
-  return function(dispatch, getState) {
+  console.log("we get here (S3)", fileName)
+
+  return function(dispatch) {
+
+    if(fileName == "None"){
+      switch(type){
+        case "schema":
+          dispatch(actionsEditor.resetLocalSchemaList());
+          dispatch(actionsEditor.setSchemaContent(null));
+          break;
+        case "config":
+          dispatch(actionsEditor.resetLocalConfigList());
+          dispatch(actionsEditor.setConfigContent(null));
+          dispatch(actionsEditor.setUpdatedFormData(null));
+          dispatch(actionsEditor.setConfigContentPreChange(""));
+          break;
+        case "config-review":
+          dispatch(actionsEditor.setConfigContent(null));
+          break;
+        
+      }
+      return;
+    }
     
       const { bucket, prefix } = pathSlice(history.location.pathname);
       const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
@@ -95,9 +118,11 @@ export const fetchFileContentS3 = (fileName, type) => {
 
                 switch (type) {
                   case "schema":
+                    dispatch(actionsEditor.resetLocalSchemaList());
                     dispatch(actionsEditor.setSchemaContent(JSON.parse(data)));
                     break;
                   case "config":
+                    dispatch(actionsEditor.resetLocalConfigList());
                     dispatch(actionsEditor.setConfigContent(JSON.parse(data)));
                     dispatch(actionsEditor.setUpdatedFormData(JSON.parse(data)));
                     dispatch(actionsEditor.setConfigContentPreChange(data));

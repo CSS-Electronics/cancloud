@@ -15,6 +15,7 @@ import * as actionsAlert from "../alert/actions";
 import AlertContainer from "../alert/AlertContainer";
 
 // NEW: ***
+import DeviceFileModal from "../browser/DeviceFileModal"
 import SideBar from "../browser/SideBar";
 import MobileHeader from "../browser/MobileHeader";
 import Header from "../browser/Header";
@@ -51,7 +52,7 @@ class Editor extends React.Component {
         comment: "Bit-time calculator",
         class: "fa fa-calculator",
         modal: <BitRateModal showAlert={this.props.showAlert} />,
-      },
+      }
     ];
 
     return (
@@ -64,6 +65,8 @@ class Editor extends React.Component {
           <Header />
 
           <AlertContainer />
+          <DeviceFileModal/>
+          
           <EditorSection
             editorTools={editorTools}
             showAlert={this.props.showAlert}

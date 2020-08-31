@@ -41,7 +41,7 @@ export class EditorSection extends React.Component {
       selecteduischema: "",
       selectedschema: "",
       selectedconfig: "",
-      configReview: { value: "None", label: "None" },
+      configreview: { value: "None", label: "None" },
       revisedConfigFile: {},
       formData: {},
       isSubmitting: false,
@@ -51,8 +51,7 @@ export class EditorSection extends React.Component {
     };
 
     this.input = "";
-    this.s3 = this.props.fetchFileContentS3 ? true : false
-
+    this.s3 = this.props.fetchFileContentS3 ? true : false;
   }
 
   escFunction(event) {
@@ -80,13 +79,17 @@ export class EditorSection extends React.Component {
       {
         [fileType]: selection,
         ["selected" + fileType]: selection,
-        [fileType + "Review"]: selection,
+        [fileType.replace("-", "")]: { value: selection, label: selection },
       },
       () => {
-        if(this.s3 && fileType != "uischema" && !selection.includes("(local)")){
+        if (
+          this.s3 &&
+          fileType != "uischema" &&
+          !selection.includes("(local)")
+        ) {
           this.props.fetchFileContentS3(selection, fileType);
-        }else{
-          this.props.fetchFileContent(selection, fileType)
+        } else {
+          this.props.fetchFileContent(selection, fileType);
         }
       }
     );
@@ -122,7 +125,6 @@ export class EditorSection extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-
     let uiLocal = nextProps.editorUISchemaFiles.filter((file) =>
       file.name.includes("(local)")
     );
@@ -152,9 +154,10 @@ export class EditorSection extends React.Component {
     // Get the initial value for the config review benchmark dropdown
     if (nextProps.editorConfigFiles.length == 0) {
       this.setState({
-        configReview: { value: "None", label: "None" },
+        configreview: { value: "None", label: "None" },
       });
     }
+
     if (
       this.props.editorConfigFiles.length !=
         nextProps.editorConfigFiles.length &&
@@ -167,10 +170,14 @@ export class EditorSection extends React.Component {
 
       this.setState(
         {
-          configReview: { value: configName, label: configName },
+          configreview: { value: configName, label: configName },
         },
         () => {
-          this.props.fetchFileContent(configName, "config-review");
+          if (configName.includes("(local)")) {
+            this.props.fetchFileContent(configName, "config-review");
+          } else if (this.s3) {
+            this.props.fetchFileContentS3(configName, "config-review");
+          }
         }
       );
     }
@@ -247,7 +254,7 @@ export class EditorSection extends React.Component {
             );
             document.body.style.overflow = "auto";
             this.setState({
-              isCompareChanges: false
+              isCompareChanges: false,
             });
           }
         }
@@ -280,7 +287,7 @@ export class EditorSection extends React.Component {
       uiContent,
       schemaContent,
       editorTools,
-      sideBarPadding
+      sideBarPadding,
     } = this.props;
 
     // add navigation bar
@@ -321,9 +328,9 @@ export class EditorSection extends React.Component {
             "encryption-padding": this.state.activeSideBar != "none",
           })}
         >
-         <header className="top-header-offline" />
+          <header className="top-header-offline" />
 
-          {editorToolsFull.map((modal,idx) => (
+          {editorToolsFull.map((modal, idx) => (
             <div
               key={idx}
               style={{
@@ -337,15 +344,13 @@ export class EditorSection extends React.Component {
             </div>
           ))}
 
-          
-
           <div>
             <br />
             <br />
             <br />
             <br />
 
-            <div >
+            <div>
               <FormWithNav
                 omitExtraData={true}
                 liveOmit={true}
@@ -365,15 +370,19 @@ export class EditorSection extends React.Component {
                   isCompareChanges={this.state.isCompareChanges}
                   revisedConfigFile={this.state.revisedConfigFile}
                   options={editorConfigFiles}
-                  selected={this.state.configReview}
+                  selected={this.state.configreview}
                   handleDropdownChange={this.handleDropdownChange}
                   closeChangesModal={this.closeChangesModal}
                   enableDownload={this.enableDownload.bind(this)}
                   s3={this.s3}
-
                 />
 
-                <div className={classNames({"config-bar":true, "fe-sidebar-shift-offline": !sideBarPadding })}>
+                <div
+                  className={classNames({
+                    "config-bar": true,
+                    "fe-sidebar-shift-offline": !sideBarPadding,
+                  })}
+                >
                   <div className="col-xs-1" style={{ minWidth: "120px" }}>
                     <button type="submit" className="btn btn-primary">
                       {" "}
@@ -381,7 +390,7 @@ export class EditorSection extends React.Component {
                     </button>
                   </div>
                   <div className="col-xs-7" style={{ float: "left" }}>
-                    {editorToolsFull.map((modal,idx) => (
+                    {editorToolsFull.map((modal, idx) => (
                       <EditorToolButton
                         key={idx}
                         onClick={() => this.subMenuBtnClick(modal.name)}
@@ -391,13 +400,11 @@ export class EditorSection extends React.Component {
                     ))}
                   </div>
                 </div>
-
               </FormWithNav>
             </div>
           </div>
         </div>
-        <div className="config-bar-background"/>
-
+        <div className="config-bar-background" />
       </div>
     );
   }

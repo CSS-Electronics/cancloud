@@ -64,7 +64,7 @@ export const fetchFileContentS3 = (fileName, type) => {
           dispatch(actionsEditor.setConfigContentPreChange(""));
           break;
         case "config-review":
-          dispatch(actionsEditor.setConfigContent(null));
+          dispatch(actionsEditor.setConfigContentPreChange(""));
           break;
       }
       return;

@@ -8,8 +8,8 @@ import {
   BitRateModal,
 } from "config-editor-tools";
 
-import EditorSection from "./editorBase/EditorSection";
-// import {EditorSection} from "config-editor-base";
+// import EditorSection from "./editorBase/EditorSection";
+import {EditorSection} from "config-editor-base";
 
 import * as actionsAlert from "../alert/actions";
 import AlertContainer from "../alert/AlertContainer";
@@ -66,7 +66,7 @@ class Editor extends React.Component {
 
           <AlertContainer />
           <DeviceFileModal/>
-          
+
           <EditorSection
             editorTools={editorTools}
             showAlert={this.props.showAlert}

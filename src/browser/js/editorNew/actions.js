@@ -1,4 +1,5 @@
-import * as actionsEditor from "./editorBase/actions";
+// import * as editorActions from "./editorBase/actions";
+import {editorActions} from "config-editor-base"
 import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
@@ -25,7 +26,7 @@ export const fetchFilesS3 = (prefix) => {
           .sort()
           .reverse();
 
-        dispatch(actionsEditor.setSchemaFile(schemaFiles));
+        dispatch(editorActions.setSchemaFile(schemaFiles));
         dispatch(fetchFileContentS3(schemaFiles[0], "schema"));
 
         // Configuration Files
@@ -34,7 +35,7 @@ export const fetchFilesS3 = (prefix) => {
           .sort()
           .reverse();
 
-        dispatch(actionsEditor.setConfigFile(configFiles));
+        dispatch(editorActions.setConfigFile(configFiles));
         dispatch(fetchFileContentS3(configFiles[0], "config"));
       })
       .catch((err) => {
@@ -54,17 +55,17 @@ export const fetchFileContentS3 = (fileName, type) => {
     if (fileName == "None") {
       switch (type) {
         case "schema":
-          dispatch(actionsEditor.resetLocalSchemaList());
-          dispatch(actionsEditor.setSchemaContent(null));
+          dispatch(editorActions.resetLocalSchemaList());
+          dispatch(editorActions.setSchemaContent(null));
           break;
         case "config":
-          dispatch(actionsEditor.resetLocalConfigList());
-          dispatch(actionsEditor.setConfigContent(null));
-          dispatch(actionsEditor.setUpdatedFormData(null));
-          dispatch(actionsEditor.setConfigContentPreChange(""));
+          dispatch(editorActions.resetLocalConfigList());
+          dispatch(editorActions.setConfigContent(null));
+          dispatch(editorActions.setUpdatedFormData(null));
+          dispatch(editorActions.setConfigContentPreChange(""));
           break;
         case "config-review":
-          dispatch(actionsEditor.setConfigContentPreChange(""));
+          dispatch(editorActions.setConfigContentPreChange(""));
           break;
       }
       return;
@@ -85,17 +86,17 @@ export const fetchFileContentS3 = (fileName, type) => {
           .then((data) => {
             switch (type) {
               case "schema":
-                dispatch(actionsEditor.resetLocalSchemaList());
-                dispatch(actionsEditor.setSchemaContent(JSON.parse(data)));
+                dispatch(editorActions.resetLocalSchemaList());
+                dispatch(editorActions.setSchemaContent(JSON.parse(data)));
                 break;
               case "config":
-                dispatch(actionsEditor.resetLocalConfigList());
-                dispatch(actionsEditor.setConfigContent(JSON.parse(data)));
-                dispatch(actionsEditor.setUpdatedFormData(JSON.parse(data)));
-                dispatch(actionsEditor.setConfigContentPreChange(data));
+                dispatch(editorActions.resetLocalConfigList());
+                dispatch(editorActions.setConfigContent(JSON.parse(data)));
+                dispatch(editorActions.setUpdatedFormData(JSON.parse(data)));
+                dispatch(editorActions.setConfigContentPreChange(data));
                 break;
               case "config-review":
-                dispatch(actionsEditor.setConfigContentPreChange(data));
+                dispatch(editorActions.setConfigContentPreChange(data));
                 break;
               default:
                 break;
@@ -104,15 +105,15 @@ export const fetchFileContentS3 = (fileName, type) => {
           .catch((e) => {
             switch (true) {
               case type == "schema":
-                dispatch(actionsEditor.setSchemaContent(null));
+                dispatch(editorActions.setSchemaContent(null));
                 break;
               case type == "config":
-                dispatch(actionsEditor.setConfigContent(null));
-                dispatch(actionsEditor.setUpdatedFormData(null));
-                dispatch(actionsEditor.setConfigContentPreChange(null));
+                dispatch(editorActions.setConfigContent(null));
+                dispatch(editorActions.setUpdatedFormData(null));
+                dispatch(editorActions.setConfigContentPreChange(null));
                 break;
               case type == "config-review":
-                dispatch(actionsEditor.setConfigContentPreChange(null));
+                dispatch(editorActions.setConfigContentPreChange(null));
                 break;
               default:
                 break;
@@ -135,8 +136,8 @@ export const updateConfigFileS3 = (content, configName) => {
   const { bucket, prefix } = pathSlice(history.location.pathname);
 
   return function (dispatch) {
-    dispatch(actionsEditor.setConfigContent(JSON.parse(content)));
-    dispatch(actionsEditor.setConfigContentPreChange(content));
+    dispatch(editorActions.setConfigContent(JSON.parse(content)));
+    dispatch(editorActions.setConfigContentPreChange(content));
 
     return web
       .PutObject({

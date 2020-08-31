@@ -1,35 +1,45 @@
 import React from "react";
 import { connect } from "react-redux";
-import classNames from "classnames";
+import * as actionsAlert from "../alert/actions";
+import AlertContainer from "../alert/AlertContainer";
+import history from "../history";
+import { pathSlice } from "../utils";
+import web from "../web";
 
+
+// import editor and tools
+import {EditorSection} from "config-editor-base";
 import {
   EncryptionModal,
   FilterModal,
   BitRateModal,
 } from "config-editor-tools";
 
-// import EditorSection from "./editorBase/EditorSection";
-import {EditorSection} from "config-editor-base";
-
-import * as actionsAlert from "../alert/actions";
-import AlertContainer from "../alert/AlertContainer";
-
-// NEW: ***
+// import other modals
 import DeviceFileModal from "../browser/DeviceFileModal"
 import SideBar from "../browser/SideBar";
 import MobileHeader from "../browser/MobileHeader";
 import Header from "../browser/Header";
-import web from "../web";
+
+// import S3 actions
 import * as actionsEditorS3 from "./actions";
 
-import history from "../history";
+// define UIschema and Rule Schema names for auto-loading purposes
+export const uiSchemaAry = [
+  "uischema-01.02.json | Simple",
+  "uischema-01.02.json | Advanced",
+];
 
-import { pathSlice } from "../utils";
+export const schemaAry = [
+  "schema-01.02.json | CANedge2",
+  "schema-01.02.json | CANedge1",
+  "schema-00.07.json | CANedge2",
+  "schema-00.07.json | CANedge1",
+];
 
 class Editor extends React.Component {
   componentWillMount() {
     const { bucket, prefix } = pathSlice(history.location.pathname);
-
     this.props.fetchFilesS3(prefix);
   }
 
@@ -58,9 +68,7 @@ class Editor extends React.Component {
     return (
       <div className="file-explorer">
         <SideBar />
-        <div
-          className={classNames({ "fe-body ": true, "fe-body-offline": false })}
-        >
+        <div className="fe-body">
           {web.LoggedIn() && <MobileHeader />}
           <Header />
 
@@ -71,6 +79,8 @@ class Editor extends React.Component {
             editorTools={editorTools}
             showAlert={this.props.showAlert}
             sideBarPadding={true}
+            uiSchemaAry={uiSchemaAry}
+            schemaAry={schemaAry}
             fetchFileContentS3={this.props.fetchFileContentS3}
             updateConfigFileS3={this.props.updateConfigFileS3}
           />

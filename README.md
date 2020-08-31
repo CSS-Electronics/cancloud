@@ -101,5 +101,6 @@ You can contact us at CSS Electronics below:
 ### Dependencies
 CANcloud uses a number of libraries - the most important are:  
 - `minio`: CANcloud utilizes some of the core structure & S3 SDK calls from the MinIO browser  
-- `react-jsonschema-form`: This library enables the configuration editor GUI  
+- [config-editor-base](https://github.com/CSS-Electronics/config-editor-base): This library serves as the basis for the built-in configuration editor
+- [config-editor-tools](https://github.com/CSS-Electronics/config-editor-tools): This library adds various supporting config editor tools
 

@@ -26,8 +26,12 @@ export const fetchFilesS3 = (prefix) => {
           .sort()
           .reverse();
 
+        console.log(schemaFiles)
+
         dispatch(editorActions.setSchemaFile(schemaFiles));
-        dispatch(fetchFileContentS3(schemaFiles[0], "schema"));
+        if(schemaFiles.length){
+          dispatch(fetchFileContentS3(schemaFiles[0], "schema"));
+        }
 
         // Configuration Files
         let configFiles = allObjects
@@ -36,7 +40,9 @@ export const fetchFilesS3 = (prefix) => {
           .reverse();
 
         dispatch(editorActions.setConfigFile(configFiles));
-        dispatch(fetchFileContentS3(configFiles[0], "config"));
+        if(configFiles.length){
+          dispatch(fetchFileContentS3(configFiles[0], "config"));
+        }
       })
       .catch((err) => {
         if (web.LoggedIn()) {

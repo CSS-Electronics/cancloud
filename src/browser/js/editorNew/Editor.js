@@ -81,8 +81,8 @@ class Editor extends React.Component {
             sideBarPadding={true}
             uiSchemaAry={uiSchemaAry}
             schemaAry={schemaAry}
-            fetchFileContentS3={this.props.fetchFileContentS3}
-            updateConfigFileS3={this.props.updateConfigFileS3}
+            fetchFileContentExt={this.props.fetchFileContentS3}
+            updateConfigFileExt={this.props.updateConfigFileS3}
           />
         </div>
       </div>

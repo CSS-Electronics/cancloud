@@ -24,8 +24,6 @@ class EditorSchemaModal extends React.Component {
       handleDropdownChange
     } = this.props;
 
-    console.log("selectedconfig",selectedconfig)
-    console.log("selectedschema",selectedschema)
     return (
       <div>
         <h4>Schema & config loader</h4>

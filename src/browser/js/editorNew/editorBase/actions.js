@@ -81,8 +81,6 @@ export const publicUiSchemaFiles = () => {
 export const fetchFileContent = (fileName, type) => {
   return function (dispatch, getState) {
 
-    console.log("we get here (non S3)")
-
     // Remove existing "uploaded" files from dropdown and set Schema to loaded file from schema/ folder
     // Note that for cases where files are uploaded, the below is handled as part of the upload function
     switch (true) {
@@ -163,8 +161,6 @@ export const handleUploadedFile = (file, dropdown) => {
             const localLoaded =
               getState().editor.editorSchemaFiles[0] &&
               getState().editor.editorSchemaFiles[0].name.includes("None");
-            console.log("File",file)
-            console.log("editorSchemaFiles",getState().editor.editorSchemaFiles[0].name)
 
             if (file && file.name && file.name.length && localLoaded) {
               dispatch(publicSchemaFiles(file.name));

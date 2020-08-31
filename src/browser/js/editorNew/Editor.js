@@ -69,6 +69,7 @@ class Editor extends React.Component {
             showAlert={this.props.showAlert}
             sideBarPadding={true}
             fetchFileContentS3={this.props.fetchFileContentS3}
+            updateConfigFileS3={this.props.updateConfigFileS3}
           />
         </div>
       </div>
@@ -81,7 +82,8 @@ const mapDispatchToProps = (dispatch) => {
     showAlert: (type, message) =>
       dispatch(actionsAlert.set({ type: type, message: message })),
     fetchFilesS3: (prefix) => dispatch(actionsEditorS3.fetchFilesS3(prefix)),
-    fetchFileContentS3: (prefix,type) => dispatch(actionsEditorS3.fetchFileContentS3(prefix,type))
+    fetchFileContentS3: (prefix,type) => dispatch(actionsEditorS3.fetchFileContentS3(prefix,type)),
+    updateConfigFileS3: (content, object) => dispatch(actionsEditorS3.updateConfigFileS3(content, object))
   };
 };
 

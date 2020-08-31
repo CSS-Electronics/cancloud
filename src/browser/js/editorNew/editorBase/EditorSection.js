@@ -51,6 +51,8 @@ export class EditorSection extends React.Component {
     };
 
     this.input = "";
+    this.s3 = this.props.fetchFileContentS3 ? true : false
+
   }
 
   escFunction(event) {
@@ -81,10 +83,10 @@ export class EditorSection extends React.Component {
         [fileType + "Review"]: selection,
       },
       () => {
-        if(this.props.fetchFileContentS3 && fileType != "uischema" && !selection.includes("(local)")){
+        if(this.s3 && fileType != "uischema" && !selection.includes("(local)")){
           this.props.fetchFileContentS3(selection, fileType);
         }else{
-          // this.props.fetchFileContent(selection, fileType)
+          this.props.fetchFileContent(selection, fileType)
         }
       }
     );
@@ -238,6 +240,15 @@ export class EditorSection extends React.Component {
             this.setState({
               isCompareChanges: false,
             });
+          } else {
+            this.props.updateConfigFileS3(
+              JSON.stringify(formData, null, 2),
+              `${revisedConfigFile}`
+            );
+            document.body.style.overflow = "auto";
+            this.setState({
+              isCompareChanges: false
+            });
           }
         }
       }
@@ -358,6 +369,8 @@ export class EditorSection extends React.Component {
                   handleDropdownChange={this.handleDropdownChange}
                   closeChangesModal={this.closeChangesModal}
                   enableDownload={this.enableDownload.bind(this)}
+                  s3={this.s3}
+
                 />
 
                 <div className={classNames({"config-bar":true, "fe-sidebar-shift-offline": !sideBarPadding })}>

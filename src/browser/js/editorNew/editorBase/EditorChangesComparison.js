@@ -59,6 +59,7 @@ class EditorChangesComparison extends React.Component {
       crc32EditorLive,
       isCompareChanges,
       enableDownload,
+      s3
     } = this.props;
 
     let pastCleaned = past && Object.keys(past).length ? JSON.stringify(JSON.parse(past), null, 2) : "";
@@ -174,7 +175,7 @@ class EditorChangesComparison extends React.Component {
           </div>
 
           <div className="modal-custom-footer">
-            <button type="submit" className="btn btn-primary" disabled={true}>
+            <button type="submit" className="btn btn-primary" disabled={!s3}>
               {" "}
               Submit to S3{" "}
             </button>{" "}

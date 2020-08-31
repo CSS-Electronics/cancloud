@@ -27,6 +27,7 @@ export class DeviceTable extends React.Component {
   };
 
   render() {
+    console.log(this.props.deviceFileContent)
     return (
       <table>
         <tbody className="device-file-table">
@@ -39,7 +40,7 @@ export class DeviceTable extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    deviceFileContent: state.editor.deviceFileContent
+    deviceFileContent: state.browser.deviceFileContent
   };
 }
 

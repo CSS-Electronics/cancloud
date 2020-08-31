@@ -4,7 +4,6 @@ import history from "../history";
 import { pathSlice } from "../utils";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
 import * as browserActions from "./actions";
-import * as editorActions from "../editor/actions";
 
 import {
   DeviceImage,
@@ -113,7 +112,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(
       dashboardStatusActions.fetchConfigFileContentAll(configObjectsUnique)
     ),
-  fetchDeviceFile: (device) => dispatch(editorActions.fetchDeviceFile(device)),
+  fetchDeviceFile: (device) => dispatch(browserActions.fetchDeviceFile(device)),
   fetchDeviceImage: (fileName) =>
     dispatch(browserActions.fetchDeviceImage(fileName)),
   setDeviceImage: (deviceImage) =>
@@ -124,7 +123,7 @@ function mapStateToProps(state) {
   return {
     currentBucket: state.buckets.currentBucket,
     mf4Objects: state.dashboardStatus.mf4Objects,
-    deviceFileContent: state.editor.deviceFileContent,
+    deviceFileContent: state.browser.deviceFileContent,
     configFileCrc32: state.dashboardStatus.configFileCrc32,
     list: state.objects.list,
     deviceImage: state.browser.deviceImage,

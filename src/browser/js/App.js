@@ -17,28 +17,20 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
 
-import Editor from "./editor/Editor";
-const Browser = EDITOR.offline ? "" : require("./browser/Browser");
-const Login = EDITOR.offline ? "" : require("./browser/Login");
-const DashboardStatus = EDITOR.offline ? "" : require("./dashboardStatus");
+import Editor from "./editorNew/Editor";
+const Browser =  require("./browser/Browser");
+const Login =  require("./browser/Login");
+const DashboardStatus = require("./dashboardStatus");
 
 export const App = () => {
-  if (EDITOR.offline) {
-    return (
-      <Switch>
-        <Route path={"/"} component={Editor} />
-      </Switch>
-    );
-  } else {
-    return (
-      <Switch>
-        <Route path={"/login"} component={Login} />
-        <Route path={"/status-dashboard"} component={DashboardStatus} />
-        <Route path={"/configuration/:device?"} component={Editor} />
-        <Route path={"/:bucket?/*"} component={Browser} />
-      </Switch>
-    );
-  }
+  return (
+    <Switch>
+      <Route path={"/login"} component={Login} />
+      <Route path={"/status-dashboard"} component={DashboardStatus} />
+      <Route path={"/configuration/:device?"} component={Editor} />
+      <Route path={"/:bucket?/*"} component={Browser} />
+    </Switch>
+  );
 };
 
 export default App;

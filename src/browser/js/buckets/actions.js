@@ -18,7 +18,7 @@ import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
 import * as objectsActions from "../objects/actions";
-import * as editorActions from "../editor/actions";
+import * as browserActions from "../browser/actions";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
 import { pathSlice, isValidDevice } from "../utils";
 
@@ -66,7 +66,6 @@ export const fetchBuckets = () => {
         ) {
           // Device editor mode
           dispatch(selectBucket(prefix));
-          dispatch(editorActions.fetchSchemaFiles(prefix));
         } else if (bucket && buckets.indexOf(bucket) > -1) {
           // Device browser mode
           dispatch(selectBucket(bucket, prefix));
@@ -171,7 +170,7 @@ export const selectBucket = (bucket, prefix) => {
     dispatch(objectsActions.selectPrefix(prefix || ""));
     // fetch the device file for the selected bucket for use in meta data
     if(bucket != "Home"){
-    dispatch(editorActions.fetchDeviceFile(bucket))
+    dispatch(browserActions.fetchDeviceFile(bucket))
     }
   };
 };

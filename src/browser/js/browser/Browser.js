@@ -20,7 +20,7 @@ import { connect } from "react-redux";
 import SideBar from "./SideBar";
 import MainContent from "./MainContent";
 import AlertContainer from "../alert/AlertContainer";
-import DeviceFileModal from "../editorTools/DeviceFileModal";
+import DeviceFileModal from "./DeviceFileModal";
 
 class Browser extends React.Component {
   render() {

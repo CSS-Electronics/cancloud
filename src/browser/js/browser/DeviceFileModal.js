@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import DeviceTable from "./DeviceTable";
 import { Modal, ModalHeader, ModalBody } from "react-bootstrap";
 
-import * as actionsEditorTools from "../editorTools/actions";
+import * as actionsBrowser from "./actions";
 
 class DeviceFileModal extends React.Component {
   render() {
@@ -13,6 +13,7 @@ class DeviceFileModal extends React.Component {
       deviceFileLastModified,
       toggleDeviceFileTable
     } = this.props;
+
     return (
       <div>
         {deviceFileContent ? (
@@ -53,16 +54,16 @@ class DeviceFileModal extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    deviceFileTableOpen: state.editorTools.deviceFileTableOpen,
-    deviceFileContent: state.editor.deviceFileContent,
-    deviceFileLastModified: state.editor.deviceFileLastModified
+    deviceFileTableOpen: state.browser.deviceFileTableOpen,
+    deviceFileContent: state.browser.deviceFileContent,
+    deviceFileLastModified: state.browser.deviceFileLastModified
   };
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     toggleDeviceFileTable: () =>
-      dispatch(actionsEditorTools.toggleDeviceFileTable())
+      dispatch(actionsBrowser.toggleDeviceFileTable())
   };
 };
 

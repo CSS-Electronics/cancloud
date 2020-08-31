@@ -15,34 +15,20 @@
  */
 
 import React from "react";
-import { connect } from "react-redux";
 import ObjectsHeader from "./ObjectsHeader";
 import ObjectsListContainer from "./ObjectsListContainer";
-import Editor from "../editor/Editor";
 
 export class ObjectsSection extends React.Component {
   render() {
-    const { isLoadManageDeviceEditor } = this.props;
-
     return (
       <div>
-        {isLoadManageDeviceEditor ? (
-          <Editor />
-        ) : (
-          <React.Fragment>
+       <React.Fragment>
             <ObjectsHeader />
             <ObjectsListContainer />
           </React.Fragment>
-        )}
       </div>
     );
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    isLoadManageDeviceEditor: state.objects.loadManageDeviceEditor
-  };
-};
-
-export default connect(mapStateToProps)(ObjectsSection);
+export default ObjectsSection;

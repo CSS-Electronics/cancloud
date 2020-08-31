@@ -15,13 +15,10 @@
  */
 
 import React from "react"
-import classNames from "classnames"
 import { connect } from "react-redux"
 import * as actionsBuckets from "./actions"
-import * as actionsEditor from '../editor/actions'
-import * as actionsEditorTools from '../editorTools/actions'
+import * as actionsBrowser from '../browser/actions'
 
-import { getCurrentBucket } from "./selectors"
 import Dropdown from "react-bootstrap/lib/Dropdown"
 import history from '../history'
 
@@ -47,7 +44,7 @@ export class BucketDropdown extends React.Component {
 
 
   render() {
-    const { bucket, selectBucket, fetchEditorFiles, fetchDeviceFileIfNew, openDeviceFileTable } = this.props
+    const { bucket, selectBucket, fetchDeviceFileIfNew, openDeviceFileTable } = this.props
     return (
       <Dropdown 
         open = {this.state.showBucketDropdown}
@@ -66,7 +63,6 @@ export class BucketDropdown extends React.Component {
                 this.toggleDropdown()
                 selectBucket(bucket)
                 history.push(`/configuration/${bucket}`)
-                fetchEditorFiles(bucket)
               }}
             >
               Configure
@@ -95,9 +91,8 @@ const mapDispatchToProps = dispatch => {
   return {
     deleteBucket: bucket => dispatch(actionsBuckets.deleteBucket(bucket)),
     showBucketPolicy: () => dispatch(actionsBuckets.showBucketPolicy()),
-    fetchEditorFiles: bucket => dispatch(actionsEditor.fetchSchemaFiles(bucket)),
-    fetchDeviceFileIfNew: bucket => dispatch(actionsEditor.fetchDeviceFileIfNew(bucket)),
-    openDeviceFileTable: () => dispatch(actionsEditorTools.openDeviceFileTable())
+    fetchDeviceFileIfNew: bucket => dispatch(actionsBrowser.fetchDeviceFileIfNew(bucket)),
+    openDeviceFileTable: () => dispatch(actionsBrowser.openDeviceFileTable())
   }
 }
 

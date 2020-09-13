@@ -93,23 +93,6 @@ class DashboardStatusSection extends React.Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.deviceList != nextProps.deviceList) {
-      let deviceList = devicesOptionsFn(nextProps.deviceList);
-      deviceList = deviceList.splice(2, deviceList.length);
-
-      this.setState({
-        devicesDevicesInput: deviceList
-      });
-
-      if (deviceList.length <= 3) {
-        this.setState({
-          devicesFilesInput: deviceList
-        });
-      }
-    }
-  }
-
   componentWillUnmount() {
     this.props.clearDataDevices();
     this.props.clearDataFiles();
@@ -378,7 +361,7 @@ class DashboardStatusSection extends React.Component {
                           />
                         ) : null}
 
-                      {widget.widget_type == "horizontal-bar" ? (
+                      {widget.widget_type == "horizontal-bar" && chartDataDevices[widget.dataset] ? (
                           <HorizontalBar
                             data={chartDataDevices[widget.dataset]}
                             height={widget.height - 60 + (resWide ? 100 : 0)}
@@ -444,7 +427,7 @@ const mapDispatchToProps = dispatch => ({
   clearDataDevices: () => dispatch(dashboardStatusActions.clearDataDevices()),
   clearDataFiles: () => dispatch(dashboardStatusActions.clearDataFiles()),
   setPeriodStartBack: periodDelta =>
-    dispatch(dashboardStatusActions.setPeriodStartBack(periodDelta))
+    dispatch(dashboardStatusActions.setPeriodStartBack(periodDelta)),
 });
 
 const mapStateToProps = state => {

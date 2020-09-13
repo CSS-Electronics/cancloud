@@ -12,7 +12,7 @@ const DeviceTable = (props) => {
   } = props;
 
   // return empty div if no devices to list
-  if (deviceIdListDeltaSort.length == 0) {
+  if (deviceIdListDeltaSort == undefined || deviceIdListDeltaSort.length == 0) {
     return (
       <div>
         <p className="widget-no-data">No devices to list</p>

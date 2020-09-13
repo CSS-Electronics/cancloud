@@ -29,9 +29,6 @@ const definePlugin = new webpack.DefinePlugin({
 });
 
 const copyPlugin = new CopyWebpackPlugin([
-  { from: "src/browser/img/browsers/chrome.png", to: "images" },
-  { from: "src/browser/img/browsers/firefox.png", to: "images" },
-  { from: "src/browser/img/browsers/safari.png", to: "images" },
   { from: "src/browser/customize-css/customize.css", to: "customize-css" }
 ]);
 

@@ -19,7 +19,7 @@ import classNames from "classnames";
 import ClickOutHandler from "react-onclickout";
 import { connect } from "react-redux";
 
-import logo from "../../img/logo-sidebar.png";
+import logo from "../../img/logo.png";
 import BucketSearch from "../buckets/BucketSearch";
 import BucketList from "../buckets/BucketList";
 import Host from "./Host";
@@ -27,30 +27,37 @@ import * as actionsCommon from "./actions";
 import web from "../web";
 import history from "../history";
 import { pathSlice } from "../utils";
-import {demoMode, demoDate} from "../utils";
+import { demoMode, demoDate } from "../utils";
 
 export const SideBar = ({
   sidebarOpen,
   clickOutside,
   endPoint,
-  bucketName
+  bucketName,
 }) => {
-  const { bucket, prefix} = pathSlice(history.location.pathname);
-  
+  const { bucket, prefix } = pathSlice(history.location.pathname);
+
   return (
     <ClickOutHandler onClickOut={clickOutside}>
       <div
         className={classNames({
           "fe-sidebar": true,
           "sb-custom": true,
-          toggled: sidebarOpen
+          toggled: sidebarOpen,
         })}
       >
         <div className="fes-header clearfix hidden-sm hidden-xs">
-          <img src={logo} style={{ width: "65%", maxHeight: "70px" }} />
+          <img src={logo} style={{ maxHeight: "70px" }} />
+          <span className="logo-text">CANcloud</span>
+
           <div className="version-text sb-custom-version">
-            v05.01.01
-{demoMode ? <div><br/>DEMO MODE (date fixed at {demoDate.split(" ")[0]})</div>: null}
+            v05.01.03
+            {demoMode ? (
+              <div>
+                <br />
+                DEMO MODE (date fixed at {demoDate.split(" ")[0]})
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="fes-list">
@@ -63,21 +70,18 @@ export const SideBar = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     sidebarOpen: state.browser.sidebarOpen,
     endPoint: state.buckets.endPoint,
-    bucketName: state.buckets.bucketName
+    bucketName: state.buckets.bucketName,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    clickOutside: () => dispatch(actionsCommon.closeSidebar())
+    clickOutside: () => dispatch(actionsCommon.closeSidebar()),
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SideBar);
+export default connect(mapStateToProps, mapDispatchToProps)(SideBar);

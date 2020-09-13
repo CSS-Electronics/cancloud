@@ -625,7 +625,8 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
   const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
   let deviceFileContents = [];
 
-  return function(dispatch) {
+  return function(dispatch, getState) {
+    let loadAll = getState().buckets.list.length == deviceFileObjects.length
     let iDeviceFileCount = 0;
 
     deviceFileObjects.map((deviceFileObject, i) =>
@@ -649,8 +650,10 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
                   )
                 );
 
-                // once all device files are loaded, add meta data to devices
-                dispatch(bucketActions.addBucketMetaData());
+                // once all device files are loaded, add meta data to devices (but only if all devices are loaded)
+                if(loadAll){
+                  dispatch(bucketActions.addBucketMetaData());
+                }
               }
             });
         })

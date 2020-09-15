@@ -3,6 +3,7 @@ import * as alertActions from "../alert/actions";
 import * as bucketActions from "../buckets/actions";
 import _ from "lodash";
 import { demoMode } from "../utils";
+import load from "jszip/lib/load";
 
 export const SET_PERIODSTART_BACK = "dashboardStatus/SET_PERIODSTART_BACK";
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
@@ -626,7 +627,10 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
   let deviceFileContents = [];
 
   return function(dispatch, getState) {
-    let loadAll = getState().buckets.list.length == deviceFileObjects.length
+    let devices = getState().buckets.list.filter(e => e.match(loggerRegex))
+
+    let loadAll = devices.length == deviceFileObjects.length
+
     let iDeviceFileCount = 0;
 
     deviceFileObjects.map((deviceFileObject, i) =>

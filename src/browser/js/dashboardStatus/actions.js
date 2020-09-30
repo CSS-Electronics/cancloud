@@ -90,6 +90,13 @@ export const listAllObjects = devicesDevicesInput => {
               }
             })
             .catch(err => {
+              dispatch(
+                alertActions.set({
+                  type: "danger",
+                  message: "Failed to fetch information for some devices - try refreshing",
+                  autoClear: true
+                })
+              );
               iDeviceFileCount += 1;
               if (iDeviceFileCount == devicesDevices.length) {
                 dispatch(setDeviceFileObjects(deviceFileObjectsAry));
@@ -659,9 +666,24 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
                   dispatch(bucketActions.addBucketMetaData());
                 }
               }
-            });
+            }).catch(e => {
+              dispatch(
+                alertActions.set({
+                  type: "danger",
+                  message: e.message,
+                  autoClear: true
+                })
+              );
+            })
         })
         .catch(e => {
+          dispatch(
+            alertActions.set({
+              type: "danger",
+              message: e.message,
+              autoClear: true
+            })
+          );
           iDeviceFileCount += 1;
 
           if (deviceFileObjects.length == iDeviceFileCount) {

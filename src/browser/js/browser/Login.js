@@ -28,6 +28,11 @@ import {demoMode} from "../utils";
 
 let news = ""
 
+const awsEndpoint = new RegExp(
+  /^(http:\/\/|https:\/\/)s3\.(-|[a-z]|[0-9])*\.amazonaws\.com$/,
+  "g"
+);
+
 try{
   let newsJson = require("../../schema/news.json")
   news = newsJson.news
@@ -107,12 +112,18 @@ export class Login extends React.Component {
     if (this.state.endPoint === "") {
       message = "End point cannot be empty";
     }
+    if (this.state.endPoint === "https://s3.amazonaws.com") {
+      message = "For AWS S3 endpoints we recommend to use the following syntax: https://s3.[region].amazonaws.com (e.g. https://s3.us-east-1.amazonaws.com)";
+    }
+    if (this.state.endPoint === "http://s3.amazonaws.com") {
+      message = "For AWS S3 endpoints we recommend to use the following syntax: http://s3.[region].amazonaws.com (e.g. http://s3.us-east-1.amazonaws.com)";
+    }
     if (
       this.state.endPoint.substring(0, 5) == "http:" &&
       location.protocol == "https:"
     ) {
       message =
-        "A http:// server cannot be accessed via a https:// browser frontend";
+        "A http:// server cannot be accessed via a https:// browser frontend. Replace https:// with http:// in the CANcloud URL of your browser and hit enter.";
     }
     if (
       this.state.endPoint.substring(0, 5) != "http:" &&
@@ -139,9 +150,14 @@ export class Login extends React.Component {
       })
       .then(res => {
         history.push("/");
+        console.log(res)
       })
       .catch(e => {
-        showAlert("danger", e.message);
+        if(this.state.endPoint.match(awsEndpoint)){
+          showAlert("danger", e.message + " - press F12 for details. Check your AWS S3 region and ensure that you've set up CORS correctly for your S3 bucket (as per the AWS S3 setup guide)");
+        }else{
+          showAlert("danger", e.message + " - press F12 for details");
+        }
       });
   }
 

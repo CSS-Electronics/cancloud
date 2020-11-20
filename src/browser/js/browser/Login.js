@@ -24,51 +24,101 @@ import InputGroup from "./InputGroup";
 import web from "../web";
 import { Redirect } from "react-router-dom";
 import history from "../history";
-import {demoMode} from "../utils";
+import { demoMode } from "../utils";
+import Files from "react-files";
 
-let news = ""
+let news = "";
 
 const awsEndpoint = new RegExp(
   /^(http:\/\/|https:\/\/)s3\.(-|[a-z]|[0-9])*\.amazonaws\.com$/,
   "g"
 );
 
-try{
-  let newsJson = require("../../schema/news.json")
-  news = newsJson.news
-  }catch(err){
-  }
+try {
+  let newsJson = require("../../schema/news.json");
+  news = newsJson.news;
+} catch (err) {}
 
 export class Login extends React.Component {
- 
   constructor(props) {
     super(props);
 
-    if(demoMode){
-      try{
-      let demo = require("../../schema/demo-credentials.json")
-      this.state = demo.demoCredentials
-      }
-      catch(err){
+    if (demoMode) {
+      try {
+        let demo = require("../../schema/demo-credentials.json");
+        this.state = demo.demoCredentials;
+      } catch (err) {
         this.state = {
           accessKey: "",
           secretKey: "",
           endPoint: "",
-          bucketName: ""
+          bucketName: "",
+          jsonFileName: "",
         };
       }
-    }else{
+    } else {
       this.state = {
         accessKey: "",
         secretKey: "",
         endPoint: "",
-        bucketName: ""
+        bucketName: "",
+        jsonFileName: "",
       };
     }
 
+    this.fileReader = new FileReader();
+
+    this.fileReader.onload = (event) => {
+      let cfg = JSON.parse(event.target.result);
+      let cfgServer =
+        cfg.connect && cfg.connect.s3 && cfg.connect.s3.server
+          ? cfg.connect.s3.server
+          : null;
+
+      if (cfgServer != null) {
+        let cfgKeyformat = cfgServer.keyformat;
+
+        if (cfgKeyformat == 0) {
+          let cfgEndpoint = cfgServer.endpoint ? cfgServer.endpoint : "";
+          let cfgPort = cfgServer.port ? cfgServer.port : "";
+          let cfgAccessKey = cfgServer.accesskey ?  cfgServer.accesskey : "";
+          let cfgSecretkey = cfgServer.secretkey ? cfgServer.secretkey : "";
+          let cfgBucket = cfgServer.bucket ? cfgServer.bucket : "";
+
+          let endpoint = ""
+          if (cfgEndpoint.match(awsEndpoint)) {
+             endpoint = cfgEndpoint;
+          } else if (cfgEndpoint.substring(cfgEndpoint.length - 3) != "com") {
+            // assume MinIO case
+             endpoint = cfgEndpoint + ":" + cfgPort;
+          }
+
+          try {
+            this.setState({
+              accessKey: cfgAccessKey,
+            secretKey: cfgSecretkey,
+            endPoint: endpoint,
+            bucketName: cfgBucket,
+
+            }, () => {
+
+            });
+          } catch (e) {
+            this.onFilesError(e);
+          }
+        }else{
+          this.props.showAlert("info", "The S3 secretKey in the Configuration File appears to be encrypted. The S3 details have therefore not been loaded");
+        }
+      }else{
+        this.props.showAlert("info", "Unable to identify S3 server details in the Configuration File");
+      }
+    };
   }
 
-  
+  onFileChange(file) {
+    this.setState({ jsonFileName: file[0].name }, () => {});
+  }
+
   configureGeneral(e) {
     e.preventDefault();
     history.push("/configuration");
@@ -77,25 +127,25 @@ export class Login extends React.Component {
   // Handle field changes
   accessKeyChange(e) {
     this.setState({
-      accessKey: e.target.value
+      accessKey: e.target.value,
     });
   }
 
   secretKeyChange(e) {
     this.setState({
-      secretKey: e.target.value
+      secretKey: e.target.value,
     });
   }
 
   endPointChange(e) {
     this.setState({
-      endPoint: e.target.value
+      endPoint: e.target.value,
     });
   }
 
   bucketNameChange(e) {
     this.setState({
-      bucketName: e.target.value
+      bucketName: e.target.value,
     });
   }
 
@@ -113,24 +163,43 @@ export class Login extends React.Component {
       message = "End point cannot be empty";
     }
     if (this.state.endPoint === "https://s3.amazonaws.com") {
-      message = "For AWS S3 endpoints we recommend to use the following syntax: https://s3.[region].amazonaws.com (e.g. https://s3.us-east-1.amazonaws.com)";
+      message =
+        "For AWS S3 endpoints we recommend to use the following syntax: https://s3.[region].amazonaws.com (e.g. https://s3.us-east-1.amazonaws.com)";
     }
     if (this.state.endPoint === "http://s3.amazonaws.com") {
-      message = "For AWS S3 endpoints we recommend to use the following syntax: http://s3.[region].amazonaws.com (e.g. http://s3.us-east-1.amazonaws.com)";
+      message =
+        "For AWS S3 endpoints we recommend to use the following syntax: http://s3.[region].amazonaws.com (e.g. http://s3.us-east-1.amazonaws.com)";
     }
+
+    
     if (
+      this.state.endPoint.substring(0, 5) == "http:" &&
+      location.protocol == "https:" && 
+      this.state.endPoint.match(awsEndpoint)
+    ) {
+      this.props.showAlert("info", "Auto-adjusting endpoint prefix from http:// to https:// to enable login via https:// browser URL")
+      let endPointAdj = this.state.endPoint.replace("http://","https://")
+      this.setState({
+      endPoint: endPointAdj,
+      }, () => {
+
+      });
+
+    }
+    else if (
       this.state.endPoint.substring(0, 5) == "http:" &&
       location.protocol == "https:"
     ) {
       message =
         "A http:// server cannot be accessed via a https:// browser frontend. Replace https:// with http:// in the CANcloud URL of your browser and hit enter.";
     }
+
+
     if (
       this.state.endPoint.substring(0, 5) != "http:" &&
       this.state.endPoint.substring(0, 6) != "https:"
     ) {
-      message =
-        "Please add http:// or https:// in front of your endpoint";
+      message = "Please add http:// or https:// in front of your endpoint";
     }
     if (this.state.bucketName === "") {
       message = "Bucket Name is required";
@@ -146,16 +215,20 @@ export class Login extends React.Component {
         accessKey: this.state.accessKey,
         secretKey: this.state.secretKey,
         endPoint: this.state.endPoint,
-        bucketName: this.state.bucketName
+        bucketName: this.state.bucketName,
       })
-      .then(res => {
+      .then((res) => {
         history.push("/");
-        console.log(res)
+        // console.log(res);
       })
-      .catch(e => {
-        if(this.state.endPoint.match(awsEndpoint)){
-          showAlert("danger", e.message + " - press F12 for details. Check your AWS S3 region and ensure that you've set up CORS correctly for your S3 bucket (as per the AWS S3 setup guide)");
-        }else{
+      .catch((e) => {
+        if (this.state.endPoint.match(awsEndpoint)) {
+          showAlert(
+            "danger",
+            e.message +
+              " - press F12 for details. Check your AWS S3 region and ensure that you've set up CORS correctly for your S3 bucket (as per the AWS S3 setup guide)"
+          );
+        } else {
           showAlert("danger", e.message + " - press F12 for details");
         }
       });
@@ -242,7 +315,29 @@ export class Login extends React.Component {
               <i className="fa fa-sign-in" />
             </button>
           </form>
-          <br/><br/>
+          <br />
+          <div>
+            <Files
+              onChange={(file) => {
+                file.length
+                  ? (this.onFileChange(file),
+                    this.fileReader.readAsText(file[0]))
+                  : this.onFilesError;
+              }}
+              onError={(error) => {
+                this.onFilesError(error);
+              }}
+              accepts={[".json"]}
+              multiple={false}
+              maxFileSize={10000000}
+              minFileSize={0}
+              clickable
+            >
+              <button className="btn btn-dark-gray">Load from config</button>
+            </Files>
+          </div>
+
+          <br />
           <div className="login-news">{news}</div>
         </div>
         <div className="l-footer">
@@ -255,17 +350,16 @@ export class Login extends React.Component {
   }
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     showAlert: (type, message) =>
       dispatch(actionsAlert.set({ type: type, message: message })),
     clearAlert: () => dispatch(actionsAlert.clear()),
     login: (accessKey, secretKey, endPoint, bucketName) =>
-      dispatch(actionsBrowser.login(accessKey, secretKey, endPoint, bucketName))
+      dispatch(
+        actionsBrowser.login(accessKey, secretKey, endPoint, bucketName)
+      ),
   };
 };
 
-module.exports = connect(
-  state => state,
-  mapDispatchToProps
-)(Login);
+module.exports = connect((state) => state, mapDispatchToProps)(Login);

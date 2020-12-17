@@ -377,8 +377,8 @@ export const listSessionMeta = (bucket,prefix) => {
             if(sessionMetaAry.length == objectsFirstLast.length){
               sessionMetaAry.sort((a, b) => (a.object > b.object) ? 1 : -1)
 
-              let timestampStart = sessionMetaAry[0].meta.metaData && sessionMetaAry[0].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[0].meta.metaData.timestamp,"YYYYMMDDTHHmmssZ", true).local() : null
-              let timestampEnd = sessionMetaAry.length == 1 ? null : sessionMetaAry[1].meta.metaData && sessionMetaAry[1].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[1].meta.metaData.timestamp,"YYYYMMDDTHHmmssZ", true).local() : null             
+              let timestampStart = sessionMetaAry[0].meta.metaData && sessionMetaAry[0].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[0].meta.metaData.timestamp,"YYYYMMDDTHHmmss", true).local() : null
+              let timestampEnd = sessionMetaAry.length == 1 ? null : sessionMetaAry[1].meta.metaData && sessionMetaAry[1].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[1].meta.metaData.timestamp,"YYYYMMDDTHHmmss", true).local() : null             
               let timestampRange = timestampStart != null ? timestampStart.format("YY-MM-DD HH:mm") + (timestampEnd != null ? " - " + timestampEnd.format("YY-MM-DD HH:mm") : "") : null
               let timestampDelta = (timestampStart != null && timestampEnd != null) ? timestampEnd.diff(timestampStart, "minutes") : 0
               timestampDelta = timestampDelta == 0 ? null : timestampDelta > 60 ? ((Math.round((timestampDelta/60)*10)/10).toString() + " hours") : Math.round((timestampDelta*10)/10).toString() + " min"

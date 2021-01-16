@@ -83,10 +83,11 @@ export const listAllObjects = devicesDevicesInput => {
 
               // when all devices are processed, update state and fetch the Device File contents and list Configuration Files
               if (iDeviceFileCount == devicesDevices.length) {
+
                 dispatch(setDeviceFileObjects(deviceFileObjectsAry));
                 dispatch(fetchDeviceFileContentAll(deviceFileObjectsAry));
                 dispatch(loadedDevice(true));
-                dispatch(listConfigFiles(devicesDevices, devicesDevicesInput));
+                dispatch(listConfigFiles(deviceFileObjectsAry, devicesDevicesInput));
               }
             })
             .catch(err => {
@@ -102,7 +103,7 @@ export const listAllObjects = devicesDevicesInput => {
                 dispatch(setDeviceFileObjects(deviceFileObjectsAry));
                 dispatch(fetchDeviceFileContentAll(deviceFileObjectsAry));
                 dispatch(loadedDevice(true));
-                dispatch(listConfigFiles(devicesDevices, devicesDevicesInput));
+                dispatch(listConfigFiles(deviceFileObjectsAry, devicesDevicesInput));
               }
             });
         });
@@ -110,100 +111,33 @@ export const listAllObjects = devicesDevicesInput => {
         !getState().dashboardStatus.loadedConfig ||
         !getState().dashboardStatus.loadedFiles
       ) {
-        dispatch(listConfigFiles(devicesDevices, devicesDevicesInput));
+        dispatch(listConfigFiles(deviceFileObjectsAry, devicesDevicesInput));
       }
     });
   };
 };
 
-export const listConfigFiles = (devicesDevices, devicesDevicesInput) => {
-  let iConfigFileCount = 0;
-  let configObjectsUniqueAry = [];
+export const listConfigFiles = (deviceFileObjectsAry, devicesDevicesInput) => {
 
-  // if the configs are not yet loaded, load one for each device
   return function(dispatch, getState) {
-    if (!getState().dashboardStatus.loadedConfig) {
-      devicesDevices.map(device => {
-        web
-          .ListObjects({
-            bucketName: device,
-            prefix: "config-",
-            marker: ""
-          })
-          .then(res => {
-            iConfigFileCount += 1;
-            let allObjects = [];
+    let configObjectsUnique = []
+    
+    deviceFileObjectsAry.map((device,index) => {
+      let deviceFileCfgName = getState().dashboardStatus.deviceFileContents.filter(e => e.id == device.deviceId)[0].cfg_name
+      configObjectsUnique[index] = {deviceId: device.deviceId, name: device.deviceId+"/"+deviceFileCfgName}
+    })
 
-            // allocate the configs to an array of objects (note: Each device may have multiple configs)
-            res.objects.forEach(e => {
-              const deviceId = device;
-              const name = device + "/config-" + e.name;
-              const lastModified = e.lastModified;
-              allObjects.push({
-                name,
-                deviceId,
-                lastModified
-              });
-            });
+    dispatch(setConfigObjects(configObjectsUnique));
+    dispatch(fetchConfigFileContentAll(configObjectsUnique));
+    dispatch(loadedConfig(true));
 
-            // ensure that configs match the regex
-            const configObjects = allObjects.filter(obj =>
-              obj.name.match(loggerConfigRegex)
-            );
-
-            // group the configs by device ID
-            let configObjectsGrouped = _.groupBy(configObjects, function(
-              object
-            ) {
-              return object.deviceId;
-            });
-
-            let configObjectsUnique = [];
-
-            // create a list of unique configs per device, taking the last (latest) config
-            Object.keys(configObjectsGrouped).map(function(key, index) {
-              configObjectsUnique[index] =
-                configObjectsGrouped[key][configObjectsGrouped[key].length - 1];
-            });
-
-            // for each device, add the resulting data to an array
-            configObjectsUniqueAry = configObjectsUniqueAry.concat(
-              configObjectsUnique
-            );
-
-            // once each device is processed, update state and fetch the config contents
-            if (iConfigFileCount == devicesDevices.length) {
-              dispatch(setConfigObjects(configObjectsUniqueAry));
-              dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
-              dispatch(loadedConfig(true));
-
-              // note: Once the device specific info is loaded, initiate the load of the log file specific data
-              // this is done as a default operation only for the case where no devicesDevicesInput is parsed
-              // i.e. when the user opens the status dashboard from the menu or clicking "update" with no selection
-              if (devicesDevicesInput == undefined) {
-                dispatch(listLogFiles());
-              }
-            }
-          })
-          .catch(err => {
-            iConfigFileCount += 1;
-
-            if (iConfigFileCount == devicesDevices.length) {
-              dispatch(setConfigObjects(configObjectsUniqueAry));
-              dispatch(fetchConfigFileContentAll(configObjectsUniqueAry));
-              dispatch(loadedConfig(true));
-              if (devicesDevicesInput == undefined) {
-                dispatch(listLogFiles());
-              }
-            }
-          });
-      });
-    } else if (!getState().dashboardStatus.loadedFiles) {
-      if (devicesDevicesInput == undefined) {
-        dispatch(listLogFiles());
-      }
+    // note: Once the device specific info is loaded, initiate the load of the log file specific data
+    // this is done as a default operation only for the case where no devicesDevicesInput is parsed
+    // i.e. when the user opens the status dashboard from the menu or clicking "update" with no selection
+    if (devicesDevicesInput == undefined) {
+      dispatch(listLogFiles());
     }
-  };
+  }
 };
 
 // list objects for log files for use in status dashboard
@@ -633,13 +567,9 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
   const expiry = 5 * 24 * 60 * 60 + 1 * 60 * 60 + 0 * 60;
   let deviceFileContents = [];
 
+
   return function(dispatch, getState) {
-    let devices = getState().buckets.list.filter(e => e.match(loggerRegex))
-
-    let loadAll = devices.length == deviceFileObjects.length
-
     let iDeviceFileCount = 0;
-
     deviceFileObjects.map((deviceFileObject, i) =>
       web
         .PresignedGet({
@@ -661,7 +591,9 @@ export const fetchDeviceFileContentAll = deviceFileObjects => {
                   )
                 );
 
-                // once all device files are loaded, add meta data to devices (but only if all devices are loaded)
+                // add meta names to sidebar devices, but only during the initial page load
+                let devices = getState().buckets.list.filter(e => e.match(loggerRegex))
+                let loadAll = devices.length == deviceFileObjects.length
                 if(loadAll){
                   dispatch(bucketActions.addBucketMetaData());
                 }
@@ -703,7 +635,6 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
   let configFileContents = [];
   let configFileCrc32 = [];
   
-
   return function(dispatch) {
     
     // clear configFileCrc32
@@ -736,13 +667,19 @@ export const fetchConfigFileContentAll = configObjectsUnique => {
                 configObjectsUnique.length == configFileContents.length &&
                 configObjectsUnique.length == configFileCrc32.length
               ) {
+ 
                 dispatch(configFileContent(configFileContents));
                 dispatch(setConfigFileCrc32(configFileCrc32));
               }
             })
             .catch(e => {
-              console.log("No valid config found");
+
               configFileContents.push({});
+              configFileCrc32.push({
+                deviceId: configObject.deviceId,
+                crc32: "NA"
+              });
+              console.log("No valid config found");
             });
         })
         .catch(e => {

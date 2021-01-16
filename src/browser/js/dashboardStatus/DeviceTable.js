@@ -43,6 +43,9 @@ const DeviceTable = (props) => {
   );
 
   // construct object containing all relevant table data based on sorted device ID list
+
+  deviceIdListDeltaSort.sort((a, b) => (a.deviceId < b.deviceId) ? -1 : 1)
+
   const tableData = deviceIdListDeltaSort.map((e) => {
     // extract the device.json content related to the device
     const deviceFile = deviceFileContents.filter(

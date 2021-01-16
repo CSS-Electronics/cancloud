@@ -51,7 +51,7 @@ export const SideBar = ({
           <span className="logo-text">CANcloud</span>
 
           <div className="version-text sb-custom-version">
-            v05.02.07
+            v05.03.01
             {demoMode ? (
               <div>
                 <br />

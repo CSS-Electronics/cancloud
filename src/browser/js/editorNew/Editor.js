@@ -28,13 +28,15 @@ import * as actionsEditorS3 from "./actions";
 export const uiSchemaAry = [
   "uischema-01.03.json | Simple",
   "uischema-01.03.json | Advanced",
+  "uischema-01.04.json | Simple",
+  "uischema-01.04.json | Advanced",
 ];
 
 export const schemaAry = [
+  "schema-01.04.json | CANedge2",
+  "schema-01.04.json | CANedge1",
   "schema-01.03.json | CANedge2",
   "schema-01.03.json | CANedge1",
-  "schema-01.02.json | CANedge2",
-  "schema-01.02.json | CANedge1",
 ];
 
 class Editor extends React.Component {

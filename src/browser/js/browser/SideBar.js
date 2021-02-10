@@ -18,8 +18,8 @@ import React from "react";
 import classNames from "classnames";
 import ClickOutHandler from "react-onclickout";
 import { connect } from "react-redux";
-
-import logo from "../../img/logo.png";
+import logo from "../../img/logo-sidebar.png";
+// import logo from "../../img/logo.png";
 import BucketSearch from "../buckets/BucketSearch";
 import BucketList from "../buckets/BucketList";
 import Host from "./Host";
@@ -47,11 +47,11 @@ export const SideBar = ({
         })}
       >
         <div className="fes-header clearfix hidden-sm hidden-xs">
-          <img src={logo} style={{ maxHeight: "70px" }} />
-          <span className="logo-text">CANcloud</span>
+        <img src={logo} style={{ width: "65%", maxHeight: "70px" }} />
+
 
           <div className="version-text sb-custom-version">
-            v05.03.01
+            v05.03.02
             {demoMode ? (
               <div>
                 <br />

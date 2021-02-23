@@ -86,16 +86,16 @@ export class Login extends React.Component {
           let cfgBucket = cfgServer.bucket ? cfgServer.bucket : "";
 
           let endpoint = ""
-          if (cfgEndpoint.match(awsEndpoint)) {
+          if (cfgEndpoint.match(awsEndpoint) || cfgEndpoint.substring(cfgEndpoint.length - 3) == "com" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "com/") {
              endpoint = cfgEndpoint;
-          } else if (cfgEndpoint.substring(cfgEndpoint.length - 3) != "com") {
+          } else {
             // assume MinIO case
              endpoint = cfgEndpoint + ":" + cfgPort;
           }
 
           try {
             this.setState({
-              accessKey: cfgAccessKey,
+            accessKey: cfgAccessKey,
             secretKey: cfgSecretkey,
             endPoint: endpoint,
             bucketName: cfgBucket,

@@ -39,6 +39,8 @@ export const schemaAry = [
   "schema-01.03.json | CANedge1",
 ];
 
+export const demoMode = false 
+
 class Editor extends React.Component {
   componentWillMount() {
     const { bucket, prefix } = pathSlice(history.location.pathname);
@@ -83,6 +85,7 @@ class Editor extends React.Component {
             sideBarPadding={true}
             uiSchemaAry={uiSchemaAry}
             schemaAry={schemaAry}
+			demoMode={demoMode}
             fetchFileContentExt={this.props.fetchFileContentS3}
             updateConfigFileExt={this.props.updateConfigFileS3}
           />

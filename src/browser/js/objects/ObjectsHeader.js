@@ -18,12 +18,19 @@ import React from "react";
 import classNames from "classnames";
 import { connect } from "react-redux";
 import * as actionsObjects from "./actions";
+import history from "../history";
+import { pathSlice } from "../utils";
+
+const { bucket, prefix } = pathSlice(history.location.pathname);
+
 
 export const ObjectsHeader = ({
   sortNameOrder,
   sortSizeOrder,
   sortLastModifiedOrder,
-  sortObjects
+  sortObjects,
+  sessionMetaList,
+  sessionObjectsMetaList
 }) => (
   <div className="feb-container">
     <br />
@@ -62,13 +69,34 @@ export const ObjectsHeader = ({
           })}
         />
       </div>
+     
+
+<div
+className="fesl-item fesl-item-modified"
+id="sort-by-last-modified"
+onClick={() => sortObjects("last-modified")}
+data-sort="last-modified"
+>
+Last Modified (SD)
+<i
+  className={classNames({
+    "fesli-sort": true,
+    fa: true,
+    "fa-sort-numeric-desc": sortLastModifiedOrder,
+    "fa-sort-numeric-asc": !sortLastModifiedOrder
+  })}
+/>
+</div>
+
+      
+
       <div
         className="fesl-item fesl-item-modified"
         id="sort-by-last-modified"
         onClick={() => sortObjects("last-modified")}
         data-sort="last-modified"
       >
-        Last Modified
+        Last Modified (S3)
         <i
           className={classNames({
             "fesli-sort": true,
@@ -88,13 +116,15 @@ const mapStateToProps = state => {
     sortNameOrder: state.objects.sortBy == "name" && state.objects.sortOrder,
     sortSizeOrder: state.objects.sortBy == "size" && state.objects.sortOrder,
     sortLastModifiedOrder:
-      state.objects.sortBy == "last-modified" && state.objects.sortOrder
+      state.objects.sortBy == "last-modified" && state.objects.sortOrder,
+      sessionMetaList: state.objects.sessionMetaList,
+      sessionObjectsMetaList: state.objects.sessionObjectsMetaList,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    sortObjects: sortBy => dispatch(actionsObjects.sortObjects(sortBy))
+    sortObjects: sortBy => dispatch(actionsObjects.sortObjects(sortBy)),
   };
 };
 

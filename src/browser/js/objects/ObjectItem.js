@@ -25,6 +25,7 @@ import SessionMetaDropdown  from "./SessionMetaDropdown"
 import HoverIntent from "react-hoverintent";
 import history from "../history";
 import {pathSlice, isValidCanedgefile} from "../utils";
+import classNames from "classnames";
 
 
 
@@ -75,7 +76,8 @@ export class ObjectItem extends React.Component {
       uncheckObject,
       actionButtons,
       onClick,
-      sessionMeta
+      sessionMeta,
+      lastModifiedSD
     } = this.props;
 
     let regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
@@ -138,8 +140,9 @@ export class ObjectItem extends React.Component {
           ) : (
             ""
           )}
-          <div className="fesl-item fesl-item-size">{size}</div>
-          <div className="fesl-item fesl-item-modified">{lastModified}</div>
+          <div  className={classNames({"fesl-item fesl-item-size": true, "range-item": name.endsWith("/")})}>{size}</div>
+          <div className={classNames({"fesl-item fesl-item-modified": true, "range-item": name.endsWith("/")})}>{lastModifiedSD}</div>
+          <div className={classNames({"fesl-item fesl-item-modified": true, "range-item": name.endsWith("/")})}>{lastModified}</div>
           <div className="fesl-item fesl-item-actions">{actionButtons}</div>
         </div>
       </HoverIntent>
@@ -150,7 +153,7 @@ export class ObjectItem extends React.Component {
 const mapStateToProps = (state, ownProps) => {
   return {
     checked: getCheckedList(state).indexOf(ownProps.name) >= 0,
-    sessionMeta: state.objects.sessionMeta
+    sessionMeta: state.objects.sessionMeta,
   };
 };
 

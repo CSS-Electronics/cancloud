@@ -18,6 +18,7 @@ import JSZip from "jszip";
 import saveAs from "file-saver";
 import _ from "lodash";
 import Moment from "moment";
+import humanize from "humanize";
 
 
 import web from "../web";
@@ -30,13 +31,21 @@ import {
   pathSlice,
   isValidLogfile
 } from "../utils";
-import { getCurrentBucket } from "../buckets/selectors";
-import { getCurrentPrefix, getCheckedList } from "./selectors";
+import {
+  getCurrentBucket
+} from "../buckets/selectors";
+import {
+  getCurrentPrefix,
+  getCheckedList
+} from "./selectors";
 import * as alertActions from "../alert/actions";
 import * as bucketActions from "../buckets/actions";
 import * as commonActions from "../browser/actions";
 import * as alertModalActions from "../alertModals/actions";
-import { DELETE, DOWNLOAD } from "../constants";
+import {
+  DELETE,
+  DOWNLOAD
+} from "../constants";
 
 export const SET_LIST = "objects/SET_LIST";
 export const RESET_LIST = "object/RESET_LIST";
@@ -60,6 +69,10 @@ export const UPDATE_PROGRESS = "objects/UPDATE_PROGRESS";
 export const STOP = "objects/STOP";
 export const SHOW_ABORT_MODAL = "objects/SHOW_ABORT_MODAL";
 export const SET_SESSION_META = "objects/SET_SESSION_META";
+export const ADD_SESSION_META_LIST = "objects/ADD_SESSION_META_LIST";
+export const RESET_SESSION_META_LIST = "objects/RESET_SESSION_META_LIST"
+export const ADD_SESSION_OBJECTS_META_LIST = "objects/ADD_SESSION_OBJECTS_META_LIST"
+export const RESET_SESSION_OBJECTS_META_LIST = "objects/RESET_SESSION_OBJECTS_META_LIST"
 
 let source;
 
@@ -122,15 +135,20 @@ export const hideAbortModal = () => ({
 });
 
 export const fetchObjects = append => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     if (!append) {
       dispatch(setList([], "load", null, null));
       dispatch(setSortBy(""));
       dispatch(setSortOrder(false));
     }
     const {
-      buckets: { currentBucket },
-      objects: { currentPrefix, marker }
+      buckets: {
+        currentBucket
+      },
+      objects: {
+        currentPrefix,
+        marker
+      }
     } = getState();
 
     if (currentBucket) {
@@ -142,6 +160,7 @@ export const fetchObjects = append => {
         })
         .then(res => {
           let objects = [];
+
           if (res.objects) {
             objects = res.objects.map(object => {
               return {
@@ -196,8 +215,10 @@ export const fetchObjects = append => {
 };
 
 export const sortObjects = sortBy => {
-  return function(dispatch, getState) {
-    const { objects } = getState();
+  return function (dispatch, getState) {
+    const {
+      objects
+    } = getState();
     const sortOrder = objects.sortBy == sortBy ? !objects.sortOrder : true;
     dispatch(setSortBy(sortBy));
     dispatch(setSortOrder(sortOrder));
@@ -233,9 +254,11 @@ export const setSortOrder = sortOrder => ({
 const loggerRegex = new RegExp(/([0-9A-Fa-f]){8}/, "g");
 
 export const selectPrefix = prefix => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     const currentBucket = getCurrentBucket(getState());
-    const { bucket } = pathSlice(history.location.pathname);
+    const {
+      bucket
+    } = pathSlice(history.location.pathname);
 
     if (bucket == "configuration" && currentBucket != "Home") {
       return;
@@ -262,7 +285,7 @@ export const selectPrefix = prefix => {
 };
 
 export const selectPathPrefix = prefix => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     if (prefix == "Home") {
       history.replace(`/${prefix}`);
       dispatch(bucketActions.selectBucket("Home", ""));
@@ -293,10 +316,10 @@ export const setPrefixWritable = prefixWritable => ({
 });
 
 
-export const listSessionMeta = (bucket,prefix) => {
-  return function(dispatch, getState) {
+export const listSessionMeta = (bucket, prefix) => {
+  return function (dispatch, getState) {
 
-     let objectMetaAry = []
+    let objectMetaAry = []
     return web
       .ListObjectsRecursive({
         bucketName: bucket,
@@ -327,82 +350,93 @@ export const listSessionMeta = (bucket,prefix) => {
         let highest = Number.NEGATIVE_INFINITY;
         let tmp;
         let totalSize = 0
-        for (var i=objectsLogfiles.length-1; i>=0; i--) {
-            tmp = objectsLogfiles[i].size;
-            totalSize += tmp
-            if (tmp < lowest) lowest = tmp;
-            if (tmp > highest) highest = tmp;
+        for (var i = objectsLogfiles.length - 1; i >= 0; i--) {
+          tmp = objectsLogfiles[i].size;
+          totalSize += tmp
+          if (tmp < lowest) lowest = tmp;
+          if (tmp > highest) highest = tmp;
         }
 
-        highest = (Math.round((highest/(1024*1024))*10)/10).toFixed(1).toString()
-        lowest = (Math.round((lowest/(1024*1024))*10)/10).toFixed(1).toString()   
-        totalSize = (Math.round((totalSize/(1024*1024))*10)/10).toFixed(1).toString()   
+        highest = (Math.round((highest / (1024 * 1024)) * 10) / 10).toFixed(1).toString()
+        lowest = (Math.round((lowest / (1024 * 1024)) * 10) / 10).toFixed(1).toString()
+        totalSize = (Math.round((totalSize / (1024 * 1024)) * 10) / 10).toFixed(1).toString()
 
         let lowestDate = Moment("2200/01/01 12:00")
         let highestDate = Moment("1900/01/01 12:00")
-        for (var i=objectsLogfiles.length-1; i>=0; i--) {
-            tmp = Moment(objectsLogfiles[i].lastModified);
-            if (tmp < lowestDate) lowestDate = tmp;
-            if (tmp > highestDate) highestDate = tmp;
+        for (var i = objectsLogfiles.length - 1; i >= 0; i--) {
+          tmp = Moment(objectsLogfiles[i].lastModified);
+          if (tmp < lowestDate) lowestDate = tmp;
+          if (tmp > highestDate) highestDate = tmp;
         }
 
         let lastModifiedDelta = (highestDate == lowestDate) ? 0 : highestDate.diff(lowestDate, "minutes")
-        lastModifiedDelta = lastModifiedDelta == 0 ? null : lastModifiedDelta > 60 ? (Math.round((lastModifiedDelta/60)*10)/10).toString() + " hours" : (Math.round(lastModifiedDelta*10)/10).toString() + " min"
-        
+        lastModifiedDelta = lastModifiedDelta == 0 ? null : lastModifiedDelta > 60 ? (Math.round((lastModifiedDelta / 60) * 10) / 10).toString() + " hours" : (Math.round(lastModifiedDelta * 10) / 10).toString() + " min"
+
         highestDate = highestDate.format("YY-MM-DD HH:mm")
         lowestDate = lowestDate.format("YY-MM-DD HH:mm")
 
 
-        let sizeRange = objectsLogfiles.length == 1 ? highest + " MB": lowest + "-" + highest + " MB"
+        let sizeRange = objectsLogfiles.length == 1 ? highest + " MB" : lowest + "-" + highest + " MB"
         let lastModifiedRange = objectsLogfiles.length == 1 ? highestDate : lowestDate + " - " + highestDate
-        
+
         // get custom S3 meta data for first (and last object, if there are more than one)
-        if(objects.length > 1){
-          objectsFirstLast = [objects[0] , objects[objects.length - 1] ]
-        }else{
+        if (objects.length > 1) {
+          objectsFirstLast = [objects[0], objects[objects.length - 1]]
+        } else {
           objectsFirstLast = [objects[0]]
         }
 
         objectsFirstLast.map((object, index) => {
 
           return web
-          .getObjectStat({
-            bucketName: bucket,
-            objectName: prefix + object.split("/")[2]
-          })
-          .then(res => {
-            
-            sessionMetaAry.push({object: object, meta: res.metaInfo})
+            .getObjectStat({
+              bucketName: bucket,
+              objectName: prefix + object.split("/")[2]
+            })
+            .then(res => {
 
-            if(sessionMetaAry.length == objectsFirstLast.length){
-              sessionMetaAry.sort((a, b) => (a.object > b.object) ? 1 : -1)
+              sessionMetaAry.push({
+                object: object,
+                meta: res.metaInfo
+              })
 
-              let timestampStart = sessionMetaAry[0].meta.metaData && sessionMetaAry[0].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[0].meta.metaData.timestamp,"YYYYMMDDTHHmmss", true).local() : null
-              let timestampEnd = sessionMetaAry.length == 1 ? null : sessionMetaAry[1].meta.metaData && sessionMetaAry[1].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[1].meta.metaData.timestamp,"YYYYMMDDTHHmmss", true).local() : null             
-              let timestampRange = timestampStart != null ? timestampStart.format("YY-MM-DD HH:mm") + (timestampEnd != null ? " - " + timestampEnd.format("YY-MM-DD HH:mm") : "") : null
-              let timestampDelta = (timestampStart != null && timestampEnd != null) ? timestampEnd.diff(timestampStart, "minutes") : 0
-              timestampDelta = timestampDelta == 0 ? null : timestampDelta > 60 ? ((Math.round((timestampDelta/60)*10)/10).toString() + " hours") : Math.round((timestampDelta*10)/10).toString() + " min"
+              if (sessionMetaAry.length == objectsFirstLast.length) {
+                sessionMetaAry.sort((a, b) => (a.object > b.object) ? 1 : -1)
 
-              let sessionMeta = [{count: count, totalSize: totalSize, sizeRange: sizeRange, lastModifiedRange: lastModifiedRange, lastModifiedDelta: lastModifiedDelta, timestampRange: timestampRange, timestampDelta: timestampDelta }]
+                let timestampStart = sessionMetaAry[0].meta.metaData && sessionMetaAry[0].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[0].meta.metaData.timestamp, "YYYYMMDDTHHmmss", true).local() : null
+                let timestampEnd = sessionMetaAry.length == 1 ? null : sessionMetaAry[1].meta.metaData && sessionMetaAry[1].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[1].meta.metaData.timestamp, "YYYYMMDDTHHmmss", true).local() : null
+                let timestampRange = timestampStart != null ? timestampStart.format("YY-MM-DD HH:mm") + (timestampEnd != null ? " - " + timestampEnd.format("YY-MM-DD HH:mm") : "") : null
+                let timestampDelta = (timestampStart != null && timestampEnd != null) ? timestampEnd.diff(timestampStart, "minutes") : 0
+                timestampDelta = timestampDelta == 0 ? null : timestampDelta > 60 ? ((Math.round((timestampDelta / 60) * 10) / 10).toString() + " hours") : Math.round((timestampDelta * 10) / 10).toString() + " min"
 
-              dispatch(setSessionMeta(sessionMeta))
-            }
-          })
-          .catch(err => {
-            if (web.LoggedIn()) {
-              dispatch(
-                alertActions.set({
-                  type: "danger",
-                  message: err.message,
-                  autoClear: true
-                })
-              );
-            } else {
-              history.push("/login");
-            }
-          });
-        }) 
-        
+                let sessionMeta = [{
+                  count: count,
+                  totalSize: totalSize,
+                  sizeRange: sizeRange,
+                  lastModifiedRange: lastModifiedRange,
+                  lastModifiedDelta: lastModifiedDelta,
+                  timestampRange: timestampRange,
+                  timestampDelta: timestampDelta
+                }]
+
+                dispatch(setSessionMeta(sessionMeta))
+              }
+            })
+            .catch(err => {
+              if (web.LoggedIn()) {
+                dispatch(
+                  alertActions.set({
+                    type: "danger",
+                    message: err.message,
+                    autoClear: true
+                  })
+                );
+              } else {
+                history.push("/login");
+              }
+            });
+        })
+
       })
       .catch(err => {
         if (web.LoggedIn()) {
@@ -427,8 +461,232 @@ export const setSessionMeta = sessionMeta => ({
 
 
 
+
+export const fetchSessionMetaList = (bucket, prefixList) => {
+
+  return function (dispatch, getState) {
+    let sessionMetaList = []
+
+    prefixList.map(prefix => {
+      return web
+        .ListObjectsRecursive({
+          bucketName: bucket,
+          prefix: prefix.name,
+          marker: ""
+        })
+        .then(res => {
+          let objects = [];
+          let objectsLogfiles = []
+          let objectsFirstLast = []
+          let sessionMetaAry = []
+
+          if (res.objects) {
+            // filter to only include log files
+            objectsLogfiles = res.objects.filter(object => isValidLogfile(object.name))
+            objects = objectsLogfiles.map(object => {
+              return object.name;
+            });
+          }
+
+          // get summary data across objects based on standard meta data (count, size range, lastModified range)
+          let tmp;
+          let totalSize = 0
+          for (var i = objectsLogfiles.length - 1; i >= 0; i--) {
+            tmp = objectsLogfiles[i].size;
+            totalSize += tmp
+          }
+
+          totalSize = humanize.filesize(totalSize)
+
+          let lastModifiedS3 = Moment("1900/01/01 12:00")
+          for (var i = objectsLogfiles.length - 1; i >= 0; i--) {
+            tmp = Moment(objectsLogfiles[i].lastModified);
+            if (tmp > lastModifiedS3) lastModifiedS3 = tmp;
+          }
+          lastModifiedS3 = lastModifiedS3.format("YY-MM-DD HH:mm")
+
+          // get custom S3 meta data for first (and last object, if there are more than one)
+          if (objects.length > 1) {
+            objectsFirstLast = [objects[0], objects[objects.length - 1]]
+          } else {
+            objectsFirstLast = [objects[0]]
+          }
+
+          objectsFirstLast.map((object, index) => {
+
+            return web
+              .getObjectStat({
+                bucketName: bucket,
+                objectName: prefix.name + object.split("/")[2]
+              })
+              .then(res => {
+
+                sessionMetaAry.push({
+                  object: object,
+                  meta: res.metaInfo
+                })
+
+                if (sessionMetaAry.length == objectsFirstLast.length) {
+                  sessionMetaAry.sort((a, b) => (a.object > b.object) ? 1 : -1)
+
+                  let lastModifiedSDStart = sessionMetaAry[0].meta.metaData && sessionMetaAry[0].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[0].meta.metaData.timestamp, "YYYYMMDDTHHmmss", true).local() : null
+                  let lastModifiedSDEnd = sessionMetaAry.length == 1 ? null : sessionMetaAry[1].meta.metaData && sessionMetaAry[1].meta.metaData.timestamp ? Moment.utc(sessionMetaAry[1].meta.metaData.timestamp, "YYYYMMDDTHHmmss", true).local() : null
+                  let lastModifiedSDRange = lastModifiedSDStart != null ? lastModifiedSDStart.format("YY-MM-DD HH:mm") + (lastModifiedSDEnd != null ? " - " + lastModifiedSDEnd.format("YY-MM-DD HH:mm") : "") : null
+
+                  let lastModifiedS3Start = Moment(sessionMetaAry[0].meta.lastModified)
+                  let lastModifiedS3End = sessionMetaAry.length == 1 ? null : Moment(sessionMetaAry[1].meta.lastModified)
+                  let lastModifiedS3Range = lastModifiedS3Start != null ? lastModifiedS3Start.format("YY-MM-DD HH:mm") + (lastModifiedS3End != null ? " - " + lastModifiedS3End.format("YY-MM-DD HH:mm") : "") : null
+
+                  sessionMetaList.push({
+                    prefix: prefix.name,
+                    lastModifiedSD: lastModifiedSDRange,
+                    lastModifiedS3: lastModifiedS3Range,
+                    totalSize: totalSize
+                  })
+
+                  if (sessionMetaList.length == prefixList.length) {
+                    dispatch(addSessionMetaList(sessionMetaList))
+                  }
+
+                }
+
+
+              })
+              .catch(err => {
+                if (web.LoggedIn()) {
+                  dispatch(
+                    alertActions.set({
+                      type: "danger",
+                      message: err.message,
+                      autoClear: true
+                    })
+                  );
+                } else {
+                  history.push("/login");
+                }
+              })
+
+          })
+
+        })
+
+    })
+  }
+
+}
+
+
+export const addSessionMetaList = sessionMetaList => ({
+  type: ADD_SESSION_META_LIST,
+  sessionMetaList
+});
+
+export const resetSessionMetaList = () => ({
+  type: RESET_SESSION_META_LIST
+});
+
+
+
+
+export const fetchSessionObjectsMetaList = (bucket, prefix, objectsList) => {
+  return function (dispatch, getState) {
+    let sessionObjectsMetaList = []
+
+
+    objectsList.map(object => {
+      return web
+        .getObjectStat({
+          bucketName: bucket,
+          objectName: prefix + object.name
+        })
+        .then(res => {
+          let objectMeta = res.metaInfo.metaData
+          let lastModifiedSD = objectMeta && objectMeta.timestamp ? Moment.utc(objectMeta.timestamp, "YYYYMMDDTHHmmss", true).local().format("YY-MM-DD HH:mm") : null
+
+          sessionObjectsMetaList.push({
+            name: object.name,
+            lastModifiedSD: lastModifiedSD
+          })
+
+          if (sessionObjectsMetaList.length == objectsList.length) {
+            dispatch(addSessionObjectsMetaList(sessionObjectsMetaList))
+          }
+        })
+        .catch(err => {
+          if (web.LoggedIn()) {
+            dispatch(
+              alertActions.set({
+                type: "danger",
+                message: err.message,
+                autoClear: true
+              })
+            );
+          } else {
+            history.push("/login");
+          }
+        })
+    })
+  }
+}
+
+
+// export const fetchSessionObjectsMetaList = (bucket, prefix, objectsList) => {
+//   return function (dispatch, getState) {
+//     let sessionObjectsMetaList = []
+
+//     objectsList.map(object => {
+
+
+//       return web
+//       .GetPartialObject({
+//         bucketName: bucket,
+//         objectName: prefix + object.name,
+//         offset: 2500,
+//         byteLength: 4500
+//       })
+//       .then(objContent => {
+//         let metaData = objContent.objContent
+//         let indexStart = metaData.indexOf('<e name="firmware version" ro="true">') + '<e name="firmware version" ro="true">'.length
+//         let indexLength = 8
+//         let metaDate = metaData.substring(indexStart,indexStart+indexLength).trim()
+
+//           let lastModifiedSD = metaDate
+
+//           sessionObjectsMetaList.push({
+//             name: object.name,
+//             lastModifiedSD: lastModifiedSD
+//           })
+
+//           if (sessionObjectsMetaList.length == objectsList.length) {
+//             dispatch(addSessionObjectsMetaList(sessionObjectsMetaList))
+//           }
+
+//       })
+//       .catch(err => {
+//         dispatch(
+//           alertActions.set({
+//             type: "danger",
+//             message: err.message
+//           })
+//         );
+//       });
+
+//     })
+//   }
+// }
+
+export const addSessionObjectsMetaList = sessionObjectsMetaList => ({
+  type: ADD_SESSION_OBJECTS_META_LIST,
+  sessionObjectsMetaList
+});
+
+export const resetSessionObjectsMetaList = () => ({
+  type: RESET_SESSION_OBJECTS_META_LIST
+});
+
+
 export const directoryObjects = prefix => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     const currentBucket = getCurrentBucket(getState());
     const currentPrefix = getCurrentPrefix(getState());
     return web
@@ -478,7 +736,7 @@ export const directoryObjects = prefix => {
 };
 
 export const deleteObject = object => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     const currentBucket = getCurrentBucket(getState());
     const currentPrefix = getCurrentPrefix(getState());
     const objectName = `${currentPrefix}${object}`;
@@ -526,7 +784,7 @@ export const removeObject = object => ({
 });
 
 export const deleteCheckedObjects = () => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     const checkedObjects = getCheckedList(getState());
     const currentPrefix = getCurrentPrefix(getState());
     for (let i = 0; i < checkedObjects.length; i++) {
@@ -541,7 +799,7 @@ export const deleteCheckedObjects = () => {
 };
 
 export const previewObject = object => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     const currentBucket = getCurrentBucket(getState());
     const currentPrefix = getCurrentPrefix(getState());
     const objectName = `${currentPrefix}${object.name}`;
@@ -549,6 +807,7 @@ export const previewObject = object => {
       .GetPartialObject({
         bucketName: currentBucket,
         objectName: objectName,
+        offset: 2000,
         byteLength: 10000
       })
       .then(objContent => {
@@ -566,7 +825,7 @@ export const previewObject = object => {
 };
 
 export const shareObject = (object, days, hours, minutes) => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     const currentBucket = getCurrentBucket(getState());
     const currentPrefix = getCurrentPrefix(getState());
     const objectName = `${currentPrefix}${object}`;
@@ -627,7 +886,7 @@ export const hideShareObject = (object, url) => ({
 });
 
 export const downloadObject = object => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     const currentBucket = getCurrentBucket(getState());
     const currentPrefix = getCurrentPrefix(getState());
     const objectName = `${currentPrefix}${object}`;
@@ -643,33 +902,33 @@ export const downloadObject = object => {
           const CancelToken = axios.CancelToken;
           source = CancelToken.source();
           axios({
-            url: res.url,
-            method: "GET",
-            responseType: "blob",
-            cancelToken: source.token,
-            onDownloadProgress: function(progressEvent) {
-              dispatch(
-                alertModalActions.AddQueue(
-                  DOWNLOAD,
-                  slug,
-                  progressEvent.total,
-                  objectName
-                )
-              );
-              dispatch(
-                alertModalActions.updateQueue(slug, progressEvent.loaded)
-              );
-            }
-          })
+              url: res.url,
+              method: "GET",
+              responseType: "blob",
+              cancelToken: source.token,
+              onDownloadProgress: function (progressEvent) {
+                dispatch(
+                  alertModalActions.AddQueue(
+                    DOWNLOAD,
+                    slug,
+                    progressEvent.total,
+                    objectName
+                  )
+                );
+                dispatch(
+                  alertModalActions.updateQueue(slug, progressEvent.loaded)
+                );
+              }
+            })
             .then(response => {
               dispatch(alertModalActions.stopQueue(slug));
               const url = window.URL.createObjectURL(new Blob([response.data]));
               const link = document.createElement("a");
               link.href = url;
               let fileFormatedName =
-                currentBucket == "Home"
-                  ? `${objectName}`
-                  : `${currentBucket}/${objectName}`;
+                currentBucket == "Home" ?
+                `${objectName}` :
+                `${currentBucket}/${objectName}`;
               link.setAttribute("download", fileFormatedName);
               document.body.appendChild(link);
               link.click();
@@ -726,7 +985,7 @@ export const exploreobjectDirectory = (bucketName, prefix) => {
 };
 
 export const downloadCheckedObjects = () => {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     const state = getState();
     const req = {
       bucketName: getCurrentBucket(state),
@@ -748,7 +1007,7 @@ export const downloadCheckedObjects = () => {
           message: `Preparing download - please wait`
         })
       );
-      let objectsPromises = _.map(req.objects, function(object) {
+      let objectsPromises = _.map(req.objects, function (object) {
         if (object.endsWith("/")) {
           return exploreobjectDirectory(
             req.bucketName,
@@ -758,7 +1017,7 @@ export const downloadCheckedObjects = () => {
         return `${req.prefix}${object}`;
       });
 
-      Promise.all(objectsPromises).then(function(result) {
+      Promise.all(objectsPromises).then(function (result) {
         let objectsToDownload = [];
         _.forEach(result, objValue => {
           if (typeof objValue == "object") {
@@ -767,7 +1026,9 @@ export const downloadCheckedObjects = () => {
             }));
             objectsToDownload = [...objectsToDownload, ...directoryObjcets];
           } else {
-            objectsToDownload.push({ name: objValue });
+            objectsToDownload.push({
+              name: objValue
+            });
           }
         });
         downloadObjectAsZip(
@@ -795,7 +1056,10 @@ const downloadObjectAsZip = (dispatch, object, bucketName, prefix) => {
     })
   );
   const objectsStatPromises = _.map(object, result =>
-    web.getObjectStat({ bucketName: bucketName, objectName: `${result.name}` })
+    web.getObjectStat({
+      bucketName: bucketName,
+      objectName: `${result.name}`
+    })
   );
   Promise.all(objectsStatPromises).then(objStat => {
     let totalQueueSize = _.reduce(
@@ -824,31 +1088,36 @@ const downloadObjectAsZip = (dispatch, object, bucketName, prefix) => {
         const result = resObj.obj;
         const slug = `${result.objectName}`;
         index
-          ? dispatch(alertModalActions.AddQueue(DOWNLOAD, slug, 0, slug))
-          : dispatch(
-              alertModalActions.AddQueue(DOWNLOAD, slug, totalQueueSize, slug)
-            );
+          ?
+          dispatch(alertModalActions.AddQueue(DOWNLOAD, slug, 0, slug)) :
+          dispatch(
+            alertModalActions.AddQueue(DOWNLOAD, slug, totalQueueSize, slug)
+          );
         axios({
-          url: result.url,
-          method: "GET",
-          responseType: "blob",
-          cancelToken: source.token,
-          onDownloadProgress: function(progressEvent) {
-            dispatch(alertModalActions.updateQueue(slug, progressEvent.loaded));
-          }
-        })
+            url: result.url,
+            method: "GET",
+            responseType: "blob",
+            cancelToken: source.token,
+            onDownloadProgress: function (progressEvent) {
+              dispatch(alertModalActions.updateQueue(slug, progressEvent.loaded));
+            }
+          })
           .then(response => {
             count++;
             if (response.data.size) {
               const fileName =
-                bucketName == "Home"
-                  ? result.objectName.replace(/\//g, "_")
-                  : `${bucketName}_${result.objectName.replace(/\//g, "_")}`;
-              zip.file(fileName, response.data, { binary: true });
+                bucketName == "Home" ?
+                result.objectName.replace(/\//g, "_") :
+                `${bucketName}_${result.objectName.replace(/\//g, "_")}`;
+              zip.file(fileName, response.data, {
+                binary: true
+              });
             }
             if (count == object.length) {
               dispatch(alertModalActions.stopQueue(slug));
-              zip.generateAsync({ type: "blob" }).then(function(content) {
+              zip.generateAsync({
+                type: "blob"
+              }).then(function (content) {
                 saveAs(content, `${bucketName}.zip`);
               });
               dispatch(alertActions.clear());
@@ -879,7 +1148,7 @@ export const HideManageDeviceEditor = () => ({
 
 export const fetchObjectStat = object => {
 
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     // dispatch(resetMetaInformation())
     const currentBucket = getCurrentBucket(getState());
     const currentPrefix = getCurrentPrefix(getState());
@@ -909,20 +1178,20 @@ export const fetchObjectStat = object => {
 };
 
 export const resetMetaInfo = () => {
-  return function(dispatch) {
+  return function (dispatch) {
     dispatch(resetMetaInformation());
   };
 };
 
 // TODO:  Rename to handleProgressModal
 export const addProgress = (slug, size, name) => {
-  return function(dispatch) {
+  return function (dispatch) {
     dispatch(add(slug, size, name));
   };
 };
 
 export const handleAbortProgressModal = () => {
-  return function(dispatch) {
+  return function (dispatch) {
     source.cancel();
   };
 };

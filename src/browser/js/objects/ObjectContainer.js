@@ -28,13 +28,18 @@ import { getCheckedList } from "./selectors";
 export const ObjectContainer = ({
   object,
   checkedObjectsCount,
-  downloadObject
+  downloadObject,
+  objectMeta
 }) => {
+
+  const lastModifiedSD = objectMeta && objectMeta.lastModifiedSD 
+
   let props = {
     name: object.name,
     contentType: object.contentType,
     size: humanize.filesize(object.size),
-    lastModified: Moment(object.lastModified).format("lll")
+    lastModifiedSD:lastModifiedSD,
+    lastModified: Moment(object.lastModified).format("YY-MM-DD HH:mm")
   };
 
   if (checkedObjectsCount == 0) {

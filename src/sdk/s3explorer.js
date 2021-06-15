@@ -552,7 +552,7 @@ class S3Explorer {
    * @description: Get object content based on the pre-defined range i.e 10kb
    */
 
-  getPartialObject(bucketName, objectName, byteLength, cb) {
+  getPartialObject(bucketName, objectName, offset, byteLength, cb) {
     let objectNameWithPrefix;
     if ("Home" == bucketName) {
       objectNameWithPrefix = objectName;
@@ -563,7 +563,7 @@ class S3Explorer {
     this.s3Client.getPartialObject(
       this.bucketName,
       objectNameWithPrefix,
-      0,
+      offset,
       byteLength,
       (err, stream) => {
         // if (err) {

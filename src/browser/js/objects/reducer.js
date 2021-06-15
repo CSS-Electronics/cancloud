@@ -68,7 +68,10 @@ export default (
     files: {},
     showAbortModal: false,
     checkedList: [],
-    sessionMeta: []
+    sessionMeta: [],
+    sessionMetaList: [],
+    sessionObjectsMetaList: []
+
   },
   action
 ) => {
@@ -169,6 +172,26 @@ export default (
       return {
         ...state,
         sessionMeta: action.sessionMeta
+      };
+    case actionsObjects.ADD_SESSION_META_LIST:
+      return {
+        ...state,
+        sessionMetaList: state.sessionMetaList.concat(action.sessionMetaList)
+      };
+    case actionsObjects.RESET_SESSION_META_LIST:
+      return {
+        ...state,
+        sessionMetaList: []
+      };
+    case actionsObjects.ADD_SESSION_OBJECTS_META_LIST:
+      return {
+        ...state,
+        sessionObjectsMetaList: state.sessionObjectsMetaList.concat(action.sessionObjectsMetaList)
+      };
+    case actionsObjects.RESET_SESSION_OBJECTS_META_LIST:
+      return {
+        ...state,
+        sessionObjectsMetaList: []
       };
     case actionsObjects.SHOW_MANAGE_DEVICE_EDITOR:
       return {

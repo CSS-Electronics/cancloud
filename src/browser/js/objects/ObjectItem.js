@@ -21,7 +21,7 @@ import { getDataType } from "../mime";
 import * as actions from "./actions";
 import { getCheckedList } from "./selectors";
 import ObjectMetaDropdown from "./ObjectMetaDropdown";
-import SessionMetaDropdown  from "./SessionMetaDropdown"
+// import SessionMetaDropdown  from "./SessionMetaDropdown"
 import HoverIntent from "react-hoverintent";
 import history from "../history";
 import {pathSlice, isValidCanedgefile} from "../utils";
@@ -70,6 +70,7 @@ export class ObjectItem extends React.Component {
       name,
       contentType,
       size,
+      totalCount,
       lastModified,
       checked,
       checkObject,
@@ -132,15 +133,16 @@ export class ObjectItem extends React.Component {
           ) : (
             ""
           )}
-           {sessionMeta.length ? (
+           {/* {sessionMeta.length ? (
             <SessionMetaDropdown
               sessionMeta={sessionMeta}
               openDropdown={this.state.openDropdown}
             />
           ) : (
             ""
-          )}
+          )} */}
           <div  className={classNames({"fesl-item fesl-item-size": true, "range-item": name.endsWith("/")})}>{size}</div>
+          <div  className={classNames({"fesl-item fesl-item-count": true, "range-item": name.endsWith("/")})}>{totalCount}</div>
           <div className={classNames({"fesl-item fesl-item-modified": true, "range-item": name.endsWith("/")})}>{lastModifiedSD}</div>
           <div className={classNames({"fesl-item fesl-item-modified": true, "range-item": name.endsWith("/")})}>{lastModified}</div>
           <div className="fesl-item fesl-item-actions">{actionButtons}</div>

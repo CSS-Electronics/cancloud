@@ -68,7 +68,7 @@ export class SessionMetaDropdown extends React.Component {
                   </tr>
 
                   <tr>
-                    <td scope="col">Last modified (SD)</td>
+                    <td scope="col">Start Time</td>
                     <td scope="col">
                       {sessionMeta[0].timestampRange}
                       {sessionMeta[0].timestampDelta ? (

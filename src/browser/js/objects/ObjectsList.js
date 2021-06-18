@@ -18,13 +18,14 @@ import React from "react";
 import ObjectContainer from "./ObjectContainer";
 import PrefixContainer from "./PrefixContainer";
 
-export const ObjectsList = ({ objects, sessionMetaList, sessionObjectsMetaList }) => {
+export const ObjectsList = ({ objects, sessionMetaList, sessionStartTimeList, sessionObjectsMetaList }) => {
   const list = objects.map(object => {
 
     
     if (object.name.endsWith("/")) {
       const sessionMeta = sessionMetaList.filter(session => session.prefix == object.name)[0]
-      return <PrefixContainer object={object} key={object.name} sessionMeta={sessionMeta} />;
+      const sessionStartTime = sessionStartTimeList.filter(session => session.prefix == object.name)[0]
+      return <PrefixContainer object={object} key={object.name} sessionMeta={sessionMeta} sessionStartTime={sessionStartTime} />;
     } else {
       const objectMeta = sessionObjectsMetaList.filter(objectMeta => objectMeta.name == object.name)[0]
       return <ObjectContainer object={object} key={object.name} objectMeta={objectMeta} />;

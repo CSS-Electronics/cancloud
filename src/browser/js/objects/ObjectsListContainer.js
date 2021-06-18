@@ -35,6 +35,7 @@ export class ObjectsListContainer extends React.Component {
   }
 
   loadSessionsMeta(propsInput,bucket, prefix) {
+    
 
     let prefixList = propsInput.objects
       .slice((this.state.page - 1) * 20, this.state.page * 20)
@@ -60,6 +61,8 @@ export class ObjectsListContainer extends React.Component {
       this.props.currentPrefix != nextProps.currentPrefix
     ) {
       this.props.resetSessionMetaList();
+      this.props.resetSessionStartTimeList();
+
       this.props.resetSessionObjectsMetaList();
       this.setState((state) => {
         return {
@@ -92,6 +95,8 @@ export class ObjectsListContainer extends React.Component {
   componentWillUnmount() {
     // reset page and sessionMetaList
     this.props.resetSessionMetaList();
+    this.props.resetSessionStartTimeList();
+
     this.props.resetSessionObjectsMetaList();
 
     this.setState((state) => {
@@ -129,6 +134,7 @@ export class ObjectsListContainer extends React.Component {
       loadObjects,
       err,
       sessionMetaList,
+      sessionStartTimeList,
       sessionObjectsMetaList,
     } = this.props;
 
@@ -166,6 +172,7 @@ export class ObjectsListContainer extends React.Component {
             <ObjectsList
               objects={visibleObjects}
               sessionMetaList={sessionMetaList}
+              sessionStartTimeList={sessionStartTimeList}
               sessionObjectsMetaList={sessionObjectsMetaList}
             />
           ) : null}{" "}
@@ -194,6 +201,7 @@ const mapStateToProps = (state) => {
     err: state.objects.err,
     isTruncated: state.objects.isTruncated,
     sessionMetaList: state.objects.sessionMetaList,
+    sessionStartTimeList: state.objects.sessionStartTimeList,
     sessionObjectsMetaList: state.objects.sessionObjectsMetaList,
   };
 };
@@ -208,6 +216,7 @@ const mapDispatchToProps = (dispatch) => {
         actionsObjects.fetchSessionObjectsMetaList(bucket, prefix, objectsList)
       ),
     resetSessionMetaList: () => dispatch(actionsObjects.resetSessionMetaList()),
+    resetSessionStartTimeList: () => dispatch(actionsObjects.resetSessionStartTimeList()),
     resetSessionObjectsMetaList: () =>
       dispatch(actionsObjects.resetSessionObjectsMetaList()),
   };

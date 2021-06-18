@@ -69,6 +69,14 @@ export const ObjectsHeader = ({
           })}
         />
       </div>
+
+      <div
+        className="fesl-item fesl-item-count"
+        id="sort-by-count"
+      >
+        Count
+      </div>
+
      
 
 <div
@@ -77,7 +85,7 @@ id="sort-by-last-modified"
 onClick={() => sortObjects("last-modified")}
 data-sort="last-modified"
 >
-Last Modified (SD)
+Start Time
 <i
   className={classNames({
     "fesli-sort": true,
@@ -115,6 +123,8 @@ const mapStateToProps = state => {
   return {
     sortNameOrder: state.objects.sortBy == "name" && state.objects.sortOrder,
     sortSizeOrder: state.objects.sortBy == "size" && state.objects.sortOrder,
+    sortCountOrder: state.objects.sortBy == "count" && state.objects.sortOrder,
+
     sortLastModifiedOrder:
       state.objects.sortBy == "last-modified" && state.objects.sortOrder,
       sessionMetaList: state.objects.sessionMetaList,

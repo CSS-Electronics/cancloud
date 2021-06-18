@@ -70,6 +70,7 @@ export default (
     checkedList: [],
     sessionMeta: [],
     sessionMetaList: [],
+    sessionStartTimeList:[],
     sessionObjectsMetaList: []
 
   },
@@ -178,11 +179,21 @@ export default (
         ...state,
         sessionMetaList: state.sessionMetaList.concat(action.sessionMetaList)
       };
+    case actionsObjects.ADD_SESSION_START_TIME_LIST:
+      return {
+        ...state,
+        sessionStartTimeList: state.sessionStartTimeList.concat(action.sessionStartTimeList)
+      };
     case actionsObjects.RESET_SESSION_META_LIST:
       return {
         ...state,
         sessionMetaList: []
       };
+    case actionsObjects.RESET_SESSION_START_TIME_LIST:
+    return {
+      ...state,
+      sessionStartTimeList: []
+    };
     case actionsObjects.ADD_SESSION_OBJECTS_META_LIST:
       return {
         ...state,

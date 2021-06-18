@@ -163,3 +163,45 @@ export const parseXml = xml => {
   }
   return result;
 };
+
+
+export function get_first_timestamp(input) {
+
+  let data = input
+
+  let view = new DataView(data.buffer);
+
+  if( data.length < 168 ) {
+      return -1;
+  }
+
+  /* Check that the header matches the expected tool */
+  let decoder = new TextDecoder();
+  const s = decoder.decode(data.slice(16, 23)).trim();
+  if( s !== "CE" ) {
+      return -1;
+  }
+
+  /* Get jump address 1 */
+  const addr_dg = Number(view.getBigUint64(88, true));
+
+  if( data.length < addr_dg + 48 ) {
+      return -1;
+  }
+
+  /* Get jump address 2 */
+  const addr_dt = Number(view.getBigUint64(addr_dg + 40, true));
+  if( data.length < addr_dt + 33 ) {
+      return -1;
+  }
+
+  /* Read data at offset */
+  const firstTimestamp = view.getFloat64(addr_dt + 25, true) * 1E-9;
+
+  /* Read start time */
+  const startTime = Number(view.getBigUint64(136, true)) * 1E-9;
+
+  const firstMeasurementTime = firstTimestamp + startTime;
+
+  return firstMeasurementTime;
+}

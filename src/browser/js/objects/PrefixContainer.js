@@ -19,16 +19,18 @@ import { connect } from "react-redux";
 import ObjectItem from "./ObjectItem";
 import * as actionsObjects from "./actions";
 
-export const PrefixContainer = ({ object, currentPrefix, selectPrefix, sessionMeta }) => {
+export const PrefixContainer = ({ object, currentPrefix, selectPrefix, sessionMeta, sessionStartTime }) => {
 
   const totalSize = sessionMeta && sessionMeta.totalSize 
   const lastModifiedS3 = sessionMeta && sessionMeta.lastModifiedS3 
-  const lastModifiedSD = sessionMeta && sessionMeta.lastModifiedSD 
+  const lastModifiedSD = sessionStartTime && sessionStartTime.lastModifiedSD 
+  const totalCount = sessionMeta && sessionMeta.totalCount
   
   const props = {
     name: object.name,
     size: totalSize,
-    lastModifiedSD:lastModifiedSD,
+    totalCount: totalCount,
+    lastModifiedSD: lastModifiedSD,
     lastModified: lastModifiedS3,
     contentType: object.contentType,
     onClick: () => selectPrefix(`${currentPrefix}${object.name}`)

@@ -122,12 +122,12 @@
 		"comment": "Total log file data uploaded per period across devices"
       },
 	   {
-        "title": "Devices (sorted by heartbeat)",
+        "title": "Devices",
 		"dependency": "devices",
         "widget_type": "table",
         "dataset": "deviceTable",
         "class_name": "col-sm-12",
-        "height": 250,
+        "height": 0,
         "colors": "",
 		"comment": "Table showing device details, sorted by when the devices last checked into the server"
       }

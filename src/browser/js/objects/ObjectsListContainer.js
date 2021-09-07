@@ -34,20 +34,13 @@ export class ObjectsListContainer extends React.Component {
     this.loadObjectsMeta = this.loadObjectsMeta.bind(this);
   }
 
-  loadSessionsMeta(propsInput,bucket, prefix) {
-    
-
-    let prefixList = propsInput.objects
-      .slice((this.state.page - 1) * 20, this.state.page * 20)
-      .filter((object) => object.name.endsWith("/"));
+  loadSessionsMeta(propsInput, bucket, prefix) {
+    let prefixList = propsInput.objects.slice((this.state.page - 1) * 20, this.state.page * 20).filter((object) => object.name.endsWith("/"));
     this.props.fetchSessionMetaList(bucket, prefixList);
   }
 
-  loadObjectsMeta(propsInput,bucket, prefix) {
-    let objectsList = propsInput.objects.slice(
-      (this.state.page - 1) * 20,
-      this.state.page * 20
-    );
+  loadObjectsMeta(propsInput, bucket, prefix) {
+    let objectsList = propsInput.objects.slice((this.state.page - 1) * 20, this.state.page * 20);
     this.props.fetchSessionObjectsMetaList(bucket, prefix, objectsList);
   }
 
@@ -55,11 +48,7 @@ export class ObjectsListContainer extends React.Component {
     const { bucket, prefix } = pathSlice(history.location.pathname);
 
     // reset page and sessionMetaList
-    if (
-      this.props.currentBucket != nextProps.currentBucket ||
-      bucket == "Home" ||
-      this.props.currentPrefix != nextProps.currentPrefix
-    ) {
+    if (this.props.currentBucket != nextProps.currentBucket || bucket == "Home" || this.props.currentPrefix != nextProps.currentPrefix) {
       this.props.resetSessionMetaList();
       this.props.resetSessionStartTimeList();
 
@@ -72,23 +61,13 @@ export class ObjectsListContainer extends React.Component {
     }
 
     // load sessionMetaList when in root device folder
-    if (
-      this.props.objects != nextProps.objects &&
-      nextProps.objects.length &&
-      prefix == "" &&
-      bucket != ""
-    ) {
-      this.loadSessionsMeta(nextProps,bucket, prefix);
-
+    if (this.props.objects != nextProps.objects && nextProps.objects.length && prefix == "" && bucket != "") {
+      this.loadSessionsMeta(nextProps, bucket, prefix);
     }
 
     // load sessionObjectsMetaList when inside session folder
-    if (
-      this.props.objects != nextProps.objects &&
-      nextProps.objects.length != 0 &&
-      prefix != ""
-    ) {
-      this.loadObjectsMeta(nextProps,bucket, prefix);
+    if (this.props.objects != nextProps.objects && nextProps.objects.length != 0 && prefix != "") {
+      this.loadObjectsMeta(nextProps, bucket, prefix);
     }
   }
 
@@ -108,7 +87,6 @@ export class ObjectsListContainer extends React.Component {
   }
 
   loadNextPage() {
-
     this.setState((state) => {
       return {
         page: state.page + 1,
@@ -119,13 +97,12 @@ export class ObjectsListContainer extends React.Component {
     const { bucket, prefix } = pathSlice(history.location.pathname);
 
     if (prefix == "" && bucket != "") {
-      this.loadSessionsMeta(this.props,bucket, prefix);
+      this.loadSessionsMeta(this.props, bucket, prefix);
     }
     if (prefix != "") {
-      this.loadObjectsMeta(this.props,bucket, prefix);
+      this.loadObjectsMeta(this.props, bucket, prefix);
     }
   }
-
 
   render() {
     const {
@@ -137,7 +114,7 @@ export class ObjectsListContainer extends React.Component {
       sessionMetaList,
       sessionStartTimeList,
       sessionObjectsMetaList,
-      objectsS3MetaStart
+      objectsS3MetaStart,
     } = this.props;
 
     const visibleObjects = objects.slice(0, this.state.page * 20);
@@ -151,9 +128,7 @@ export class ObjectsListContainer extends React.Component {
       >
         <InfiniteScroll
           pageStart={0}
-          loadMore={
-            visibleObjects.length > 0 ? this.loadNextPage : () => {}
-          }
+          loadMore={visibleObjects.length > 0 ? this.loadNextPage : () => {}}
           hasMore={objects.length > visibleObjects.length}
           useWindow={true}
           initialLoad={false}
@@ -179,9 +154,7 @@ export class ObjectsListContainer extends React.Component {
               objectsS3MetaStart={objectsS3MetaStart}
             />
           ) : null}{" "}
-          {err != "noBucket" && err != "load" && err ? (
-            <CorsError currentBucket={currentBucket} />
-          ) : null}{" "}
+          {err != "noBucket" && err != "load" && err ? <CorsError currentBucket={currentBucket} /> : null}{" "}
         </InfiniteScroll>{" "}
         <div
           className="text-center"
@@ -206,29 +179,20 @@ const mapStateToProps = (state) => {
     sessionMetaList: state.objects.sessionMetaList,
     sessionStartTimeList: state.objects.sessionStartTimeList,
     sessionObjectsMetaList: state.objects.sessionObjectsMetaList,
-    objectsS3MetaStart: state.objects.objectsS3MetaStart
+    objectsS3MetaStart: state.objects.objectsS3MetaStart,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
     loadObjects: (append) => dispatch(actionsObjects.fetchObjects(append)),
-    fetchSessionMetaList: (bucket, prefix) =>
-      dispatch(actionsObjects.fetchSessionMetaList(bucket, prefix)),
-    fetchSessionObjectsMetaList: (bucket, prefix, objectsList) =>
-      dispatch(
-        actionsObjects.fetchSessionObjectsMetaList(bucket, prefix, objectsList)
-      ),
+    fetchSessionMetaList: (bucket, prefix) => dispatch(actionsObjects.fetchSessionMetaList(bucket, prefix)),
+    fetchSessionObjectsMetaList: (bucket, prefix, objectsList) => dispatch(actionsObjects.fetchSessionObjectsMetaList(bucket, prefix, objectsList)),
     resetSessionMetaList: () => dispatch(actionsObjects.resetSessionMetaList()),
     resetSessionStartTimeList: () => dispatch(actionsObjects.resetSessionStartTimeList()),
-    resetSessionObjectsMetaList: () =>
-      dispatch(actionsObjects.resetSessionObjectsMetaList()),
-      resetObjectsS3MetaStart: () =>
-      dispatch(actionsObjects.resetObjectsS3MetaStart()),
+    resetSessionObjectsMetaList: () => dispatch(actionsObjects.resetSessionObjectsMetaList()),
+    resetObjectsS3MetaStart: () => dispatch(actionsObjects.resetObjectsS3MetaStart()),
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ObjectsListContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(ObjectsListContainer);

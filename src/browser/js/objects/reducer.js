@@ -17,7 +17,7 @@
 import * as actionsObjects from "./actions";
 
 const removeObject = (list, objectToRemove, lookup) => {
-  const idx = list.findIndex(object => lookup(object) === objectToRemove);
+  const idx = list.findIndex((object) => lookup(object) === objectToRemove);
   if (idx == -1) {
     return list;
   }
@@ -29,16 +29,16 @@ const add = (files, action) => ({
   [action.slug]: {
     loaded: 0,
     size: action.size,
-    name: action.name
-  }
+    name: action.name,
+  },
 });
 
 const updateProgress = (files, action) => ({
   ...files,
   [action.slug]: {
     ...files[action.slug],
-    loaded: action.loaded
-  }
+    loaded: action.loaded,
+  },
 });
 
 const stop = (files, action) => {
@@ -59,20 +59,19 @@ export default (
     shareObject: {
       show: false,
       object: "",
-      url: ""
+      url: "",
     },
     previewObject: {
       show: false,
-      content: ""
+      content: "",
     },
     files: {},
     showAbortModal: false,
     checkedList: [],
-    sessionMeta: [],
     sessionMetaList: [],
-    sessionStartTimeList:[],
+    sessionStartTimeList: [],
     sessionObjectsMetaList: [],
-    objectsS3MetaStart: []
+    objectsS3MetaStart: [],
   },
   action
 ) => {
@@ -83,14 +82,14 @@ export default (
         list: action.objects,
         err: action.err,
         marker: action.marker,
-        isTruncated: action.isTruncated
+        isTruncated: action.isTruncated,
       };
     case actionsObjects.RESET_LIST:
       return {
         ...state,
         list: [],
         marker: "",
-        isTruncated: false
+        isTruncated: false,
       };
     case actionsObjects.APPEND_LIST:
       return {
@@ -98,39 +97,39 @@ export default (
         list: [...state.list, ...action.objects],
         marker: action.marker,
         err: action.err,
-        isTruncated: action.isTruncated
+        isTruncated: action.isTruncated,
       };
     case actionsObjects.REMOVE:
       return {
         ...state,
-        list: removeObject(state.list, action.object, object => object.name)
+        list: removeObject(state.list, action.object, (object) => object.name),
       };
     case actionsObjects.SET_SORT_BY:
       return {
         ...state,
-        sortBy: action.sortBy
+        sortBy: action.sortBy,
       };
-        case actionsObjects.SET_SORT_BY:
+    case actionsObjects.SET_SORT_BY:
       return {
         ...state,
-        sortBy: action.sortBy
+        sortBy: action.sortBy,
       };
     case actionsObjects.SET_SORT_ORDER:
       return {
         ...state,
-        sortOrder: action.sortOrder
+        sortOrder: action.sortOrder,
       };
     case actionsObjects.SET_CURRENT_PREFIX:
       return {
         ...state,
         currentPrefix: action.prefix,
         marker: "",
-        isTruncated: false
+        isTruncated: false,
       };
     case actionsObjects.SET_PREFIX_WRITABLE:
       return {
         ...state,
-        prefixWritable: action.prefixWritable
+        prefixWritable: action.prefixWritable,
       };
     case actionsObjects.SET_SHARE_OBJECT:
       return {
@@ -138,8 +137,8 @@ export default (
         shareObject: {
           show: action.show,
           object: action.object,
-          url: action.url
-        }
+          url: action.url,
+        },
       };
     case actionsObjects.SET_PREVIEW_OBJECT:
       return {
@@ -147,112 +146,103 @@ export default (
         previewObject: {
           show: action.show,
           object: action.object,
-          content: action.content
-        }
+          content: action.content,
+        },
       };
     case actionsObjects.CHECKED_LIST_ADD:
       return {
         ...state,
-        checkedList: [...state.checkedList, action.object]
+        checkedList: [...state.checkedList, action.object],
       };
     case actionsObjects.CHECKED_LIST_REMOVE:
       return {
         ...state,
-        checkedList: removeObject(
-          state.checkedList,
-          action.object,
-          object => object
-        )
+        checkedList: removeObject(state.checkedList, action.object, (object) => object),
       };
     case actionsObjects.CHECKED_LIST_RESET:
       return {
         ...state,
-        checkedList: []
-      };
-    case actionsObjects.SET_SESSION_META:
-      return {
-        ...state,
-        sessionMeta: action.sessionMeta
+        checkedList: [],
       };
     case actionsObjects.ADD_SESSION_META_LIST:
       return {
         ...state,
-        sessionMetaList: state.sessionMetaList.concat(action.sessionMetaList)
+        sessionMetaList: state.sessionMetaList.concat(action.sessionMetaList),
       };
     case actionsObjects.ADD_SESSION_START_TIME_LIST:
       return {
         ...state,
-        sessionStartTimeList: state.sessionStartTimeList.concat(action.sessionStartTimeList)
+        sessionStartTimeList: state.sessionStartTimeList.concat(action.sessionStartTimeList),
       };
     case actionsObjects.RESET_SESSION_META_LIST:
       return {
         ...state,
-        sessionMetaList: []
+        sessionMetaList: [],
       };
     case actionsObjects.RESET_SESSION_START_TIME_LIST:
-    return {
-      ...state,
-      sessionStartTimeList: []
-    };
+      return {
+        ...state,
+        sessionStartTimeList: [],
+      };
     case actionsObjects.ADD_SESSION_OBJECTS_META_LIST:
       return {
         ...state,
-        sessionObjectsMetaList: state.sessionObjectsMetaList.concat(action.sessionObjectsMetaList)
+        sessionObjectsMetaList: state.sessionObjectsMetaList.concat(action.sessionObjectsMetaList),
       };
     case actionsObjects.ADD_OBJECTS_S3_META_START:
       return {
         ...state,
-        objectsS3MetaStart: state.objectsS3MetaStart.concat(action.objectsS3MetaStart)
+        objectsS3MetaStart: state.objectsS3MetaStart.concat(action.objectsS3MetaStart),
       };
     case actionsObjects.RESET_SESSION_OBJECTS_META_LIST:
       return {
         ...state,
-        sessionObjectsMetaList: []
+        sessionObjectsMetaList: [],
       };
     case actionsObjects.RESET_OBJECTS_S3_META_START:
       return {
         ...state,
-        objectsS3MetaStart: []
+        objectsS3MetaStart: [],
       };
     case actionsObjects.SHOW_MANAGE_DEVICE_EDITOR:
       return {
         ...state,
-        loadManageDeviceEditor: action.show
+        loadManageDeviceEditor: action.show,
       };
     case actionsObjects.HIDE_MANAGE_DEVICE_EDITOR:
       return {
         ...state,
-        loadManageDeviceEditor: action.show
+        loadManageDeviceEditor: action.show,
       };
     case actionsObjects.OBJECT_META_INFO:
       return {
         ...state,
-        info: action.info
+        info: action.info,
       };
     case actionsObjects.RESET_OBJECT_META_INFO:
       return {
         ...state,
-        info: action.info
+        info: action.info,
       };
     case actionsObjects.ADD:
       return {
         ...state,
-        files: add(state.files, action)
+        files: add(state.files, action),
       };
     case actionsObjects.UPDATE_PROGRESS:
       return {
         ...state,
-        files: updateProgress(state.files, action)
+        files: updateProgress(state.files, action),
       };
     case actionsObjects.STOP:
       return {
         ...state,
-        files: stop(state.files, action)
+        files: stop(state.files, action),
       };
     case actionsObjects.SHOW_ABORT_MODAL:
       return {
         ...state,
-        showAbortModal: action.show
+        showAbortModal: action.show,
       };
     default:
       return state;

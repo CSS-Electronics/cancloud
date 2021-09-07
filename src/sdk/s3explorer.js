@@ -552,28 +552,48 @@ class S3Explorer {
    * @description: Get object content based on the pre-defined range i.e 10kb
    */
 
-  getPartialObject(bucketName, objectName, byteLength, cb) {
+  getPartialObject(bucketName, objectName, offset, byteLength, cb) {
     let objectNameWithPrefix;
     if ("Home" == bucketName) {
       objectNameWithPrefix = objectName;
     } else {
       objectNameWithPrefix = bucketName + "/" + objectName;
     }
-    let partialContent = "";
+    let type = "bytes"
+    let partialContent = ""
+
+    if(type == "bytes"){
+      partialContent = [];
+    }
     this.s3Client.getPartialObject(
       this.bucketName,
       objectNameWithPrefix,
-      0,
+      offset,
       byteLength,
       (err, stream) => {
+        
         // if (err) {
         //   console.log(err);
         //   return cb(err);
         // }
-        stream.on("data", function(chunk) {
-          partialContent += chunk.toString();
-        });
+        if(type == "bytes"){
+
+          stream.on("data", function(chunk) {
+            partialContent.push(chunk)
+            
+          });
+        }
+        else{
+          stream.on("data", function(chunk) {
+            partialContent += chunk.toString();
+            
+          });
+        }
         stream.on("end", function() {
+          if(type == "bytes" && partialContent.length == 2){
+            partialContent = [Uint8ClampedArray.from(partialContent.reduce((a, b) => [...a, ...b], []))]
+          }
+
           const response = StorageResponses.makeDefaultResponse(
             "objContent",
             partialContent

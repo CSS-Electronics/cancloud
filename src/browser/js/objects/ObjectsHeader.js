@@ -18,63 +18,74 @@ import React from "react";
 import classNames from "classnames";
 import { connect } from "react-redux";
 import * as actionsObjects from "./actions";
+import history from "../history";
+import { pathSlice } from "../utils";
 
-export const ObjectsHeader = ({
-  sortNameOrder,
-  sortSizeOrder,
-  sortLastModifiedOrder,
-  sortObjects
-}) => (
+const { bucket, prefix } = pathSlice(history.location.pathname);
+
+export const ObjectsHeader = ({ sortNameOrder, sortSizeOrder, sortLastModifiedOrder, sortObjects }) => (
   <div className="feb-container">
     <br />
     <br />
     <header className="fesl-row" data-type="folder">
       <div className="fesl-item fesl-item-icon" />
-      <div
-        className="fesl-item fesl-item-name"
-        id="sort-by-name"
-        onClick={() => sortObjects("name")}
-        data-sort="name"
-      >
+      <div className="fesl-item fesl-item-name" id="sort-by-name" onClick={() => sortObjects("name")} data-sort="name">
         Name
         <i
           className={classNames({
             "fesli-sort": true,
             fa: true,
             "fa-sort-alpha-desc": sortNameOrder,
-            "fa-sort-alpha-asc": !sortNameOrder
+            "fa-sort-alpha-asc": !sortNameOrder,
           })}
         />
       </div>
-      <div
-        className="fesl-item fesl-item-size"
-        id="sort-by-size"
-        onClick={() => sortObjects("size")}
-        data-sort="size"
-      >
+      <div className="fesl-item fesl-item-size" id="sort-by-size" onClick={() => sortObjects("size")} data-sort="size">
         Size
         <i
           className={classNames({
             "fesli-sort": true,
             fa: true,
             "fa-sort-amount-desc": sortSizeOrder,
-            "fa-sort-amount-asc": !sortSizeOrder
+            "fa-sort-amount-asc": !sortSizeOrder,
           })}
         />
       </div>
+
+      <div className="fesl-item fesl-item-count" id="sort-by-count">
+        Count
+      </div>
+
       <div
         className="fesl-item fesl-item-modified"
         id="sort-by-last-modified"
         onClick={() => sortObjects("last-modified")}
         data-sort="last-modified"
       >
-        Last Modified
+        Start Time
         <i
           className={classNames({
             "fesli-sort": true,
             fa: true,
             "fa-sort-numeric-desc": sortLastModifiedOrder,
-            "fa-sort-numeric-asc": !sortLastModifiedOrder
+            "fa-sort-numeric-asc": !sortLastModifiedOrder,
+          })}
+        />
+      </div>
+
+      <div
+        className="fesl-item fesl-item-modified"
+        id="sort-by-last-modified"
+        onClick={() => sortObjects("last-modified")}
+        data-sort="last-modified"
+      >
+        Last Modified (S3)
+        <i
+          className={classNames({
+            "fesli-sort": true,
+            fa: true,
+            "fa-sort-numeric-desc": sortLastModifiedOrder,
+            "fa-sort-numeric-asc": !sortLastModifiedOrder,
           })}
         />
       </div>
@@ -83,22 +94,19 @@ export const ObjectsHeader = ({
   </div>
 );
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     sortNameOrder: state.objects.sortBy == "name" && state.objects.sortOrder,
     sortSizeOrder: state.objects.sortBy == "size" && state.objects.sortOrder,
-    sortLastModifiedOrder:
-      state.objects.sortBy == "last-modified" && state.objects.sortOrder
+    sortCountOrder: state.objects.sortBy == "count" && state.objects.sortOrder,
+    sortLastModifiedOrder: state.objects.sortBy == "last-modified" && state.objects.sortOrder,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    sortObjects: sortBy => dispatch(actionsObjects.sortObjects(sortBy))
+    sortObjects: (sortBy) => dispatch(actionsObjects.sortObjects(sortBy)),
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ObjectsHeader);
+export default connect(mapStateToProps, mapDispatchToProps)(ObjectsHeader);

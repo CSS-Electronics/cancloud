@@ -18,6 +18,10 @@
     .clearfix();
 }
 
+.range-item{
+    color: lighten(@text-color,20%);
+}
+
 header.fesl-row {
     @media (min-width:(@screen-sm-min - 100px)) {
         margin-bottom: 20px;
@@ -276,14 +280,19 @@ div.fesl-row {
 
         &.fesl-item-name {
             flex: 3;
+            min-width: 140px;
         }
 
         &.fesl-item-size {
             width: 140px;
         }
 
+        &.fesl-item-count {
+            width: 140px;
+        }
+
         &.fesl-item-modified {
-            width: 190px;
+            width: 260px;
         }
 
         &.fesl-item-actions {
@@ -300,6 +309,7 @@ div.fesl-row {
         }
 
         &.fesl-item-size,
+        &.fesl-item-count,
         &.fesl-item-modified {
             font-size: 12px;
             color: #B5B5B5;
@@ -313,6 +323,10 @@ div.fesl-row {
         }
 
         &.fesl-item-size {
+            margin-right: 10px;
+        }
+
+        &.fesl-item-count {
             margin-right: 10px;
         }
 

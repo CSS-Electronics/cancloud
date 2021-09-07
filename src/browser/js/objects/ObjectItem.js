@@ -21,62 +21,37 @@ import { getDataType } from "../mime";
 import * as actions from "./actions";
 import { getCheckedList } from "./selectors";
 import ObjectMetaDropdown from "./ObjectMetaDropdown";
-import SessionMetaDropdown  from "./SessionMetaDropdown"
 import HoverIntent from "react-hoverintent";
-import history from "../history";
-import {pathSlice, isValidCanedgefile} from "../utils";
-
-
+import { isValidCanedgefile } from "../utils";
+import classNames from "classnames";
 
 export class ObjectItem extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      openDropdown: false
+      openDropdown: false,
     };
   }
 
   showMetaInfo() {
     this.setState({
-      openDropdown: true
+      openDropdown: true,
     });
-
-    // reset sessionMeta first
-    this.props.setSessionMeta([])
 
     if (isValidCanedgefile(this.props.name.split(".").slice(-1)[0])) {
       this.props.fetchState(this.props.name);
-    }
-
-    const { bucket } = pathSlice(history.location.pathname);
-    let regexSession = new RegExp(/([0-9]){8}\/$/, "g");
-
-    if(this.props.name.match(regexSession) != null && bucket != ""){
-      this.props.listSessionMeta(bucket, this.props.name)
     }
   }
 
   hideMetaInfo() {
     this.props.resetMetaInfo();
-    this.props.setSessionMeta([])
     this.setState({
-      openDropdown: false
+      openDropdown: false,
     });
   }
 
   render() {
-    const {
-      name,
-      contentType,
-      size,
-      lastModified,
-      checked,
-      checkObject,
-      uncheckObject,
-      actionButtons,
-      onClick,
-      sessionMeta
-    } = this.props;
+    const { name, contentType, size, totalCount, lastModified, checked, checkObject, uncheckObject, actionButtons, onClick, startTime } = this.props;
 
     let regexFileExt = new RegExp(/\b(mf4|MF4|MFE|MFC|MFM|txt|TXT|csv|json|JSON)\b/, "g");
     const regexLogFile0007 = new RegExp("^\\d{8}-[a-zA-Z0-9]{64}\\.mf4$", "g");
@@ -85,13 +60,7 @@ export class ObjectItem extends React.Component {
     const regexLogFile0102Epoch = new RegExp("-[a-zA-Z0-9]{8}", "g");
 
     return (
-      <HoverIntent
-        onMouseOver={this.showMetaInfo.bind(this)}
-        onMouseOut={this.hideMetaInfo.bind(this)}
-        sensitivity={10}
-        interval={500}
-        timeout={250}
-      >
+      <HoverIntent onMouseOver={this.showMetaInfo.bind(this)} onMouseOut={this.hideMetaInfo.bind(this)} sensitivity={10} interval={500} timeout={250}>
         <div className={"fesl-row"} data-type={getDataType(name, contentType)}>
           <div className="fesl-item fesl-item-icon">
             <div className="fi-select">
@@ -111,35 +80,26 @@ export class ObjectItem extends React.Component {
           <div className="fesl-item fesl-item-name">
             <a
               href="#"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 if (onClick) {
                   onClick();
                 }
               }}
             >
-              {name.match(regexLogFile0007) ? name.replace(name.match(regexLogFile0007Crc), "") : name.match(regexLogFile0102) ? name.replace(name.match(regexLogFile0102Epoch), "") : name }
-            
+              {name.match(regexLogFile0007)
+                ? name.replace(name.match(regexLogFile0007Crc), "")
+                : name.match(regexLogFile0102)
+                ? name.replace(name.match(regexLogFile0102Epoch), "")
+                : name}
             </a>
           </div>
-          {regexFileExt.test(name.split(".").slice(-1)[0]) ? (
-            <ObjectMetaDropdown
-              name={name}
-              openDropdown={this.state.openDropdown}
-            />
-          ) : (
-            ""
-          )}
-           {sessionMeta.length ? (
-            <SessionMetaDropdown
-              sessionMeta={sessionMeta}
-              openDropdown={this.state.openDropdown}
-            />
-          ) : (
-            ""
-          )}
-          <div className="fesl-item fesl-item-size">{size}</div>
-          <div className="fesl-item fesl-item-modified">{lastModified}</div>
+          {regexFileExt.test(name.split(".").slice(-1)[0]) ? <ObjectMetaDropdown name={name} openDropdown={this.state.openDropdown} /> : ""}
+
+          <div className={classNames({ "fesl-item fesl-item-size": true, "range-item": name.endsWith("/") })}>{size}</div>
+          <div className={classNames({ "fesl-item fesl-item-count": true, "range-item": name.endsWith("/") })}>{totalCount}</div>
+          <div className={classNames({ "fesl-item fesl-item-modified": true, "range-item": name.endsWith("/") })}>{startTime}</div>
+          <div className={classNames({ "fesl-item fesl-item-modified": true, "range-item": name.endsWith("/") })}>{lastModified}</div>
           <div className="fesl-item fesl-item-actions">{actionButtons}</div>
         </div>
       </HoverIntent>
@@ -150,22 +110,16 @@ export class ObjectItem extends React.Component {
 const mapStateToProps = (state, ownProps) => {
   return {
     checked: getCheckedList(state).indexOf(ownProps.name) >= 0,
-    sessionMeta: state.objects.sessionMeta
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    checkObject: name => dispatch(actions.checkObject(name)),
-    uncheckObject: name => dispatch(actions.uncheckObject(name)),
-    fetchState: name => dispatch(actions.fetchObjectStat(name)),
+    checkObject: (name) => dispatch(actions.checkObject(name)),
+    uncheckObject: (name) => dispatch(actions.uncheckObject(name)),
+    fetchState: (name) => dispatch(actions.fetchObjectStat(name)),
     resetMetaInfo: () => dispatch(actions.resetMetaInfo()),
-    listSessionMeta: (bucket, prefix) => dispatch(actions.listSessionMeta(bucket, prefix)),
-    setSessionMeta: (sessionMeta) => dispatch(actions.setSessionMeta(sessionMeta))
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ObjectItem);
+export default connect(mapStateToProps, mapDispatchToProps)(ObjectItem);

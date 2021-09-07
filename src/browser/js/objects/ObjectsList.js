@@ -18,12 +18,18 @@ import React from "react";
 import ObjectContainer from "./ObjectContainer";
 import PrefixContainer from "./PrefixContainer";
 
-export const ObjectsList = ({ objects }) => {
+export const ObjectsList = ({ objects, sessionMetaList, sessionStartTimeList, sessionObjectsMetaList, objectsS3MetaStart }) => {
   const list = objects.map(object => {
+
+    
     if (object.name.endsWith("/")) {
-      return <PrefixContainer object={object} key={object.name} />;
+      const sessionMeta = sessionMetaList.filter(session => session.prefix == object.name)[0]
+      const sessionStartTime = sessionStartTimeList.filter(session => session.prefix == object.name)[0]
+      return <PrefixContainer object={object} key={object.name} sessionMeta={sessionMeta} sessionStartTime={sessionStartTime} />;
     } else {
-      return <ObjectContainer object={object} key={object.name} />;
+      const objectMeta = sessionObjectsMetaList.filter(objectMeta => objectMeta.name == object.name)[0]
+      const objectS3MetaStart = objectsS3MetaStart.filter(objectMeta => objectMeta.name ==  object.name)[0]
+      return <ObjectContainer object={object} key={object.name} objectMeta={objectMeta} objectS3MetaStart={objectS3MetaStart} />;
     }
   });
   return <div>{list}</div>;

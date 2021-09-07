@@ -28,13 +28,24 @@ import { getCheckedList } from "./selectors";
 export const ObjectContainer = ({
   object,
   checkedObjectsCount,
-  downloadObject
+  downloadObject,
+  objectMeta,
+  objectS3MetaStart
 }) => {
+
+
+  const lastModifiedSD = objectMeta && objectMeta.lastModifiedSD 
+  const s3MetaStart = objectS3MetaStart && objectS3MetaStart.s3MetaStart
+  // if MF4, use partial object based, else use S3 meta timestamp
+  const startTime = lastModifiedSD ? lastModifiedSD : s3MetaStart 
+
   let props = {
     name: object.name,
     contentType: object.contentType,
     size: humanize.filesize(object.size),
-    lastModified: Moment(object.lastModified).format("lll")
+    lastModifiedSD:lastModifiedSD,
+    startTime: startTime,
+    lastModified: Moment(object.lastModified).format("YY-MM-DD HH:mm")
   };
 
   if (checkedObjectsCount == 0) {

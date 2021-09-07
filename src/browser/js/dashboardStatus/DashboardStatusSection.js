@@ -26,6 +26,7 @@ const confDash = statusConfig.dashboard;
 const chDefaults = confDash.default_settings;
 const chColors = chDefaults.chart_colors.split(" ");
 const wgt = confDash.widgets;
+let tableHeight = (window.innerHeight - (window.innerHeight < 1100 ? 450 : 750) + (window.innerWidth < 800 ? 200 : 0))
 
 defaults.global.elements.line.borderWidth = chDefaults.line_border_width;
 defaults.global.elements.point.radius = chDefaults.point_radius;
@@ -268,7 +269,8 @@ class DashboardStatusSection extends React.Component {
                     style={{
                       height:
                         widget.height +
-                        (widget.widget_type != "kpi" && resWide ? 100 : 0)
+                        (widget.widget_type != "kpi" && resWide ? 100 : 0) +
+                        (widget.widget_type == "table" ? tableHeight : 0)
                     }}
                   >
                     <div
@@ -379,7 +381,7 @@ class DashboardStatusSection extends React.Component {
                               chartDataArray[2] ? chartDataArray[2] : []
                             }
                             deviceCrc32Test={chartDataDevicesArray[2]}
-                            height={widget.height - 50 + (resWide ? 100 : 0)}
+                            height={tableHeight}
                             deviceLastMf4MetaData={deviceLastMf4MetaData}
                           />
                         ) : null}

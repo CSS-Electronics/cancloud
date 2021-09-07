@@ -47,6 +47,14 @@ class Editor extends React.Component {
     this.props.fetchFilesS3(prefix);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if( this.props.currentBucket != "" && this.props.currentBucket != nextProps.currentBucket ){
+      const { bucket, prefix } = pathSlice(history.location.pathname);
+
+      this.props.fetchFilesS3(prefix);
+    }
+  }
+
   render() {
     let editorTools = [
       {
@@ -85,7 +93,7 @@ class Editor extends React.Component {
             sideBarPadding={true}
             uiSchemaAry={uiSchemaAry}
             schemaAry={schemaAry}
-			demoMode={demoMode}
+            demoMode={demoMode}
             fetchFileContentExt={this.props.fetchFileContentS3}
             updateConfigFileExt={this.props.updateConfigFileS3}
           />
@@ -94,6 +102,12 @@ class Editor extends React.Component {
     );
   }
 }
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    currentBucket: state.buckets.currentBucket,
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -105,4 +119,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(null, mapDispatchToProps)(Editor);
+export default connect(mapStateToProps, mapDispatchToProps)(Editor);

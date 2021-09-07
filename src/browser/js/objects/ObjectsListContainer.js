@@ -15,26 +15,93 @@
  */
 
 import React from "react";
-import classNames from "classnames";
 import { connect } from "react-redux";
 import InfiniteScroll from "react-infinite-scroller";
 import * as actionsObjects from "./actions";
 import ObjectsList from "./ObjectsList";
 import CorsError from "./corsError";
+import history from "../history";
+import { pathSlice } from "../utils";
 
 export class ObjectsListContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      page: 1
+      page: 1,
     };
     this.loadNextPage = this.loadNextPage.bind(this);
+    this.loadSessionsMeta = this.loadSessionsMeta.bind(this);
+    this.loadObjectsMeta = this.loadObjectsMeta.bind(this);
+  }
+
+  loadSessionsMeta(propsInput, bucket, prefix) {
+    let prefixList = propsInput.objects.slice((this.state.page - 1) * 20, this.state.page * 20).filter((object) => object.name.endsWith("/"));
+    this.props.fetchSessionMetaList(bucket, prefixList);
+  }
+
+  loadObjectsMeta(propsInput, bucket, prefix) {
+    let objectsList = propsInput.objects.slice((this.state.page - 1) * 20, this.state.page * 20);
+    this.props.fetchSessionObjectsMetaList(bucket, prefix, objectsList);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
+    // reset page and sessionMetaList
+    if (this.props.currentBucket != nextProps.currentBucket || bucket == "Home" || this.props.currentPrefix != nextProps.currentPrefix) {
+      this.props.resetSessionMetaList();
+      this.props.resetSessionStartTimeList();
+
+      this.props.resetSessionObjectsMetaList();
+      this.setState((state) => {
+        return {
+          page: 1,
+        };
+      });
+    }
+
+    // load sessionMetaList when in root device folder
+    if (this.props.objects != nextProps.objects && nextProps.objects.length && prefix == "" && bucket != "") {
+      this.loadSessionsMeta(nextProps, bucket, prefix);
+    }
+
+    // load sessionObjectsMetaList when inside session folder
+    if (this.props.objects != nextProps.objects && nextProps.objects.length != 0 && prefix != "") {
+      this.loadObjectsMeta(nextProps, bucket, prefix);
+    }
+  }
+
+  componentWillUnmount() {
+    // reset page and sessionMetaList
+    this.props.resetSessionMetaList();
+    this.props.resetSessionStartTimeList();
+
+    this.props.resetSessionObjectsMetaList();
+    this.props.resetObjectsS3MetaStart();
+
+    this.setState((state) => {
+      return {
+        page: 1,
+      };
+    });
   }
 
   loadNextPage() {
-    this.setState(state => {
-      return { page: state.page + 1 };
+    this.setState((state) => {
+      return {
+        page: state.page + 1,
+      };
     });
+
+    // load next batch of sessionMetaList when in root device folder and user has scrolled to next page
+    const { bucket, prefix } = pathSlice(history.location.pathname);
+
+    if (prefix == "" && bucket != "") {
+      this.loadSessionsMeta(this.props, bucket, prefix);
+    }
+    if (prefix != "") {
+      this.loadObjectsMeta(this.props, bucket, prefix);
+    }
   }
 
   render() {
@@ -43,16 +110,25 @@ export class ObjectsListContainer extends React.Component {
       isTruncated,
       currentBucket,
       loadObjects,
-      err
+      err,
+      sessionMetaList,
+      sessionStartTimeList,
+      sessionObjectsMetaList,
+      objectsS3MetaStart,
     } = this.props;
 
+    const visibleObjects = objects.slice(0, this.state.page * 20);
 
-    const visibleObjects = objects.slice(0, this.state.page * 100);
     return (
-      <div className="feb-container" style={{ position: "relative" }}>
+      <div
+        className="feb-container"
+        style={{
+          position: "relative",
+        }}
+      >
         <InfiniteScroll
           pageStart={0}
-          loadMore={this.loadNextPage}
+          loadMore={visibleObjects.length > 0 ? this.loadNextPage : () => {}}
           hasMore={objects.length > visibleObjects.length}
           useWindow={true}
           initialLoad={false}
@@ -60,50 +136,63 @@ export class ObjectsListContainer extends React.Component {
           {err == "noBucket" ? (
             <div className="text-center">
               {" "}
-              <span>No Content</span>
+              <span> No Content </span>{" "}
             </div>
-          ) : null}
+          ) : null}{" "}
           {err == "load" ? (
             <div className="text-center">
               {" "}
-              <span>Loading...</span>
+              <span> Loading... </span>{" "}
             </div>
-          ) : null}
+          ) : null}{" "}
           {err != "noBucket" && err != "load" && !err ? (
-            <ObjectsList objects={visibleObjects} />
-          ) : null}
-          {err != "noBucket" && err != "load" && err ? (
-            <CorsError currentBucket={currentBucket} />
-          ) : null}
-        </InfiniteScroll>
+            <ObjectsList
+              objects={visibleObjects}
+              sessionMetaList={sessionMetaList}
+              sessionStartTimeList={sessionStartTimeList}
+              sessionObjectsMetaList={sessionObjectsMetaList}
+              objectsS3MetaStart={objectsS3MetaStart}
+            />
+          ) : null}{" "}
+          {err != "noBucket" && err != "load" && err ? <CorsError currentBucket={currentBucket} /> : null}{" "}
+        </InfiniteScroll>{" "}
         <div
           className="text-center"
-          style={{ display: isTruncated && currentBucket ? "block" : "none" }}
+          style={{
+            display: isTruncated && currentBucket ? "block" : "none",
+          }}
         >
-          <span>Loading...</span>
-        </div>
+          <span> Loading... </span>{" "}
+        </div>{" "}
       </div>
     );
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     currentBucket: state.buckets.currentBucket,
     currentPrefix: state.objects.currentPrefix,
     objects: state.objects.list,
     err: state.objects.err,
-    isTruncated: state.objects.isTruncated
+    isTruncated: state.objects.isTruncated,
+    sessionMetaList: state.objects.sessionMetaList,
+    sessionStartTimeList: state.objects.sessionStartTimeList,
+    sessionObjectsMetaList: state.objects.sessionObjectsMetaList,
+    objectsS3MetaStart: state.objects.objectsS3MetaStart,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    loadObjects: append => dispatch(actionsObjects.fetchObjects(append))
+    loadObjects: (append) => dispatch(actionsObjects.fetchObjects(append)),
+    fetchSessionMetaList: (bucket, prefix) => dispatch(actionsObjects.fetchSessionMetaList(bucket, prefix)),
+    fetchSessionObjectsMetaList: (bucket, prefix, objectsList) => dispatch(actionsObjects.fetchSessionObjectsMetaList(bucket, prefix, objectsList)),
+    resetSessionMetaList: () => dispatch(actionsObjects.resetSessionMetaList()),
+    resetSessionStartTimeList: () => dispatch(actionsObjects.resetSessionStartTimeList()),
+    resetSessionObjectsMetaList: () => dispatch(actionsObjects.resetSessionObjectsMetaList()),
+    resetObjectsS3MetaStart: () => dispatch(actionsObjects.resetObjectsS3MetaStart()),
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ObjectsListContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(ObjectsListContainer);

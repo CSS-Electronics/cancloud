@@ -24,13 +24,16 @@ export const PrefixContainer = ({ object, currentPrefix, selectPrefix, sessionMe
   const totalSize = sessionMeta && sessionMeta.totalSize 
   const lastModifiedS3 = sessionMeta && sessionMeta.lastModifiedS3 
   const lastModifiedSD = sessionStartTime && sessionStartTime.lastModifiedSD 
+  const lastModifiedS3Meta = sessionMeta && sessionMeta.lastModifiedS3Meta
   const totalCount = sessionMeta && sessionMeta.totalCount
-  
+  const startTime = lastModifiedSD  ? lastModifiedSD : lastModifiedS3Meta
+
   const props = {
     name: object.name,
     size: totalSize,
     totalCount: totalCount,
     lastModifiedSD: lastModifiedSD,
+    startTime: startTime,
     lastModified: lastModifiedS3,
     contentType: object.contentType,
     onClick: () => selectPrefix(`${currentPrefix}${object.name}`)

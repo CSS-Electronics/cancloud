@@ -98,6 +98,7 @@ export class ObjectsListContainer extends React.Component {
     this.props.resetSessionStartTimeList();
 
     this.props.resetSessionObjectsMetaList();
+    this.props.resetObjectsS3MetaStart();
 
     this.setState((state) => {
       return {
@@ -136,6 +137,7 @@ export class ObjectsListContainer extends React.Component {
       sessionMetaList,
       sessionStartTimeList,
       sessionObjectsMetaList,
+      objectsS3MetaStart
     } = this.props;
 
     const visibleObjects = objects.slice(0, this.state.page * 20);
@@ -174,6 +176,7 @@ export class ObjectsListContainer extends React.Component {
               sessionMetaList={sessionMetaList}
               sessionStartTimeList={sessionStartTimeList}
               sessionObjectsMetaList={sessionObjectsMetaList}
+              objectsS3MetaStart={objectsS3MetaStart}
             />
           ) : null}{" "}
           {err != "noBucket" && err != "load" && err ? (
@@ -203,6 +206,7 @@ const mapStateToProps = (state) => {
     sessionMetaList: state.objects.sessionMetaList,
     sessionStartTimeList: state.objects.sessionStartTimeList,
     sessionObjectsMetaList: state.objects.sessionObjectsMetaList,
+    objectsS3MetaStart: state.objects.objectsS3MetaStart
   };
 };
 
@@ -219,6 +223,8 @@ const mapDispatchToProps = (dispatch) => {
     resetSessionStartTimeList: () => dispatch(actionsObjects.resetSessionStartTimeList()),
     resetSessionObjectsMetaList: () =>
       dispatch(actionsObjects.resetSessionObjectsMetaList()),
+      resetObjectsS3MetaStart: () =>
+      dispatch(actionsObjects.resetObjectsS3MetaStart()),
   };
 };
 

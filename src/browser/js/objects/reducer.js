@@ -71,8 +71,8 @@ export default (
     sessionMeta: [],
     sessionMetaList: [],
     sessionStartTimeList:[],
-    sessionObjectsMetaList: []
-
+    sessionObjectsMetaList: [],
+    objectsS3MetaStart: []
   },
   action
 ) => {
@@ -199,10 +199,20 @@ export default (
         ...state,
         sessionObjectsMetaList: state.sessionObjectsMetaList.concat(action.sessionObjectsMetaList)
       };
+    case actionsObjects.ADD_OBJECTS_S3_META_START:
+      return {
+        ...state,
+        objectsS3MetaStart: state.objectsS3MetaStart.concat(action.objectsS3MetaStart)
+      };
     case actionsObjects.RESET_SESSION_OBJECTS_META_LIST:
       return {
         ...state,
         sessionObjectsMetaList: []
+      };
+    case actionsObjects.RESET_OBJECTS_S3_META_START:
+      return {
+        ...state,
+        objectsS3MetaStart: []
       };
     case actionsObjects.SHOW_MANAGE_DEVICE_EDITOR:
       return {

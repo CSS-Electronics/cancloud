@@ -18,7 +18,7 @@ import React from "react";
 import ObjectContainer from "./ObjectContainer";
 import PrefixContainer from "./PrefixContainer";
 
-export const ObjectsList = ({ objects, sessionMetaList, sessionStartTimeList, sessionObjectsMetaList }) => {
+export const ObjectsList = ({ objects, sessionMetaList, sessionStartTimeList, sessionObjectsMetaList, objectsS3MetaStart }) => {
   const list = objects.map(object => {
 
     
@@ -28,7 +28,8 @@ export const ObjectsList = ({ objects, sessionMetaList, sessionStartTimeList, se
       return <PrefixContainer object={object} key={object.name} sessionMeta={sessionMeta} sessionStartTime={sessionStartTime} />;
     } else {
       const objectMeta = sessionObjectsMetaList.filter(objectMeta => objectMeta.name == object.name)[0]
-      return <ObjectContainer object={object} key={object.name} objectMeta={objectMeta} />;
+      const objectS3MetaStart = objectsS3MetaStart.filter(objectMeta => objectMeta.name ==  object.name)[0]
+      return <ObjectContainer object={object} key={object.name} objectMeta={objectMeta} objectS3MetaStart={objectS3MetaStart} />;
     }
   });
   return <div>{list}</div>;

@@ -26,13 +26,10 @@ import { Redirect } from "react-router-dom";
 import history from "../history";
 import { demoMode } from "../utils";
 import Files from "react-files";
+const { detect } = require('detect-browser')
+const browser = detect()
 
 let news = "";
-
-const awsEndpoint = new RegExp(
-  /^(http:\/\/|https:\/\/)s3\.(-|[a-z]|[0-9])*\.amazonaws\.com$/,
-  "g"
-);
 
 try {
   let newsJson = require("../../schema/news.json");
@@ -86,7 +83,9 @@ export class Login extends React.Component {
           let cfgBucket = cfgServer.bucket ? cfgServer.bucket : "";
 
           let endpoint = ""
-          if (cfgEndpoint.match(awsEndpoint) || cfgEndpoint.substring(cfgEndpoint.length - 3) == "com" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "com/") {
+          let cloudEndPointTest = cfgEndpoint.substring(cfgEndpoint.length - 3) == "com" ||  cfgEndpoint.substring(cfgEndpoint.length - 3) == "net" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "com/" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "net/"
+
+          if (cloudEndPointTest) {
              endpoint = cfgEndpoint;
           } else {
             // assume MinIO case
@@ -153,6 +152,8 @@ export class Login extends React.Component {
     event.preventDefault();
     const { showAlert, history } = this.props;
     let message = "";
+    let cloudEndPointTest = this.state.endPoint.substring(this.state.endPoint.length - 3) != "com" && this.state.endPoint.substring(this.state.endPoint.length - 4) != "com/" && this.state.endPoint.substring(this.state.endPoint.length - 3) != "net" && this.state.endPoint.substring(this.state.endPoint.length - 4) != "net/"
+
     if (this.state.accessKey === "") {
       message = "Access Key cannot be empty";
     }
@@ -175,7 +176,7 @@ export class Login extends React.Component {
     if (
       this.state.endPoint.substring(0, 5) == "http:" &&
       location.protocol == "https:" && 
-      this.state.endPoint.match(awsEndpoint)
+      cloudEndPointTest
     ) {
       this.props.showAlert("info", "Auto-adjusting endpoint prefix from http:// to https:// to enable login via https:// browser URL")
       let endPointAdj = this.state.endPoint.replace("http://","https://")
@@ -201,13 +202,22 @@ export class Login extends React.Component {
     ) {
       message = "Please add http:// or https:// in front of your endpoint";
     }
+
+    if (
+      this.state.endPoint.substring(0, 6) != "https:" &&
+      (browser.name == "chrome" || browser.name == "edge") && 
+      cloudEndPointTest
+    ) {
+      message = "It looks like you are trying to login to a TLS-disabled MinIO S3 server using a Chrome/Edge browser. This is not possible unless you are self-hosting CANcloud on the S3 server network. You can use Firefox instead - or enable TLS on your MinIO S3 server. See the S3 server documentation details.";
+    }
+
     if (this.state.bucketName === "") {
       message = "Bucket Name is required";
     }
 
     if (message) {
       showAlert("danger", message);
-      return;
+        // return;
     }
 
     web
@@ -222,15 +232,7 @@ export class Login extends React.Component {
         // console.log(res);
       })
       .catch((e) => {
-        if (this.state.endPoint.match(awsEndpoint)) {
-          showAlert(
-            "danger",
-            e.message +
-              " - press F12 for details. Check your AWS S3 region and ensure that you've set up CORS correctly for your S3 bucket (as per the AWS S3 setup guide)"
-          );
-        } else {
-          showAlert("danger", e.message + " - press F12 for details");
-        }
+        showAlert("danger", e.message + " - press F12 for details. " + message);
       });
   }
 

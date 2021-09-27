@@ -83,9 +83,9 @@ export class Login extends React.Component {
           let cfgBucket = cfgServer.bucket ? cfgServer.bucket : "";
 
           let endpoint = ""
-          let cloudEndPointTest = cfgEndpoint.substring(cfgEndpoint.length - 3) == "com" ||  cfgEndpoint.substring(cfgEndpoint.length - 3) == "net" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "com/" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "net/"
+          let cfgCloudEndPointTest = cfgEndpoint.substring(cfgEndpoint.length - 3) == "com" ||  cfgEndpoint.substring(cfgEndpoint.length - 3) == "net" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "com/" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "net/"
 
-          if (cloudEndPointTest) {
+          if (cfgCloudEndPointTest) {
              endpoint = cfgEndpoint;
           } else {
             // assume MinIO case
@@ -152,7 +152,7 @@ export class Login extends React.Component {
     event.preventDefault();
     const { showAlert, history } = this.props;
     let message = "";
-    let cloudEndPointTest = this.state.endPoint.substring(this.state.endPoint.length - 3) != "com" && this.state.endPoint.substring(this.state.endPoint.length - 4) != "com/" && this.state.endPoint.substring(this.state.endPoint.length - 3) != "net" && this.state.endPoint.substring(this.state.endPoint.length - 4) != "net/"
+    let isMinioServer = this.state.endPoint.substring(this.state.endPoint.length - 6).includes(":")
 
     if (this.state.accessKey === "") {
       message = "Access Key cannot be empty";
@@ -176,7 +176,7 @@ export class Login extends React.Component {
     if (
       this.state.endPoint.substring(0, 5) == "http:" &&
       location.protocol == "https:" && 
-      cloudEndPointTest
+      isMinioServer == false
     ) {
       this.props.showAlert("info", "Auto-adjusting endpoint prefix from http:// to https:// to enable login via https:// browser URL")
       let endPointAdj = this.state.endPoint.replace("http://","https://")
@@ -206,7 +206,7 @@ export class Login extends React.Component {
     if (
       this.state.endPoint.substring(0, 6) != "https:" &&
       (browser.name == "chrome" || browser.name == "edge") && 
-      cloudEndPointTest
+      isMinioServer == true
     ) {
       message = "It looks like you are trying to login to a TLS-disabled MinIO S3 server using a Chrome/Edge browser. This is not possible unless you are self-hosting CANcloud on the S3 server network. You can use Firefox instead - or enable TLS on your MinIO S3 server. See the S3 server documentation details.";
     }

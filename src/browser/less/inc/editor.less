@@ -1,3 +1,73 @@
+@-webkit-keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+    16% {
+        opacity: 1;
+    }
+    84% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+    16% {
+        opacity: 1;
+    }
+    84% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+.fadeout-box {
+    opacity: 0;
+    -webkit-animation: fadeInOut 6s;
+    animation: fadeInOut 6s;
+}
+
+
+.schema-loader-callout{
+  position: fixed;
+  z-index: 9999;
+  right: 20px;
+  width: 15%;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 10px;
+  border-color: rgba(255, 255, 255, 0);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 0;
+  margin-top: -1px;
+  -webkit-box-shadow: @dropdown-shadow;
+  box-shadow: @dropdown-shadow;
+
+  margin-right: 340px;
+}
+
+.uischema-loader{
+  top:138px;
+}
+
+.schema-loader{
+  top:220px;
+}
+
+.config-loader{
+  top:330px;
+}
+
+@media (max-width: @screen-sm-max) {
+  .schema-loader-callout {
+    visibility: hidden !important;
+  }
+}
 
 .config-editor {
   padding-top: 0px;

@@ -8,9 +8,17 @@ import { SECRET_CODE } from "../browser/js/constants";
 import { S3Client } from "./s3client";
 import StorageResponses from "./response";
 import AwsSdk from "./aws-sdk-client";
+import storage from 'local-storage-fallback'
+
 
 class S3Explorer {
+
+
   constructor(options, token) {
+    // when the region has been stored in cache, we can now load it from here
+    if (storage.getItem('region')) {
+      var region = storage.getItem('region')
+    }
     if (token) {
       let sessionObj = jwt.verify(token, SECRET_CODE);
       this.endPoint = sessionObj.endPoint;
@@ -19,19 +27,23 @@ class S3Explorer {
       this.s3Client = S3Client(
         sessionObj.endPoint,
         sessionObj.accessKey,
-        sessionObj.secretKey
+        sessionObj.secretKey,
+        region
       );
       this.bucketName = sessionObj.bucketName;
     } else if (options.endPoint) {
+      // when the user needs to log in, the region is parsed based on the options provided
       this.s3Client = S3Client(
         options.endPoint,
         options.accessKey,
-        options.secretKey
+        options.secretKey,
+        options.region
       );
       this.endPoint = options.endPoint;
       this.accessKey = options.accessKey;
       this.secretKey = options.secretKey;
       this.bucketName = options.bucketName;
+      this.region = options.region
     }
 
     this.AwsSdk = new AwsSdk(this.accessKey, this.secretKey, this.endPoint);

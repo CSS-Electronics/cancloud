@@ -126,6 +126,13 @@ export class Client {
 
     this.regionMap = {}
 
+    // set the region from the login inputs if available
+    if(params.region != '' && params.region != undefined){
+      this.region = params.region
+      storage.setItem('region',params.region)
+    }
+
+    // or, set the region from cache if available
     if (storage.getItem('region')) {
       this.region = storage.getItem('region')
     }
@@ -313,8 +320,7 @@ export class Client {
   // payload can be empty string in case of no payload.
   // statusCode is the expected statusCode. If response.statusCode does not match
   // we parse the XML error and call the callback with the error message.
-  // A valid region is passed by the calls - listBuckets, makeBucket and
-  // getBucketRegion.
+  // A valid region is passed by the calls - listBuckets, makeBucket.
   makeRequest(options, payload, statusCode, region, returnResponse, cb) {
     if (!isObject(options)) {
       throw new TypeError('options should be of type "object"')
@@ -431,70 +437,7 @@ export class Client {
         cb(e)
       })
     }
-    if (region) return _makeRequest(null, region)
-    this.getBucketRegion(options.bucketName, _makeRequest)
-  }
-
-  // gets the region of the bucket
-  getBucketRegion(bucketName, cb) {
-    
-    if (!isValidBucketName(bucketName)) {
-      throw new errors.InvalidBucketNameError(`Invalid bucket name : ${bucketName}`)
-    }
-    if (!isFunction(cb)) {
-      throw new TypeError('cb should be of type "function"')
-    }
-    
-    // Region is set with constructor, return the region right here.
-    if (this.region) return cb(null, this.region)
-  
-    if (this.regionMap[bucketName]) return cb(null, this.regionMap[bucketName])
-    var extractRegion = (response) => {
-      var transformer = transformers.getBucketRegionTransformer()
-      var region = 'us-east-1'
-      pipesetup(response, transformer)
-        .on('error', cb)
-        .on('data', data => {
-          if (data) region = data
-        })
-        .on('end', () => {
-          this.regionMap[bucketName] = region
-          storage.setItem('region',region)
-          cb(null, region)
-        })
-    }
-
-    var method = 'GET'
-    var query = 'location'
-
-    // `getBucketLocation` behaves differently in following ways for
-    // different environments.
-    //
-    // - For nodejs env we default to path style requests.
-    // - For browser env path style requests on buckets yields CORS
-    //   error. To circumvent this problem we make a virtual host
-    //   style request signed with 'us-east-1'. This request fails
-    //   with an error 'AuthorizationHeaderMalformed', additionally
-    //   the error XML also provides Region of the bucket. To validate
-    //   this region is proper we retry the same request with the newly
-    //   obtained region.
-    var pathStyle = typeof window === 'undefined'
-    this.makeRequest({method, bucketName, query, pathStyle}, '', 200, 'us-east-1', true, (e, response) => {
-      if (e) {
-        if (e.code === 'AuthorizationHeaderMalformed') {
-          var region = e.region
-          if (!region) return cb(e)
-          this.makeRequest({method, bucketName, query}, '', 200, region, true, (e, response) => {
-            if (e) return cb(e)
-            extractRegion(response)
-          })
-          return
-        }
-        return cb(e)
-      } else {
-        extractRegion(response)
-      }
-    })
+    if (this.region) return _makeRequest(null, this.region)
   }
 
   // Creates the bucket `bucketName`.
@@ -1583,10 +1526,8 @@ export class Client {
     }
     var requestDate = new Date()
     var query = querystring.stringify(reqParams)
-    this.getBucketRegion(bucketName, (e, region) => {
-      if (e) return cb(e)
-      // This statement is added to ensure that we send error through
-      // callback on presign failure.
+
+      var region = this.region
       var url
       var reqOptions = this.getRequestOptions({method,
                                                region,
@@ -1595,12 +1536,11 @@ export class Client {
                                                query})
       try {
         url = presignSignatureV4(reqOptions, this.accessKey, this.secretKey,
-                                 region, requestDate, expires)
+                                 this.region, requestDate, expires)
       } catch (pe) {
         return cb(pe)
       }
       cb(null, url)
-    })
   }
 
   // Generate a presigned URL for GET
@@ -1648,57 +1588,6 @@ export class Client {
     return new PostPolicy()
   }
 
-  // presignedPostPolicy can be used in situations where we want more control on the upload than what
-  // presignedPutObject() provides. i.e Using presignedPostPolicy we will be able to put policy restrictions
-  // on the object's `name` `bucket` `expiry` `Content-Type`
-  presignedPostPolicy(postPolicy, cb) {
-    if (this.anonymous) {
-      throw new errors.AnonymousRequestError('Presigned POST policy cannot be generated for anonymous requests')
-    }
-    if (!isObject(postPolicy)) {
-      throw new TypeError('postPolicy should be of type "object"')
-    }
-    if (!isFunction(cb)) {
-      throw new TypeError('cb should be of type "function"')
-    }
-    this.getBucketRegion(postPolicy.formData.bucket, (e, region) => {
-      if (e) return cb(e)
-      var date = new Date()
-      var dateStr = makeDateLong(date)
-
-      if (!postPolicy.policy.expiration) {
-        // 'expiration' is mandatory field for S3.
-        // Set default expiration date of 7 days.
-        var expires = new Date()
-        expires.setSeconds(24 * 60 * 60 * 7)
-        postPolicy.setExpires(expires)
-      }
-
-      postPolicy.policy.conditions.push(['eq', '$x-amz-date', dateStr])
-      postPolicy.formData['x-amz-date'] = dateStr
-
-      postPolicy.policy.conditions.push(['eq', '$x-amz-algorithm', 'AWS4-HMAC-SHA256'])
-      postPolicy.formData['x-amz-algorithm'] = 'AWS4-HMAC-SHA256'
-
-      postPolicy.policy.conditions.push(["eq", "$x-amz-credential", this.accessKey + "/" + getScope(region, date)])
-      postPolicy.formData['x-amz-credential'] = this.accessKey + "/" + getScope(region, date)
-
-      var policyBase64 = new Buffer(JSON.stringify(postPolicy.policy)).toString('base64')
-
-      postPolicy.formData.policy = policyBase64
-
-      var signature = postPresignSignatureV4(region, date, this.secretKey, policyBase64)
-
-      postPolicy.formData['x-amz-signature'] = signature
-      var opts = {}
-      opts.region = region
-      opts.bucketName = postPolicy.formData.bucket
-      var reqOptions = this.getRequestOptions(opts)
-      var portStr = (this.port == 80 || this.port === 443) ? '' : `:${this.port.toString()}`
-      var urlStr = `${reqOptions.protocol}//${reqOptions.host}${portStr}${reqOptions.path}`
-      cb(null, {postURL: urlStr,formData: postPolicy.formData})
-    })
-  }
 
   // Calls implemented below are related to multipart.
 
@@ -2131,7 +2020,6 @@ Client.prototype.removeObjects = promisify(Client.prototype.removeObjects)
 
 Client.prototype.presignedGetObject = promisify(Client.prototype.presignedGetObject)
 Client.prototype.presignedPutObject = promisify(Client.prototype.presignedPutObject)
-Client.prototype.presignedPostPolicy = promisify(Client.prototype.presignedPostPolicy)
 Client.prototype.getBucketNotification = promisify(Client.prototype.getBucketNotification)
 Client.prototype.setBucketNotification = promisify(Client.prototype.setBucketNotification)
 Client.prototype.removeAllBucketNotification = promisify(Client.prototype.removeAllBucketNotification)

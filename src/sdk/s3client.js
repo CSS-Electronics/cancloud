@@ -17,7 +17,7 @@
 const StorageClient = require('./storage')
 import { endPointSchema } from './helpers'
 
-export function S3Client(endPoint, accessKey, secretKey) {
+export function S3Client(endPoint, accessKey, secretKey, region = '') {
   let useSSL = false
   const parsedEndPoint = endPointSchema(endPoint)
  
@@ -40,13 +40,15 @@ export function S3Client(endPoint, accessKey, secretKey) {
       port: parseInt(parsedEndPoint.port) || 80,
       useSSL: useSSL,
       accessKey: accessKey,
-      secretKey: secretKey
+      secretKey: secretKey,
+      region:region
     })
   } else {
     return new StorageClient.Client({
       endPoint: parsedEndPoint.hostname,
       accessKey: accessKey,
-      secretKey: secretKey
+      secretKey: secretKey,
+      region:region
     })
   }
 }

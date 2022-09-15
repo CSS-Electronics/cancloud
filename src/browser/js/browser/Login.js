@@ -49,6 +49,7 @@ export class Login extends React.Component {
           accessKey: "",
           secretKey: "",
           endPoint: "",
+          region: "",
           bucketName: "",
           jsonFileName: "",
         };
@@ -58,6 +59,7 @@ export class Login extends React.Component {
         accessKey: "",
         secretKey: "",
         endPoint: "",
+        region: "",
         bucketName: "",
         jsonFileName: "",
       };
@@ -81,6 +83,7 @@ export class Login extends React.Component {
           let cfgAccessKey = cfgServer.accesskey ?  cfgServer.accesskey : "";
           let cfgSecretkey = cfgServer.secretkey ? cfgServer.secretkey : "";
           let cfgBucket = cfgServer.bucket ? cfgServer.bucket : "";
+          let cfgRegion = cfgServer.region ? cfgServer.region : "";
 
           let endpoint = ""
           let cfgCloudEndPointTest = cfgEndpoint.substring(cfgEndpoint.length - 3) == "com" ||  cfgEndpoint.substring(cfgEndpoint.length - 3) == "net" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "com/" || cfgEndpoint.substring(cfgEndpoint.length - 4) == "net/"
@@ -97,6 +100,7 @@ export class Login extends React.Component {
             accessKey: cfgAccessKey,
             secretKey: cfgSecretkey,
             endPoint: endpoint,
+            region: cfgRegion,
             bucketName: cfgBucket,
 
             }, () => {
@@ -142,6 +146,12 @@ export class Login extends React.Component {
     });
   }
 
+  regionChange(e) {
+    this.setState({
+      region: e.target.value,
+    });
+  }
+
   bucketNameChange(e) {
     this.setState({
       bucketName: e.target.value,
@@ -162,6 +172,9 @@ export class Login extends React.Component {
     }
     if (this.state.endPoint === "") {
       message = "End point cannot be empty";
+    }
+    if (this.state.region === "") {
+      message = "Region cannot be empty";
     }
     if (this.state.endPoint === "https://s3.amazonaws.com") {
       message =
@@ -225,6 +238,7 @@ export class Login extends React.Component {
         accessKey: this.state.accessKey,
         secretKey: this.state.secretKey,
         endPoint: this.state.endPoint,
+        region: this.state.region,
         bucketName: this.state.bucketName,
       })
       .then((res) => {
@@ -299,6 +313,18 @@ export class Login extends React.Component {
               required="required"
               autoComplete="new-password"
             />
+            <InputGroup
+              value={this.state.region}
+              onChange={this.regionChange.bind(this)}
+              className="ig-dark"
+              label="Region"
+              id="region"
+              name="region"
+              type="text"
+              spellCheck="false"
+              required="required"
+              autoComplete="region"
+            />
 
             <InputGroup
               value={this.state.bucketName}
@@ -357,9 +383,9 @@ const mapDispatchToProps = (dispatch) => {
     showAlert: (type, message) =>
       dispatch(actionsAlert.set({ type: type, message: message })),
     clearAlert: () => dispatch(actionsAlert.clear()),
-    login: (accessKey, secretKey, endPoint, bucketName) =>
+    login: (accessKey, secretKey, endPoint, region, bucketName) =>
       dispatch(
-        actionsBrowser.login(accessKey, secretKey, endPoint, bucketName)
+        actionsBrowser.login(accessKey, secretKey, endPoint,region, bucketName)
       ),
   };
 };

@@ -1,6 +1,6 @@
 {
   "name": "cancloud",
-  "version": "05.07.01",
+  "version": "05.08.02",
   "description": "A React based s3 browser for use with the CANedge2",
   "main": "index.js",
   "scripts": {
@@ -62,7 +62,7 @@
     "chart.js": "^2.8.0",
     "classnames": "^2.2.6",
     "concat-stream": "^1.6.2",
-    "config-editor-base": "^1.6.7",
+    "config-editor-base": "^1.7.6",
     "config-editor-tools": "^1.1.2",
     "crc": "^3.8.0",
     "create-file": "^1.0.1",

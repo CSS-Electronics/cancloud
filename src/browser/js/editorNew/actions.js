@@ -4,7 +4,7 @@ import web from "../web";
 import history from "../history";
 import * as alertActions from "../alert/actions";
 
-import { isValidSchema, isValidConfig, pathSlice } from "../utils";
+import { isValidUISchema, isValidSchema, isValidConfig, pathSlice } from "../utils";
 
 export const fetchFilesS3 = (prefix) => {
   return function (dispatch) {
@@ -26,8 +26,6 @@ export const fetchFilesS3 = (prefix) => {
           .sort()
           .reverse();
 
-        console.log(schemaFiles)
-
         dispatch(editorActions.setSchemaFile(schemaFiles));
         if(schemaFiles.length){
           dispatch(fetchFileContentS3(schemaFiles[0], "schema"));
@@ -43,6 +41,21 @@ export const fetchFilesS3 = (prefix) => {
         if(configFiles.length){
           dispatch(fetchFileContentS3(configFiles[0], "config"));
         }
+
+        // UIschemas
+        let uischemaFiles = allObjects
+        .filter((str) => isValidUISchema(str))
+        .sort()
+        .reverse();
+
+        dispatch(editorActions.setUISchemaFile(uischemaFiles));
+
+        if(uischemaFiles.length){
+          dispatch(editorActions.resetUISchemaList());
+          dispatch(editorActions.setUISchemaFile(uischemaFiles));
+          dispatch(fetchFileContentS3(uischemaFiles[0], "uischema"));
+        }
+
       })
       .catch((err) => {
         if (web.LoggedIn()) {
@@ -55,11 +68,16 @@ export const fetchFilesS3 = (prefix) => {
 };
 
 // fetch file contents from S3 for Rule Schema or Configuration Files
-// This should only be triggered by non UIschema dropdowns
+// This should only be triggered when selecting a non-embedded and non-uploaded file
 export const fetchFileContentS3 = (fileName, type) => {
+
   return function (dispatch) {
     if (fileName == "None") {
       switch (type) {
+        case "uischema":
+          dispatch(editorActions.resetLocalUISchemaList());
+          dispatch(editorActions.setUISchemaContent(null));
+          break;
         case "schema":
           dispatch(editorActions.resetLocalSchemaList());
           dispatch(editorActions.setSchemaContent(null));
@@ -91,6 +109,10 @@ export const fetchFileContentS3 = (fileName, type) => {
           .then((r) => r.text())
           .then((data) => {
             switch (type) {
+              case "uischema":
+                dispatch(editorActions.resetLocalUISchemaList());
+                dispatch(editorActions.setUISchemaContent(JSON.parse(data)));
+                break;
               case "schema":
                 dispatch(editorActions.resetLocalSchemaList());
                 dispatch(editorActions.setSchemaContent(JSON.parse(data)));
@@ -110,6 +132,9 @@ export const fetchFileContentS3 = (fileName, type) => {
           })
           .catch((e) => {
             switch (true) {
+              case type == "uischema":
+                dispatch(editorActions.setUISchemaContent(null));
+                break;
               case type == "schema":
                 dispatch(editorActions.setSchemaContent(null));
                 break;

@@ -51,11 +51,13 @@ export const SideBar = ({
 
 
           <div className="version-text sb-custom-version">
-            v05.08.01
+            v05.08.02
             {demoMode ? (
               <div>
                 <br />
                 DEMO MODE (date fixed at {demoDate.split(" ")[0]})
+                <br /><br />
+                Open the official & latest CANcloud <a href="https://canlogger.csselectronics.com/cancloud/">here</a>
               </div>
             ) : null}
           </div>

@@ -16,7 +16,7 @@
 
 import React from "react";
 import { connect } from "react-redux";
-import InfiniteScroll from "react-infinite-scroller";
+import InfiniteScroll from "react-infinite-scroll-component";
 import * as actionsObjects from "./actions";
 import ObjectsList from "./ObjectsList";
 import CorsError from "./corsError";
@@ -28,19 +28,23 @@ export class ObjectsListContainer extends React.Component {
     super(props);
     this.state = {
       page: 1,
+      timeoutId: null,
+      pageCounterList: []
     };
     this.loadNextPage = this.loadNextPage.bind(this);
     this.loadSessionsMeta = this.loadSessionsMeta.bind(this);
     this.loadObjectsMeta = this.loadObjectsMeta.bind(this);
+    this.loadMetaDataBasedOnScroll = this.loadMetaDataBasedOnScroll.bind(this);
+    window.addEventListener('scroll', this.loadMetaDataBasedOnScroll, true);
   }
 
-  loadSessionsMeta(propsInput, bucket, prefix) {
-    let prefixList = propsInput.objects.slice((this.state.page - 1) * 20, this.state.page * 20).filter((object) => object.name.endsWith("/"));
+  loadSessionsMeta(propsInput, bucket, prefix, pageCounter) {
+    let prefixList = propsInput.objects.slice((pageCounter - 1) * 20, pageCounter * 20).filter((object) => object.name.endsWith("/"));
     this.props.fetchSessionMetaList(bucket, prefixList);
   }
 
-  loadObjectsMeta(propsInput, bucket, prefix) {
-    let objectsList = propsInput.objects.slice((this.state.page - 1) * 20, this.state.page * 20);
+  loadObjectsMeta(propsInput, bucket, prefix, pageCounter) {
+    let objectsList = propsInput.objects.slice((pageCounter - 1) * 20, pageCounter * 20);
     this.props.fetchSessionObjectsMetaList(bucket, prefix, objectsList);
   }
 
@@ -62,16 +66,17 @@ export class ObjectsListContainer extends React.Component {
 
     // load sessionMetaList when in root device folder
     if (this.props.objects != nextProps.objects && nextProps.objects.length && prefix == "" && bucket != "") {
-      this.loadSessionsMeta(nextProps, bucket, prefix);
+      this.loadSessionsMeta(nextProps, bucket, prefix, 1);
     }
 
     // load sessionObjectsMetaList when inside session folder
     if (this.props.objects != nextProps.objects && nextProps.objects.length != 0 && prefix != "") {
-      this.loadObjectsMeta(nextProps, bucket, prefix);
+      this.loadObjectsMeta(nextProps, bucket, prefix, 1);
     }
   }
 
   componentWillUnmount() {
+    window.removeEventListener('scroll', this.loadMetaDataBasedOnScroll, true);
     // reset page and sessionMetaList
     this.props.resetSessionMetaList();
     this.props.resetSessionStartTimeList();
@@ -79,9 +84,15 @@ export class ObjectsListContainer extends React.Component {
     this.props.resetSessionObjectsMetaList();
     this.props.resetObjectsS3MetaStart();
 
+    if (this.state.timeoutId) {
+      clearTimeout(this.state.timeoutId);
+    }
+
     this.setState((state) => {
       return {
         page: 1,
+        pageCounterList: [],
+        timeoutId: null
       };
     });
   }
@@ -89,19 +100,43 @@ export class ObjectsListContainer extends React.Component {
   loadNextPage() {
     this.setState((state) => {
       return {
-        page: state.page + 1,
+        page: state.page + 1
       };
     });
+  }
 
-    // load next batch of sessionMetaList when in root device folder and user has scrolled to next page
-    const { bucket, prefix } = pathSlice(history.location.pathname);
+  loadMetaDataBasedOnScroll() {
 
-    if (prefix == "" && bucket != "") {
-      this.loadSessionsMeta(this.props, bucket, prefix);
+    if (this.state.timeoutId) {
+      clearTimeout(this.state.timeoutId);
     }
-    if (prefix != "") {
-      this.loadObjectsMeta(this.props, bucket, prefix);
-    }
+    this.setState({
+      timeoutId: setTimeout(() => {
+
+        // define pageCounter based
+        let pageCounter = Math.ceil((window.pageYOffset || document.documentElement.scrollTop) / 1040)
+
+        // load next batch of sessionMetaList when in root device folder and user has scrolled to next page
+        if (this.state.pageCounterList && this.state.pageCounterList.includes(pageCounter) == false) {
+          const { bucket, prefix } = pathSlice(history.location.pathname);
+          if (prefix == "" && bucket != "") {
+            this.loadSessionsMeta(this.props, bucket, prefix, pageCounter);
+          }
+          if (prefix != "") {
+            this.loadObjectsMeta(this.props, bucket, prefix, pageCounter);
+          }
+          this.setState((prevState) => {
+            return {
+              pageCounterList: [...prevState.pageCounterList, pageCounter],
+            };
+          });
+        }
+
+      }, 1000)
+    })
+
+
+
   }
 
   render() {
@@ -117,20 +152,24 @@ export class ObjectsListContainer extends React.Component {
       objectsS3MetaStart,
     } = this.props;
 
-    const visibleObjects = objects.slice(0, this.state.page * 20);
+    const visibleObjects = objects.slice(0, this.state.page * 50);
 
     return (
       <div
         className="feb-container"
+        onScroll={this.loadSessionDataBasedOnScroll}
         style={{
           position: "relative",
         }}
       >
         <InfiniteScroll
           pageStart={0}
-          loadMore={visibleObjects.length > 0 ? this.loadNextPage : () => {}}
-          hasMore={objects.length > visibleObjects.length}
-          useWindow={true}
+          dataLength={visibleObjects.length}
+          children={objects}
+          next={visibleObjects.length > 0 ? this.loadNextPage : () => { }}
+          hasMore={visibleObjects.length < objects.length}
+          loader={<h4>Loading...</h4>}
+          // useWindow={true}
           initialLoad={false}
         >
           {err == "noBucket" ? (
@@ -156,6 +195,7 @@ export class ObjectsListContainer extends React.Component {
           ) : null}{" "}
           {err != "noBucket" && err != "load" && err ? <CorsError currentBucket={currentBucket} /> : null}{" "}
         </InfiniteScroll>{" "}
+
         <div
           className="text-center"
           style={{

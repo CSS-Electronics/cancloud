@@ -1,7 +1,7 @@
 {
   "name": "cancloud",
-  "version": "05.08.02",
-  "description": "A React based s3 browser for use with the CANedge2",
+  "version": "05.08.04",
+  "description": "A React based S3 browser for use with the CANedge",
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development --open --progress --colors --hot",
@@ -110,7 +110,10 @@
     "react-gh-like-diff": "^2.0.2",
     "react-hover-observer": "^2.1.1",
     "react-hoverintent": "0.0.10",
+    "react-infinite-scroll-component": "^6.1.0",
+    "react-infinite-scroll-up-n-down": "^1.3.3",
     "react-infinite-scroller": "^1.2.2",
+    "react-intersection-observer": "^9.4.1",
     "react-json-view": "^1.19.1",
     "react-jsonschema-form": "^2.0.0-alpha.1",
     "react-multiselect-checkboxes": "^0.1.1",

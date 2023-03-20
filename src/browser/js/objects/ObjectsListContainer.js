@@ -132,7 +132,7 @@ export class ObjectsListContainer extends React.Component {
           });
         }
 
-      }, 1000)
+      }, 500)
     })
 
 

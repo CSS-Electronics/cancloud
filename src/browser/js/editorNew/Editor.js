@@ -37,6 +37,8 @@ export const schemaAry = [
   "schema-01.06.json | CANedge1",
   "schema-01.07.json | CANedge2",
   "schema-01.07.json | CANedge1",
+  "schema-01.07.json | CANedge2 GNSS",
+  "schema-01.07.json | CANedge1 GNSS",
 ];
 
 export const demoMode = false 
@@ -81,10 +83,11 @@ class Editor extends React.Component {
       <div className="file-explorer">
         <SideBar />
         <div className="fe-body">
+        <AlertContainer />
+
           {web.LoggedIn() && <MobileHeader />}
           <Header />
 
-          <AlertContainer />
           <DeviceFileModal/>
 
           <EditorSection

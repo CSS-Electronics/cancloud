@@ -26,8 +26,8 @@ import * as actionsEditorS3 from "./actions";
 
 // define UIschema and Rule Schema names for auto-loading purposes
 export const uiSchemaAry = [
-  "uischema-01.06.json | Simple",
-  "uischema-01.06.json | Advanced",
+  // "uischema-01.06.json | Simple",
+  // "uischema-01.06.json | Advanced",
   "uischema-01.07.json | Simple",
   "uischema-01.07.json | Advanced",
 ];
@@ -37,6 +37,7 @@ export const schemaAry = [
   "schema-01.06.json | CANedge1",
   "schema-01.07.json | CANedge2",
   "schema-01.07.json | CANedge1",
+  "schema-01.07.json | CANedge3 GNSS",
   "schema-01.07.json | CANedge2 GNSS",
   "schema-01.07.json | CANedge1 GNSS",
 ];

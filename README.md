@@ -55,11 +55,6 @@ If you wish to customize your self-hosted version of CANcloud, you can do so wit
 
 You can now access your own self-hosted version of CANcloud - incl. any customizations made. 
 
-#### Deployment (offline editor) 
-
-1. Run `npm run simple`
-2. Copy the offline editor from the `simple` folder 
-
 #### Example of login details 
 If you have set up e.g. an AWS S3 server and bucket, your login details could look as below:
 

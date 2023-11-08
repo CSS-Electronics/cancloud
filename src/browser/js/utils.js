@@ -18,7 +18,7 @@ import { minioBrowserPrefix } from "./constants.js";
 import xml2js from "xml2js";
 import _ from "lodash";
 
-export const demoMode = false 
+export const demoMode = false
 export const demoDate = '2023.01.14 13:46:32'
 
 export const sortObjectsByName = (objects, order) => {
@@ -153,7 +153,7 @@ export const parseXml = xml => {
   var error = null;
 
   var parser = new xml2js.Parser(options);
-  parser.parseString(xml, function(e, r) {
+  parser.parseString(xml, function (e, r) {
     error = e;
     result = r;
   });
@@ -164,44 +164,47 @@ export const parseXml = xml => {
   return result;
 };
 
-
-export function get_first_timestamp(input) {
-
-  let data = input
-
+export function get_first_timestamp(data) {
   let view = new DataView(data.buffer);
 
-  if( data.length < 168 ) {
-      return -1;
+  /* Sanity check */
+  if (data.length < 168) {
+    return -1;
   }
 
   /* Check that the header matches the expected tool */
   let decoder = new TextDecoder();
   const s = decoder.decode(data.slice(16, 23)).trim();
-  if( s !== "CE" ) {
-      return -1;
+  if (s !== "CE") {
+    return -1;
   }
 
-  /* Get jump address 1 */
-  const addr_dg = Number(view.getBigUint64(88, true));
+  /* Find first DG block */
+  const addressDG = Number(view.getBigUint64(88, true));
 
-  if( data.length < addr_dg + 48 ) {
-      return -1;
+  /* Sanity check */
+  if (data.length < (addressDG + 40)) {
+    return -1;
   }
 
-  /* Get jump address 2 */
-  const addr_dt = Number(view.getBigUint64(addr_dg + 40, true));
-  if( data.length < addr_dt + 33 ) {
-      return -1;
+  /* Find data block */
+  const addressDT = Number(view.getBigUint64(addressDG + 40, true));
+
+  /* Sanity check */
+  if (data.length < (addressDT + 25)) {
+    return -1;
   }
 
-  /* Read data at offset */
-  const firstTimestamp = view.getFloat64(addr_dt + 25, true) * 1E-9;
+  /* Select method based on offset */
+  let firstTimestamp = -1;
+  if (addressDT > 100000) {
+    firstTimestamp = Number(view.getBigUint64(addressDT + 25, true) & BigInt(0x0000FFFFFFFFFFFF)) * 1E-6;
+  } else {
+    firstTimestamp = view.getFloat64(addressDT + 25, true) * 1E-9;
+  }
 
   /* Read start time */
   const startTime = Number(view.getBigUint64(136, true)) * 1E-9;
 
-  const firstMeasurementTime = firstTimestamp + startTime;
-
-  return firstMeasurementTime;
+  return firstTimestamp + startTime;
 }

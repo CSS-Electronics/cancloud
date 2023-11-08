@@ -349,45 +349,45 @@ export const fetchSessionMetaList = (bucket, prefixList) => {
 
           objectsFirstLast.map((object, index) => {
             // get partial content from each object for use in extracting 'start time' from MF4 files
-            web
-              .GetPartialObject({
-                bucketName: bucket,
-                objectName: prefix.name + object.split("/")[2],
-                offset: 0,
-                byteLength: 15000,
-              })
-              .then((objContent) => {
-                objectCounter += 1;
-                let metaData = objContent.objContent[0];
+            // web
+            //   .GetPartialObject({
+            //     bucketName: bucket,
+            //     objectName: prefix.name + object.split("/")[2],
+            //     offset: 0,
+            //     byteLength: 15000,
+            //   })
+            //   .then((objContent) => {
+            //     objectCounter += 1;
+            //     let metaData = objContent.objContent[0];
 
-                let metaDate = get_first_timestamp(metaData);
-                let lastModifiedSD = metaDate ? (metaDate != -1 ? Moment.unix(metaDate).format("YY-MM-DD HH:mm") : null) : null;
+            //     let metaDate = get_first_timestamp(metaData);
+            //     let lastModifiedSD = metaDate ? (metaDate != -1 ? Moment.unix(metaDate).format("YY-MM-DD HH:mm") : null) : null;
 
-                sessionObjectsStartTime.push({
-                  name: object.split("/")[2],
-                  lastModifiedSD: lastModifiedSD,
-                });
+            //     sessionObjectsStartTime.push({
+            //       name: object.split("/")[2],
+            //       lastModifiedSD: lastModifiedSD,
+            //     });
 
-                // Once we have loaded partial content for the 0-2 log files, sort them and add range to sessionStartTimeRange
-                if (objectCounter == objectsFirstLast.length) {
-                  sessionObjectsStartTime.sort((a, b) => (a.name > b.name ? 1 : -1));
+            //     // Once we have loaded partial content for the 0-2 log files, sort them and add range to sessionStartTimeRange
+            //     if (objectCounter == objectsFirstLast.length) {
+            //       sessionObjectsStartTime.sort((a, b) => (a.name > b.name ? 1 : -1));
 
-                  let lastModifiedSDStart = sessionObjectsStartTime[0].lastModifiedSD ? sessionObjectsStartTime[0].lastModifiedSD : null;
-                  let lastModifiedSDEnd = sessionObjectsStartTime.length == 1 ? null : sessionObjectsStartTime[1].lastModifiedSD;
-                  let lastModifiedSDRange =
-                    lastModifiedSDStart != null ? lastModifiedSDStart + (lastModifiedSDEnd != null ? " - " + lastModifiedSDEnd : "") : null;
+            //       let lastModifiedSDStart = sessionObjectsStartTime[0].lastModifiedSD ? sessionObjectsStartTime[0].lastModifiedSD : null;
+            //       let lastModifiedSDEnd = sessionObjectsStartTime.length == 1 ? null : sessionObjectsStartTime[1].lastModifiedSD;
+            //       let lastModifiedSDRange =
+            //         lastModifiedSDStart != null ? lastModifiedSDStart + (lastModifiedSDEnd != null ? " - " + lastModifiedSDEnd : "") : null;
 
-                  sessionStartTimeRange.push({
-                    prefix: prefix.name,
-                    lastModifiedSD: lastModifiedSDRange,
-                  });
+            //       sessionStartTimeRange.push({
+            //         prefix: prefix.name,
+            //         lastModifiedSD: lastModifiedSDRange,
+            //       });
 
-                  // Once we have completed sessionStartTimeRange, load the S3 meta data next for each prefix
-                  if (sessionStartTimeRange.length == prefixList.length) {
-                    dispatch(addSessionStartTimeList(sessionStartTimeRange));
-                  }
-                }
-              });
+            //       // Once we have completed sessionStartTimeRange, load the S3 meta data next for each prefix
+            //       if (sessionStartTimeRange.length == prefixList.length) {
+            //         dispatch(addSessionStartTimeList(sessionStartTimeRange));
+            //       }
+            //     }
+            //   });
 
             // Get S3 meta data for the first/last objects
             web

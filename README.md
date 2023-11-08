@@ -28,7 +28,7 @@ At [CSS Electronics](https://www.csselectronics.com/screen/overview), we always 
 
 For more details on CANcloud and the CANedge2 see below:  
 - [CANcloud intro](https://www.csselectronics.com/screen/page/cancloud-telematics-platform/language/en)  
-- [CANcloud docs](https://canlogger.csselectronics.com/canedge-getting-started/transfer-data/server-tools/cancloud-intro)  
+- [CANcloud docs](https://canlogger.csselectronics.com/canedge-getting-started/ce2/transfer-data/server-tools/cancloud-intro)  
 - [CANedge2 CAN logger](https://www.csselectronics.com/screen/product/can-lin-logger-wifi-canedge2/language/en)  
 
 ---
@@ -68,7 +68,7 @@ bucket: aws-cancloud-bucket
 Note the following:  
 - When logging into a MinIO server the port should be included (e.g. `http://5.123.138.42:9000`)  
 - You need to create your bucket before you can login (i.e. outside of CANcloud, e.g. in your AWS console)  
-- For some S3 servers (e.g. AWS), you may need to change the CORS config - see the [getting started docs](https://canlogger.csselectronics.com/canedge-getting-started/transfer-data/s3-server/)  
+- For some S3 servers (e.g. AWS), you may need to change the CORS config - see the [getting started docs](https://canlogger.csselectronics.com/canedge-getting-started/ce2/transfer-data/s3-server/)  
 
 ---
 ### Versioning

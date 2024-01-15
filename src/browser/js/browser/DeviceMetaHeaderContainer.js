@@ -68,6 +68,7 @@ export class DeviceMetaHeaderContainer extends Component {
       deviceFileContent,
       configFileCrc32,
       deviceImage,
+      deviceFileLastModified
     } = this.props;
 
     let dataUploadTime = [];
@@ -85,6 +86,7 @@ export class DeviceMetaHeaderContainer extends Component {
             <DeviceMeta
               deviceFileContent={deviceFileContent}
               configFileCrc32={configFileCrc32}
+              deviceFileLastModified={deviceFileLastModified}
             />
             <p className="field-description">
               Device meta data based on the uploaded Device File. You can change
@@ -127,6 +129,7 @@ function mapStateToProps(state) {
     configFileCrc32: state.dashboardStatus.configFileCrc32,
     list: state.objects.list,
     deviceImage: state.browser.deviceImage,
+    deviceFileLastModified: state.browser.deviceFileLastModified
   };
 }
 

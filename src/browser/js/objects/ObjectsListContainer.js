@@ -114,7 +114,7 @@ export class ObjectsListContainer extends React.Component {
       timeoutId: setTimeout(() => {
 
         // define pageCounter based
-        let pageCounter = Math.ceil((window.pageYOffset || document.documentElement.scrollTop) / 1040)
+        let pageCounter = Math.ceil((document.documentElement.scrollTop) / 1040)
 
         // load next batch of sessionMetaList when in root device folder and user has scrolled to next page
         if (this.state.pageCounterList && this.state.pageCounterList.includes(pageCounter) == false) {
@@ -152,8 +152,11 @@ export class ObjectsListContainer extends React.Component {
       objectsS3MetaStart,
     } = this.props;
 
-    const visibleObjects = objects.slice(0, this.state.page * 50);
+    // Load JSON objects separately to ensure they are always included at the top when existing
+    let jsonObjects = objects.filter((object) => object.name.endsWith(".json"))
+    let visibleObjects = objects.slice(0, this.state.page * 50);
 
+    visibleObjects = Array.from(new Set(jsonObjects.concat(visibleObjects) ));
     return (
       <div
         className="feb-container"

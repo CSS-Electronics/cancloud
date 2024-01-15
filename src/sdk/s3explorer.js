@@ -227,7 +227,13 @@ class S3Explorer {
     var stream;
     let objectNameWithPrefix = bucketName + "/" + prefix;
     if ("Home" == bucketName) {
-      stream = this.s3Client.listObjects(this.bucketName, prefix, marker, true);
+      if(marker == ""){
+        // faster if no marker is available
+        stream = this.s3Client.listObjectsV2(this.bucketName, prefix, true);
+      } else{
+        stream = this.s3Client.listObjects(this.bucketName, prefix, marker, true);
+      }
+
     } else {
       stream = this.s3Client.listObjects(
         this.bucketName,
@@ -259,6 +265,8 @@ class S3Explorer {
       cb(err);
     });
   }
+
+  
 
   // Make bucket to S3 compatible storage
   makeBucket(bucketName, region, cb) {

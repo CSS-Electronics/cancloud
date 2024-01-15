@@ -164,6 +164,18 @@ export const parseXml = xml => {
   return result;
 };
 
+export function sdValidityTest(str) {
+  // Extract substring starting from the 8th character (index 7) and 12 characters long
+  var extractedSubstring = str.substring(8, 20);
+
+  // Check if the substring matches the specified strings
+  if (extractedSubstring === '534133324780' || extractedSubstring === '534130384780') {
+      return true;
+  } else {
+      return false;
+  }
+}
+
 export function get_first_timestamp(data) {
   let view = new DataView(data.buffer);
 

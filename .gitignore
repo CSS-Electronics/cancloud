@@ -1,7 +1,7 @@
 node_modules
 dist
 
-demo-credentials.json
+*demo-credentials.json
 news.json
 
 site

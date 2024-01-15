@@ -173,7 +173,7 @@ export const identifyLogFileMarkers = devicesFiles => {
       web
         .ListObjects({
           bucketName: "Home",
-          prefix: device + "/0"
+          prefix: device + "/"
         })
         .then(data => {
           // implement basic binary search:
@@ -448,7 +448,7 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
           web
             .ListObjectsRecursive({
               bucketName: "Home",
-              prefix: device + "/0",
+              prefix: device + "/",
               marker: marker
             })
             .then(data => {

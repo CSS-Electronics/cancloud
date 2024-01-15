@@ -390,7 +390,7 @@ class DashboardStatusSection extends React.Component {
                       <div>
                         <p className="loading-delay">
                           <span className="loading-dots">Loading data</span>
-                          <br />({devicesFilesCount}/{devicesFilesInput.length}{" "}
+                          <br />({devicesFilesCount}{" "}
                           devices)
                         </p>
                       </div>

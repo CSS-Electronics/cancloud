@@ -159,6 +159,9 @@ export const fetchObjects = (append) => {
               };
             });
           }
+
+          // sort objects in reverse to put latest session folders at top
+          objects = sortObjectsByName(objects,true)
           if (append) {
             dispatch(appendList(objects, false, res.nextmarker, res.istruncated));
           } else if (objects.length) {

@@ -152,11 +152,11 @@ export class ObjectsListContainer extends React.Component {
       objectsS3MetaStart,
     } = this.props;
 
-    // Load JSON objects separately to ensure they are always included at the top when existing
-    let jsonObjects = objects.filter((object) => object.name.endsWith(".json"))
+    // Load file objects separately to ensure they are always included at the top when existing
+    let fileObjects = objects.filter((object) => !object.name.endsWith("/"))
     let visibleObjects = objects.slice(0, this.state.page * 50);
 
-    visibleObjects = Array.from(new Set(jsonObjects.concat(visibleObjects) ));
+    visibleObjects = Array.from(new Set(fileObjects.concat(visibleObjects) ));
     return (
       <div
         className="feb-container"

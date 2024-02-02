@@ -1,6 +1,6 @@
 {
   "name": "cancloud",
-  "version": "05.08.11",
+  "version": "05.08.12",
   "description": "A React based S3 browser for use with the CANedge",
   "main": "index.js",
   "scripts": {

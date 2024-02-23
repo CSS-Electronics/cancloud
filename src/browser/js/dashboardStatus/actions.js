@@ -177,8 +177,13 @@ export const identifyLogFileMarkers = devicesFiles => {
         })
         .then(data => {
           // implement basic binary search:
+          // Remove JSON files from search
+          let validObjects = data.objects.filter(obj => !obj.name.endsWith(".json"));
+
+           console.log("validObjects",validObjects)
+          // Continue with the binary search or other operations on validObjects
           let binL = 0;
-          let binA = data.objects;
+          let binA = validObjects;
           let binR = binA.length - 1;
           let binM = Math.floor((binL + binR) / 2);
 

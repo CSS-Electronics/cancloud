@@ -4,6 +4,7 @@ import * as bucketActions from "../buckets/actions";
 import _ from "lodash";
 import { demoMode } from "../utils";
 import load from "jszip/lib/load";
+import { isValidLogfile } from "../utils";
 
 export const SET_PERIODSTART_BACK = "dashboardStatus/SET_PERIODSTART_BACK";
 export const SET_OBJECTS_DATA = "dashboardStatus/SET_OBJECTS_DATA";
@@ -177,10 +178,9 @@ export const identifyLogFileMarkers = devicesFiles => {
         })
         .then(data => {
           // implement basic binary search:
-          // Remove JSON files from search
-          let validObjects = data.objects.filter(obj => !obj.name.endsWith(".json"));
+          // Remove non-session folders from search
+          let validObjects = data.objects.filter(obj => obj.name.endsWith("/"));
 
-           console.log("validObjects",validObjects)
           // Continue with the binary search or other operations on validObjects
           let binL = 0;
           let binA = validObjects;
@@ -246,8 +246,9 @@ export const binarySearchEdges = (
           prefix: binA[binA.length - 1].name
         })
         .then(data => {
+          let validObjects = data.objects // no filtration required as we assume the session folders to be clean
           let lastObjectLastModified =
-            data.objects[data.objects.length - 1].lastModified;
+          validObjects[validObjects.length - 1].lastModified;
 
           // if all these objects are before periodStart, don't load anything
           if (lastObjectLastModified < binPeriodStart) {
@@ -269,7 +270,8 @@ export const binarySearchEdges = (
                 prefix: binA[0].name
               })
               .then(data => {
-                let firstObjectLastModified = data.objects[0].lastModified;
+                let validObjects = data.objects // no filtration as we assume the session folders to be clean
+                let firstObjectLastModified = validObjects[0].lastModified;
 
                 // if all these objects are after the periodStart, load everything
                 if (firstObjectLastModified > binPeriodStart) {
@@ -457,15 +459,16 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
               marker: marker
             })
             .then(data => {
+              let validObjects = data.objects.filter(obj => isValidLogfile(obj.name.split(".").slice(-1)[0])); // include only log files
               iCount += 1;
               dispatch(setDevicesFilesCount(iCount));
 
               // extract the last uploaded log file for each device
-              let lastFile = data.objects[data.objects.length - 1];
+              let lastFile = validObjects[validObjects.length - 1];
 
               if (lastFile) {
                 lastFileAry = lastFileAry.concat(
-                  data.objects[data.objects.length - 1]
+                  validObjects[validObjects.length - 1]
                 );
               }
 
@@ -477,7 +480,7 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
                 let sizePerTime = {};
 
                 // aggregate log file size
-                sizePerTime = data.objects.reduce(
+                sizePerTime = validObjects.reduce(
                   (acc, { lastModified, size }) => {
                     if (lastModified > periodStartVar) {
                       const lastModH = speedDate.cached(format, lastModified);
@@ -500,7 +503,7 @@ export const processLogFiles = (devicesFiles, logFileMarkers) => {
                 );
 
                 // aggregate log file count
-                let countPerTime = data.objects.reduce(
+                let countPerTime = validObjects.reduce(
                   (accCnt, { lastModified }) => {
                     if (lastModified > periodStartVar) {
                       const lastModH = speedDate.cached(format, lastModified);

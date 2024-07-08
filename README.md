@@ -1,10 +1,10 @@
 # CANcloud - Open Source Telematics Platform
 
-CANcloud is an open source portal for managing your [CANedge2](https://www.csselectronics.com/screen/product/can-lin-logger-wifi-canedge2/language/en) IoT CAN loggers and data. 
+CANcloud is an open source S3 browser for managing your [CANedge2](https://www.csselectronics.com/products/can-bus-data-logger-wifi-canedge2)/[CANedge3](https://www.csselectronics.com/products/can-bus-data-logger-4g-lte-canedge3-gnss) CAN loggers and data. 
 
-The tool is a simple front-end that can be hosted on a web server and accessed via your browser. 
+The tool is a simple front-end that can be hosted on a web server and accessed via your browser. No backend functionality is included - the backend is purely your own S3 bucket.
 
-At [CSS Electronics](https://www.csselectronics.com/screen/overview), we always host the latest version of CANcloud - but you can build, customize & host it yourself as well.
+At [CSS Electronics](https://www.csselectronics.com), we always host the [latest version of CANcloud](https://canlogger.csselectronics.com/cancloud/) - but you can build, customize & host it yourself as well.
 
 ---
 
@@ -13,13 +13,12 @@ At [CSS Electronics](https://www.csselectronics.com/screen/overview), we always 
 ```
 1. Securely login to any S3 server by providing your endpoint, credentials and bucket name
 2. List all objects within an S3 bucket in a folder structure hierarchy
-3. Easily navigate between connected CANedge2 devices via the sidebar
+3. Easily navigate between connected CANedge2/CANedge3 devices via the sidebar
 4. Download, share & delete objects - or upload files (e.g. firmware.bin for firmware over-the-air)
 5. Configure CANedge devices via an online editor - and submit for easy over-the-air updates
 6. Encrypt configuration passwords using the built-in encryption tool
-7. Add device meta data (incl. pictures and searchable name/group/subgroup)
+7. Add device meta data (incl. pictures and searchable meta name)
 8. Easily customize the portal with your own logo and CSS styling (see `src/browser/index.html`)
-9. Build the offline configuration editor, usable without an internet connection
 
 ```
 ---
@@ -27,10 +26,10 @@ At [CSS Electronics](https://www.csselectronics.com/screen/overview), we always 
 ### Documentation
 
 For more details on CANcloud and the CANedge2 see below:  
-- [CANcloud intro](https://www.csselectronics.com/screen/page/cancloud-telematics-platform/language/en)  
+- [CANcloud intro](https://www.csselectronics.com/pages/cancloud-telematics-platform)  
 - [CANcloud docs](https://canlogger.csselectronics.com/canedge-getting-started/ce2/transfer-data/server-tools/cancloud-intro)  
-- [CANedge2 CAN logger](https://www.csselectronics.com/screen/product/can-lin-logger-wifi-canedge2/language/en)  
-
+- [CANedge2 2 x CAN/LIN logger with WiFi](https://www.csselectronics.com/products/can-bus-data-logger-wifi-canedge2)  
+- [CANedge3 2 x CAN/LIN logger with 3G/4G](https://www.csselectronics.com/products/can-bus-data-logger-4g-lte-canedge3-gnss)
 ---
 ### Simple self-hosting
 You can easily host CANcloud on your own web server by unzipping the latest release contents to your target folder. 
@@ -45,7 +44,7 @@ If you wish to customize your self-hosted version of CANcloud, you can do so wit
 #### Deployment (development mode)
 
 1. Clone the repository
-2. Run `npm install` in the folder to install application dependencies
+2. Run `npm install` in the folder to install application dependencies (tested on `node: 'v16.16.0'` and `npm: '8.11.0'`)
 3. Run `npm start` to run application in development mode
 
 #### Deployment (production) 

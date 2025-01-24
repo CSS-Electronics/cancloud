@@ -51,7 +51,7 @@ export const SideBar = ({
 
 
           <div className="version-text sb-custom-version">
-            v05.09.01
+            v05.09.02
             {demoMode ? (
               <div>
                 <br />

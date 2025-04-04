@@ -47,7 +47,7 @@ export const fetchFilesS3 = (prefix) => {
         .filter((str) => isValidUISchema(str))
         .sort()
         .reverse();
-
+  
         dispatch(editorActions.setUISchemaFile(uischemaFiles));
 
         if(uischemaFiles.length){

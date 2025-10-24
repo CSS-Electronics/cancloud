@@ -23,9 +23,10 @@ export const devicesOptionsFn = deviceList => {
   return devicesOptions;
 };
 
-export const selectedListFn = (event, list) => {
+export const selectedListFn = (event, list, searchTerm = "") => {
   const all = event.filter(e => e.value == "all").length;
   const clear = event.filter(e => e.value == "clear").length;
+  const selectAllMatches = event.filter(e => e.value == "select-all-matches").length;
 
   let selectedList = event;
   if (all) {
@@ -34,6 +35,13 @@ export const selectedListFn = (event, list) => {
   }
   if (clear) {
     selectedList = [];
+  }
+  if (selectAllMatches && searchTerm) {
+    // Filter devices that match the search term and return them
+    const allOptions = devicesOptionsFn(list).slice(2);
+    selectedList = allOptions.filter(option => 
+      option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }
   return selectedList;
 };

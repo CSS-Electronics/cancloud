@@ -42,11 +42,16 @@ class DashboardStatusSection extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeDevices = this.handleChangeDevices.bind(this);
     this.handleChangeFiles = this.handleChangeFiles.bind(this);
+    this.handleInputChangeDevices = this.handleInputChangeDevices.bind(this);
+    this.handleInputChangeFiles = this.handleInputChangeFiles.bind(this);
+    this.getOptionsWithSelectAllMatches = this.getOptionsWithSelectAllMatches.bind(this);
 
     this.state = {
       periodHours: 24 * 7,
       devicesDevicesInput: [],
-      devicesFilesInput: []
+      devicesFilesInput: [],
+      devicesSearchTerm: "",
+      filesSearchTerm: ""
     };
   }
 
@@ -63,7 +68,7 @@ class DashboardStatusSection extends React.Component {
   }
 
   handleChangeDevices(event) {
-    let selectedList = selectedListFn(event, this.props.deviceList);
+    let selectedList = selectedListFn(event, this.props.deviceList, this.state.devicesSearchTerm);
 
     this.setState({
       devicesDevicesInput: selectedList
@@ -71,7 +76,7 @@ class DashboardStatusSection extends React.Component {
   }
 
   handleChangeFiles(event) {
-    let selectedList = selectedListFn(event, this.props.deviceList);
+    let selectedList = selectedListFn(event, this.props.deviceList, this.state.filesSearchTerm);
 
     this.setState({
       devicesFilesInput: selectedList
@@ -92,6 +97,26 @@ class DashboardStatusSection extends React.Component {
       this.props.clearDataFiles();
       this.props.listLogFiles(this.state.devicesFilesInput.map(e => e.value));
     });
+  }
+
+  handleInputChangeDevices(inputValue) {
+    this.setState({ devicesSearchTerm: inputValue });
+  }
+
+  handleInputChangeFiles(inputValue) {
+    this.setState({ filesSearchTerm: inputValue });
+  }
+
+  getOptionsWithSelectAllMatches(baseOptions, searchTerm) {
+    if (searchTerm && searchTerm.trim() !== "") {
+      // When there's a search term, add "Select all matches" option
+      const selectAllMatchesOption = { 
+        label: `Select all matches (${searchTerm})`, 
+        value: "select-all-matches" 
+      };
+      return [selectAllMatchesOption, ...baseOptions];
+    }
+    return baseOptions;
   }
 
   componentWillUnmount() {
@@ -115,8 +140,10 @@ class DashboardStatusSection extends React.Component {
       deviceLastMf4MetaData
     } = this.props;
 
-    const { periodHours, devicesDevicesInput, devicesFilesInput } = this.state;
+    const { periodHours, devicesDevicesInput, devicesFilesInput, devicesSearchTerm, filesSearchTerm } = this.state;
     const devicesOptions = devicesOptionsFn(deviceList);
+    const devicesOptionsWithSelectAllMatches = this.getOptionsWithSelectAllMatches(devicesOptions, devicesSearchTerm);
+    const filesOptionsWithSelectAllMatches = this.getOptionsWithSelectAllMatches(devicesOptions, filesSearchTerm);
 
     const loadedDeviceData =
       deviceFileObjects && deviceFileContents
@@ -183,8 +210,9 @@ class DashboardStatusSection extends React.Component {
               <div className="check-box-container multi-select">
                 <ReactMultiSelectCheckboxes
                   value={devicesFilesInput}
-                  options={devicesOptions}
+                  options={filesOptionsWithSelectAllMatches}
                   onChange={this.handleChangeFiles}
+                  onInputChange={this.handleInputChangeFiles}
                   styles={customCheckboxStyles}
                 />
               </div>
@@ -220,8 +248,9 @@ class DashboardStatusSection extends React.Component {
               <div className="check-box-container multi-select">
                 <ReactMultiSelectCheckboxes
                   value={devicesDevicesInput}
-                  options={devicesOptions}
+                  options={devicesOptionsWithSelectAllMatches}
                   onChange={this.handleChangeDevices}
+                  onInputChange={this.handleInputChangeDevices}
                   styles={customCheckboxStyles}
                 />
               </div>

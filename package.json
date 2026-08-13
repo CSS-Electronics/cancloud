@@ -58,7 +58,7 @@
     "humanize": "0.0.9",
     "isomorphic-unfetch": "^3.0.0",
     "json-stream": "^1.0.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "jszip": "^3.10.1",
     "jszip-utils": "0.0.2",
     "local-storage-fallback": "^4.1.1",

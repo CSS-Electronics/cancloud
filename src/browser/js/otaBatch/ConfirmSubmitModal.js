@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 
 import * as actions from "./actions";
 import CollapsiblePreview from "./CollapsiblePreview";
+import ReviewChangesPanel from "./ReviewChangesPanel";
 import {
   getAggregatedWarnings,
   getEncryptActive,
@@ -19,9 +20,9 @@ export class ConfirmSubmitModal extends React.Component {
     this.state = {
       acknowledged: false,
       verifiedOnOne: false,
-      previewOpen: false,
+      reviewOpen: true, // the diff is the point of the modal - show it up front
+      partialOpen: false,
       targetsOpen: false,
-      fieldsOpen: false,
       fwOpen: false
     };
   }
@@ -31,9 +32,9 @@ export class ConfirmSubmitModal extends React.Component {
       this.setState({
         acknowledged: false,
         verifiedOnOne: false,
-        previewOpen: false,
+        reviewOpen: true,
+        partialOpen: false,
         targetsOpen: false,
-        fieldsOpen: false,
         fwOpen: false
       });
     }
@@ -85,7 +86,8 @@ export class ConfirmSubmitModal extends React.Component {
       evaluations,
       aggregatedWarnings,
       closeConfirm,
-      startRun
+      startRun,
+      buildEncryptedPreview
     } = this.props;
 
     if (!open) return null;
@@ -116,17 +118,9 @@ export class ConfirmSubmitModal extends React.Component {
         })
       : [];
 
-    // per-section encryption counts across the devices that will be encrypted
-    const encryptionCounts = {};
-    if (encryptActive) {
-      deviceIds.forEach((deviceId) => {
-        const ev = evaluations[deviceId];
-        if (!willEncrypt(ev)) return;
-        (ev.enc.summary || []).forEach((row) => {
-          encryptionCounts[row] = (encryptionCounts[row] || 0) + 1;
-        });
-      });
-    }
+    // devices the diff can show: a firmware run rewrites a config only where it
+    // migrates, and a TLS run writes no config at all
+    const diffDeviceIds = firmwareActive ? migrateDeviceIds : deviceIds;
 
     // static label (the title already states whether encryption is applied) so
     // the button width does not jump between modes
@@ -158,6 +152,20 @@ export class ConfirmSubmitModal extends React.Component {
           </div>
 
           <div className="modal-custom-content ota-confirm-content">
+            {!tlsActive && diffDeviceIds.length ? (
+              <ReviewChangesPanel
+                open={this.state.reviewOpen}
+                onToggle={() =>
+                  this.setState({ reviewOpen: !this.state.reviewOpen })
+                }
+                deviceIds={diffDeviceIds}
+                deviceFiles={deviceFiles}
+                evaluations={evaluations}
+                encryptActive={encryptActive && !firmwareActive}
+                buildEncryptedPreview={buildEncryptedPreview}
+              />
+            ) : null}
+
             {firmwareActive ? (
               <div>
                 {this.renderCollapsible(
@@ -232,63 +240,13 @@ export class ConfirmSubmitModal extends React.Component {
 
             {partial ? (
               <CollapsiblePreview
-                open={this.state.previewOpen}
+                open={this.state.partialOpen}
                 onToggle={() =>
-                  this.setState({ previewOpen: !this.state.previewOpen })
+                  this.setState({ partialOpen: !this.state.partialOpen })
                 }
                 data={partial}
-                label="Show partial config preview"
+                label="Show loaded partial JSON"
               />
-            ) : null}
-
-            {encryptActive && Object.keys(encryptionCounts).length ? (
-              <div style={{ marginTop: "10px" }}>
-                <div
-                  onClick={() =>
-                    this.setState({ fieldsOpen: !this.state.fieldsOpen })
-                  }
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    color: "#999999",
-                    userSelect: "none"
-                  }}
-                >
-                  <i
-                    className={
-                      this.state.fieldsOpen
-                        ? "fa fa-angle-down"
-                        : "fa fa-angle-right"
-                    }
-                    style={{ marginRight: "6px", width: "8px" }}
-                  />
-                  Show fields to encrypt ({Object.keys(encryptionCounts).length})
-                </div>
-                {this.state.fieldsOpen ? (
-                  <pre
-                    className="browse-file-preview"
-                    style={{
-                      maxHeight: "200px",
-                      overflow: "auto",
-                      marginTop: "10px"
-                    }}
-                  >
-                    {Object.keys(encryptionCounts)
-                      .map(
-                        (row) =>
-                          row +
-                          "  (" +
-                          encryptionCounts[row] +
-                          " device" +
-                          (encryptionCounts[row] === 1 ? "" : "s") +
-                          ")"
-                      )
-                      .join("\n")}
-                  </pre>
-                ) : null}
-              </div>
             ) : null}
 
             {partialNotes.length ? (
@@ -318,23 +276,55 @@ export class ConfirmSubmitModal extends React.Component {
                 ))}
               </div>
             ) : null}
+          </div>
 
-            {/* checkbox markup copied from the editor OBD tool: the label wraps
+          <div className="modal-custom-footer">
+            {/* The gate sits in the footer next to the button it enables - the
+                diff view makes the body tall enough to scroll it out of sight.
+                Checkbox markup copied from the editor OBD tool: the label wraps
                 only the input + an empty span (the check box), the caption is a
-                flex sibling so it stays vertically centered with the box */}
-            {/* fleet-safety gate: for a multi-device rollout, require the user to
-                confirm they have already validated the update on a single device */}
-            {deviceIds.length > 1 ? (
+                flex sibling so it stays vertically centered with the box. */}
+            <div className="ota-confirm-gate">
+              {/* fleet-safety gate: for a multi-device rollout, require the user
+                  to confirm they already validated the update on one device */}
+              {deviceIds.length > 1 ? (
+                <div
+                  className="ota-confirm-ack"
+                  onClick={() =>
+                    this.setState({ verifiedOnOne: !this.state.verifiedOnOne })
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    cursor: "pointer"
+                  }}
+                >
+                  <span
+                    style={{ width: "20px", flexShrink: 0 }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <label className="checkbox-design">
+                      <input
+                        type="checkbox"
+                        checked={this.state.verifiedOnOne}
+                        onChange={() =>
+                          this.setState({
+                            verifiedOnOne: !this.state.verifiedOnOne
+                          })
+                        }
+                      />
+                      <span></span>
+                    </label>
+                  </span>
+                  <span>I have already verified this update on 1 device</span>
+                </div>
+              ) : null}
               <div
                 className="ota-confirm-ack"
                 onClick={() =>
-                  this.setState({ verifiedOnOne: !this.state.verifiedOnOne })
+                  this.setState({ acknowledged: !this.state.acknowledged })
                 }
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  cursor: "pointer"
-                }}
+                style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
               >
                 <span
                   style={{ width: "20px", flexShrink: 0 }}
@@ -343,61 +333,33 @@ export class ConfirmSubmitModal extends React.Component {
                   <label className="checkbox-design">
                     <input
                       type="checkbox"
-                      checked={this.state.verifiedOnOne}
+                      checked={this.state.acknowledged}
                       onChange={() =>
-                        this.setState({
-                          verifiedOnOne: !this.state.verifiedOnOne
-                        })
+                        this.setState({ acknowledged: !this.state.acknowledged })
                       }
                     />
                     <span></span>
                   </label>
                 </span>
-                <span>I have already verified this update on 1 device</span>
+                <span>
+                  {firmwareActive
+                    ? "I understand this will update the firmware (and migrate the configuration where needed) of " +
+                      deviceIds.length +
+                      " device" +
+                      (deviceIds.length === 1 ? "" : "s")
+                    : tlsActive
+                    ? "I understand this will update the TLS server certificates of " +
+                      deviceIds.length +
+                      " device" +
+                      (deviceIds.length === 1 ? "" : "s")
+                    : "I understand this will overwrite the Configuration File of " +
+                      deviceIds.length +
+                      " device" +
+                      (deviceIds.length === 1 ? "" : "s")}
+                </span>
               </div>
-            ) : null}
-            <div
-              className="ota-confirm-ack"
-              onClick={() =>
-                this.setState({ acknowledged: !this.state.acknowledged })
-              }
-              style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
-            >
-              <span
-                style={{ width: "20px", flexShrink: 0 }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <label className="checkbox-design">
-                  <input
-                    type="checkbox"
-                    checked={this.state.acknowledged}
-                    onChange={() =>
-                      this.setState({ acknowledged: !this.state.acknowledged })
-                    }
-                  />
-                  <span></span>
-                </label>
-              </span>
-              <span>
-                {firmwareActive
-                  ? "I understand this will update the firmware (and migrate the configuration where needed) of " +
-                    deviceIds.length +
-                    " device" +
-                    (deviceIds.length === 1 ? "" : "s")
-                  : tlsActive
-                  ? "I understand this will update the TLS server certificates of " +
-                    deviceIds.length +
-                    " device" +
-                    (deviceIds.length === 1 ? "" : "s")
-                  : "I understand this will overwrite the Configuration File of " +
-                    deviceIds.length +
-                    " device" +
-                    (deviceIds.length === 1 ? "" : "s")}
-              </span>
             </div>
-          </div>
 
-          <div className="modal-custom-footer">
             <button
               type="button"
               className="btn btn-primary"
@@ -440,7 +402,9 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   closeConfirm: () => dispatch(actions.setConfirmOpen(false)),
-  startRun: () => dispatch(actions.startRun())
+  startRun: () => dispatch(actions.startRun()),
+  buildEncryptedPreview: (deviceId) =>
+    dispatch(actions.buildEncryptedPreview(deviceId))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfirmSubmitModal);

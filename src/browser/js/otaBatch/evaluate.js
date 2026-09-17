@@ -319,8 +319,7 @@ const assessEncryption = (config, deviceJson, revision) => {
   const {
     analyzeConfigEncryption,
     validateDeviceFile,
-    detectDeviceTypeFromConfig,
-    summarizeDelta
+    detectDeviceTypeFromConfig
   } = encryptionFields;
 
   const analysis = analyzeConfigEncryption(config);
@@ -345,19 +344,17 @@ const assessEncryption = (config, deviceJson, revision) => {
       "Password too long to encrypt: " + checks.lengthViolations.join(", ");
   }
 
+  // a blank SIM PIN staying plain is a no-op, not something to warn about; the
+  // diff view in the confirm modal shows the actual per-device field changes
   const warnings = [];
   checks.blankFields.forEach((label) =>
     warnings.push("Blank password will be encrypted: " + label)
   );
-  if (checks.pinSkipped) {
-    warnings.push("Blank SIM PIN cannot be encrypted - left as-is");
-  }
 
   return {
     hasPlain: checks.hasPlainFields,
     compatible,
     reason,
-    summary: summarizeDelta(analysis),
     warnings
   };
 };

@@ -5,15 +5,12 @@ import { statusRequestQueue } from "../requestQueue";
 import { nextSort } from "../tableSort";
 import * as dashboardStatusActions from "../dashboardStatus/actions";
 import * as alertActions from "../alert/actions";
-import {
-  encryptionFields,
-  encryptionCrypto,
-  migration
-} from "config-editor-tools";
+import { encryptionFields, migration } from "config-editor-tools";
 import { loadFile } from "config-editor-base";
 
 import * as cache from "./cache";
-import { analyzePartial, evaluateDevice, mergeConfig } from "./evaluate";
+import { analyzePartial, evaluateDevice } from "./evaluate";
+import { buildEncryptedConfig } from "./encryptConfig";
 import { getEncryptActive } from "./selectors";
 import {
   startRun as engineStartRun,
@@ -610,6 +607,14 @@ const downloadJsonFile = (fileName, text) => {
   document.body.removeChild(anchor);
 };
 
+// the encrypt toggle is effective for this device (the predicate the run uses)
+const willEncryptDevice = (rootState, evaluation) =>
+  getEncryptActive(rootState) &&
+  !!evaluation &&
+  !!evaluation.enc &&
+  evaluation.enc.hasPlain &&
+  evaluation.enc.compatible;
+
 export const downloadNewConfig = (deviceId) => {
   return function (dispatch, getState) {
     const rootState = getState();
@@ -633,14 +638,7 @@ export const downloadNewConfig = (deviceId) => {
       : null;
     if (!base) return Promise.resolve();
 
-    const encryptThisDevice =
-      getEncryptActive(rootState) &&
-      evaluation &&
-      evaluation.enc &&
-      evaluation.enc.hasPlain &&
-      evaluation.enc.compatible;
-
-    if (!encryptThisDevice) {
+    if (!willEncryptDevice(rootState, evaluation)) {
       downloadJsonFile(fileName, JSON.stringify(base, null, 2));
       return Promise.resolve();
     }
@@ -649,20 +647,9 @@ export const downloadNewConfig = (deviceId) => {
     // ephemeral key. The submission re-encrypts with another fresh key
     // (structure and fields identical, ciphertexts differ)
     if (!deviceJson) return Promise.resolve();
-    const analysis = encryptionFields.analyzeConfigEncryption(base);
-    return encryptionCrypto
-      .deriveEncryptionMaterial(deviceJson.kpub)
-      .then(({ serverPublicKeyBase64, symmetricKey }) =>
-        encryptionFields.buildEncryptedDelta(
-          base,
-          symmetricKey,
-          serverPublicKeyBase64,
-          analysis
-        )
-      )
-      .then((delta) => {
-        const merged = mergeConfig(base, delta);
-        downloadJsonFile(fileName, JSON.stringify(merged, null, 2));
+    return buildEncryptedConfig(base, deviceJson.kpub, null)
+      .then((result) => {
+        downloadJsonFile(fileName, result.text);
       })
       .catch((e) => {
         dispatch(
@@ -673,6 +660,28 @@ export const downloadNewConfig = (deviceId) => {
           })
         );
       });
+  };
+};
+
+// The confirm modal's diff needs the same encrypted result the download serves.
+// Rejects rather than alerting - the modal covers the alert area, so the panel
+// renders the failure inline instead.
+export const buildEncryptedPreview = (deviceId) => {
+  return function (dispatch, getState) {
+    const rootState = getState();
+    const state = rootState.otaBatch;
+    const deviceJson = state.deviceFiles[deviceId];
+    const mergedResult = cache.getMergedResult(deviceId);
+    if (
+      !mergedResult ||
+      !deviceJson ||
+      !willEncryptDevice(rootState, state.evaluations[deviceId])
+    ) {
+      return Promise.resolve(null);
+    }
+    return buildEncryptedConfig(mergedResult.merged, deviceJson.kpub, null).then(
+      (result) => result.text
+    );
   };
 };
 

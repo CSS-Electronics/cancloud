@@ -20,6 +20,14 @@
  *     seed        write <id>/device.json + config-XX.XX.json + schema-XX.XX.json
  *     verify      count seeded folders/objects per cohort
  *     teardown    delete every object under the synthetic id prefix (--yes)
+ *     sync        real profile: make every TRUCK device.json report what a
+ *                 real device would after consuming its folder - fw_ver from a
+ *                 pending firmware.bin (then deleted, as the device does),
+ *                 cfg_* / sch_name for that revision, cfg_crc32 of the config
+ *                 object actually in the folder, missing schema uploaded, and
+ *                 a fresh Last-Modified (= heartbeat). Clears the deliberate
+ *                 1-in-7 stale checksums too; re-run seed to get them back.
+ *                 --dry-run prints the plan, --keep-firmware leaves firmware.bin
  *
  *   credentials (required for every mode except validate)
  *     --creds <file.json>   a CANedge configuration file (reads
@@ -623,12 +631,137 @@ const modeTeardown = async () => {
   console.log("  remaining: " + (await listPlanKeys(s3, bucket, buildPlan())).length);
 };
 
+// --------------------------------------------------------------------------
+// sync: device.json follows the folder (see usage). Family is needed to upload
+// a schema the device would have pushed itself after a firmware update.
+
+const TYPE_FAMILY = {
+  "0000001F": "CANedge2",
+  "0000005F": "CANedge2 GNSS",
+  "0000007D": "CANedge3 GNSS"
+};
+
+// firmware.bin header: bytes 0-3 magic -> family, bytes 4-6 -> major.minor.patch
+const FW_MAGIC_FAMILY = {
+  DEAD10CC: "CANedge1",
+  "0F4947CF": "CANedge1 GNSS",
+  BAADA555: "CANedge2",
+  "7FD43111": "CANedge2 GNSS",
+  E670C727: "CANedge3",
+  B74D1858: "CANedge3 GNSS"
+};
+
+const parseFirmwareHeader = (buffer) => ({
+  family: FW_MAGIC_FAMILY[buffer.slice(0, 4).toString("hex").toUpperCase()] || null,
+  fwVer: [buffer[4], buffer[5], buffer[6]].map((n) => String(n).padStart(2, "0")).join(".")
+});
+
+const getText = async (s3, bucket, key) =>
+  (await s3.getObject({ Bucket: bucket, Key: key }).promise()).Body.toString();
+
+// what one device folder should report; null when nothing can be decided
+const planSync = async (s3, bucket, id) => {
+  const rootKeys = (await listAll(s3, bucket, id + "/", "/")).keys.map((k) => k.slice(id.length + 1));
+  if (!rootKeys.includes("device.json")) return { id, skip: "no device.json" };
+  const deviceJson = JSON.parse(await getText(s3, bucket, id + "/device.json"));
+  if (typeof deviceJson.log_meta !== "string" || deviceJson.log_meta.indexOf("TRUCK ") !== 0) {
+    return { id, skip: "not a TRUCK device - not ours" };
+  }
+  const family = TYPE_FAMILY[deviceJson.type];
+  if (!family) return { id, skip: "unknown device type " + deviceJson.type };
+
+  let fwVer = deviceJson.fw_ver;
+  const hasFirmware = rootKeys.includes("firmware.bin");
+  if (hasFirmware) {
+    const head = await s3
+      .getObject({ Bucket: bucket, Key: id + "/firmware.bin", Range: "bytes=0-15" })
+      .promise();
+    const fw = parseFirmwareHeader(head.Body);
+    if (fw.family !== family) {
+      return { id, skip: "firmware.bin is for " + fw.family + ", device is " + family };
+    }
+    fwVer = fw.fwVer;
+  }
+  const revision = fwVer.slice(0, 5);
+  const cfgName = "config-" + revision + ".json";
+  const schName = "schema-" + revision + ".json";
+  if (!rootKeys.includes(cfgName)) {
+    return { id, skip: cfgName + " missing in folder (device on " + fwVer + ")" };
+  }
+  const crc = crc32Hex(await getText(s3, bucket, id + "/" + cfgName));
+
+  const next = {
+    ...deviceJson,
+    fw_ver: fwVer,
+    cfg_ver: revision,
+    cfg_name: cfgName,
+    cfg_crc32: crc,
+    sch_name: schName
+  };
+  const changed = Object.keys(next).filter((key) => next[key] !== deviceJson[key]);
+  return {
+    id,
+    family,
+    revision,
+    deviceJson: next,
+    changed,
+    uploadSchema: !rootKeys.includes(schName),
+    deleteFirmware: hasFirmware && !has("keep-firmware")
+  };
+};
+
+const modeSync = async () => {
+  if (PROFILE !== "real") usage("sync only applies to --profile real (TRUCK fleet)");
+  const dryRun = has("dry-run");
+  const { s3, bucket } = makeClient();
+  const { prefixes } = await listAll(s3, bucket, "", "/");
+  const ids = prefixes.map((p) => p.replace(/\/$/, "")).filter((p) => /^[0-9A-F]{8}$/i.test(p));
+
+  const plans = [];
+  for (const id of ids) plans.push(await planSync(s3, bucket, id));
+
+  const bundledSchemas = {};
+  const schemaTextFor = (family, revision) => {
+    const key = family + "/" + revision;
+    if (!bundledSchemas[key]) {
+      bundledSchemas[key] = JSON.stringify(loadSchema(family, revision), null, 2);
+    }
+    return bundledSchemas[key];
+  };
+
+  let touched = 0;
+  for (const plan of plans) {
+    if (plan.skip) {
+      console.log("  " + plan.id + "  skip: " + plan.skip);
+      continue;
+    }
+    const actions = ["device.json" + (plan.changed.length ? " (" + plan.changed.join(", ") + ")" : " (heartbeat only)")];
+    if (plan.uploadSchema) actions.push("+ schema-" + plan.revision + ".json");
+    if (plan.deleteFirmware) actions.push("- firmware.bin");
+    console.log("  " + plan.id + "  " + plan.deviceJson.log_meta.padEnd(9) + " " + actions.join("  "));
+    if (dryRun) continue;
+
+    const put = (name, body) =>
+      s3
+        .putObject({ Bucket: bucket, Key: plan.id + "/" + name, Body: body, ContentType: "application/json" })
+        .promise();
+    if (plan.uploadSchema) await put("schema-" + plan.revision + ".json", schemaTextFor(plan.family, plan.revision));
+    await put("device.json", JSON.stringify(plan.deviceJson, null, 2));
+    if (plan.deleteFirmware) {
+      await s3.deleteObject({ Bucket: bucket, Key: plan.id + "/firmware.bin" }).promise();
+    }
+    touched += 1;
+  }
+  console.log(dryRun ? "dry run - nothing written" : "synced " + touched + " device folders");
+};
+
 const MODES = {
   list: modeList,
   validate: async () => modeValidate(),
   seed: modeSeed,
   verify: modeVerify,
-  teardown: modeTeardown
+  teardown: modeTeardown,
+  sync: modeSync
 };
 
 if (!MODES[MODE]) usage(MODE ? "unknown mode: " + MODE : null);

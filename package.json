@@ -1,6 +1,6 @@
 {
   "name": "cancloud",
-  "version": "07.00.00",
+  "version": "07.00.02",
   "description": "CANcloud - browser based telematics platform for the CANedge",
   "main": "index.js",
   "license": "ISC",
@@ -42,7 +42,7 @@
     "bootstrap": "^3.4.1",
     "chart.js": "^2.9.4",
     "classnames": "^2.2.6",
-    "config-editor-base": "^4.0.4",
+    "config-editor-base": "^4.0.9",
     "config-editor-tools": "^2.0.0",
     "crc": "^3.8.0",
     "deepmerge": "^4.1.1",

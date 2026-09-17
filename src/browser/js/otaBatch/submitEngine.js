@@ -12,19 +12,11 @@
 
 import web from "../web";
 import { createRequestQueue } from "../requestQueue";
-import {
-  encryptionFields,
-  encryptionCrypto,
-  migration
-} from "config-editor-tools";
+import { migration } from "config-editor-tools";
 
 import * as cache from "./cache";
-import {
-  analyzePartial,
-  evaluateDevice,
-  mergeConfig,
-  tlsGate
-} from "./evaluate";
+import { buildEncryptedConfig } from "./encryptConfig";
+import { analyzePartial, evaluateDevice, tlsGate } from "./evaluate";
 import { getEncryptActive } from "./selectors";
 import {
   SUBMIT_CONCURRENCY,
@@ -464,26 +456,9 @@ const submitDevice = async (dispatch, getState, deviceId, token) => {
 
   if (willEncrypt) {
     // fresh analysis + fresh ephemeral key PER DEVICE, on the POST-merge config
-    const encAnalysis = encryptionFields.analyzeConfigEncryption(base);
-    if (!encAnalysis.ok) {
-      throw new Error(
-        "Config changed on the server and can no longer be encrypted - use Retry failed to re-evaluate"
-      );
-    }
-    const material = await encryptionCrypto.deriveEncryptionMaterial(
-      deviceJson.kpub
-    );
-    const delta = await encryptionFields.buildEncryptedDelta(
-      base,
-      material.symmetricKey,
-      material.serverPublicKeyBase64,
-      encAnalysis
-    );
-    const finalConfig = mergeConfig(base, delta);
-    if (!validator(finalConfig)) {
-      throw new Error("Encrypted config fails validation vs the device's schema");
-    }
-    mergedText = JSON.stringify(finalConfig, null, 2);
+    mergedText = (
+      await buildEncryptedConfig(base, deviceJson.kpub, validator)
+    ).text;
   } else {
     mergedText = result.mergedText;
   }

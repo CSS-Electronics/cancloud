@@ -317,13 +317,29 @@ describe("evaluateDevice - partial merge", () => {
 });
 
 describe("evaluateDevice - encryption assessment (post-merge)", () => {
-  it("plain credentials: encryptable with a non-empty summary", () => {
+  it("plain credentials: encryptable", () => {
     const result = evaluateDevice(makeInput({}));
     expect(result.status).toBe("eligible");
     expect(result.eligible).toBe(true); // encryptable even with no partial
     expect(result.enc.hasPlain).toBe(true);
     expect(result.enc.compatible).toBe(true);
-    expect(result.enc.summary.length).toBeGreaterThan(0);
+    // the per-field summary fed a confirm-modal accordion replaced by the diff
+    // view; dropping it also drops a summarizeDelta call per device
+    expect(result.enc.summary).toBeUndefined();
+  });
+
+  // a blank SIM PIN cannot be encrypted, but leaving it plain is a no-op - the
+  // warning was noise in both the table and the confirm modal
+  it("blank SIM PIN: no warning, but other blank credentials still warn", () => {
+    const config = baseConfig();
+    config.connect.cellular = { keyformat: 0, pin: "" };
+    config.connect.s3.server.secretkey = "";
+    const result = evaluateDevice(makeInput({ config }));
+    expect(result.enc.hasPlain).toBe(true);
+    expect(result.enc.warnings.join(" ")).not.toMatch(/SIM PIN/);
+    expect(result.enc.warnings.join(" ")).toMatch(
+      /Blank password will be encrypted: connect\.s3\.server\.secretkey/
+    );
   });
 
   it("invalid kpub: has plaintext but not encrypt-compatible", () => {

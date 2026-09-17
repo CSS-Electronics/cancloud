@@ -400,15 +400,22 @@
 }
 
 .ota-confirm-modal {
+    // as wide as the editor's Review-changes modal so the side-by-side diff has
+    // room; the height still hugs the content, so the modal stays small while
+    // the diff is collapsed
     height: auto;
     max-height: 80%;
     top: 10%;
     left: 50%;
     transform: translateX(-50%);
-    width: 700px;
-    max-width: 92%;
+    width: 80%;
+    max-width: none;
     display: flex;
     flex-direction: column;
+
+    @media (max-width: @screen-sm-max) {
+        width: 94%;
+    }
 
     .modal-review-changes-header {
         height: auto;
@@ -422,7 +429,21 @@
     .modal-custom-content {
         position: static;
         flex: 1 1 auto;
-        overflow-y: auto;
+        min-height: 0; // flex children default to min-height:auto and would not shrink
+        overflow-y: auto; // safety net only - see the flex chain below
+        display: flex;
+        flex-direction: column;
+
+        // When the modal hits its height cap, ONLY the expanded diff gives way.
+        // That keeps the body itself from scrolling, so there is never a second
+        // scrollbar next to the diff's own.
+        > * {
+            flex: 0 0 auto;
+        }
+        > .ota-review-panel.is-open {
+            flex: 1 1 auto;
+            min-height: 0;
+        }
     }
 
     .modal-custom-footer {
@@ -449,6 +470,160 @@
 
 .ota-confirm-warnings {
     margin-top: 12px;
+}
+
+// matches the inline-styled accordion toggles elsewhere in the confirm modal
+.ota-accordion-toggle {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 12px;
+    color: #999999;
+    user-select: none;
+
+    > i {
+        margin-right: 6px;
+        width: 8px;
+    }
+}
+
+.ota-review-panel {
+    margin-top: 10px;
+
+    // the chain that lets .ota-diff-band absorb the leftover height. Only while
+    // expanded: collapsed, the panel must keep its toggle at natural height.
+    &.is-open {
+        display: flex;
+        flex-direction: column;
+
+        > .ota-accordion-toggle {
+            flex: 0 0 auto;
+        }
+
+        .ota-review-body,
+        .ota-diff-result {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        .ota-diff-head,
+        .ota-diff-empty,
+        .ota-diff-note,
+        .ota-panel-note {
+            flex: 0 0 auto;
+        }
+
+        .ota-diff-band {
+            flex: 1 1 auto;
+            min-height: 140px; // floor: below this the diff stops being readable
+        }
+    }
+}
+
+.ota-review-body {
+    margin-top: 10px;
+}
+
+.ota-diff-head {
+    display: flex;
+    gap: 25px;
+
+    > div {
+        flex: 1 1 50%;
+        min-width: 0; // let the selects shrink instead of overflowing the row
+    }
+
+    p {
+        font-size: 12px;
+        margin: 0 0 6px 0;
+    }
+
+    @media (max-width: @screen-sm-max) {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.ota-diff-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ota-diff-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px;
+}
+
+.ota-diff-cycle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    font-size: 12px;
+
+    button {
+        width: 26px;
+        height: 30px;
+        background-color: @white;
+        border: 1px solid #cccccc;
+        border-radius: 3px;
+        color: #555555;
+
+        &:disabled {
+            color: #cccccc;
+            cursor: default;
+        }
+    }
+}
+
+.ota-diff-band {
+    // position:relative on purpose: diff2html's side line numbers are
+    // position:absolute with no offsets, so this must be their containing block
+    // (they scroll vertically with the code) while the per-side horizontal
+    // scroller inside stays unpositioned (line numbers stay pinned)
+    position: relative;
+    max-height: 50vh; // ceiling when there is spare room; flex shrinks it otherwise
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 10px;
+    border: 1px solid @border-color;
+    border-radius: 3px;
+
+    .d2h-wrapper {
+        margin: 0;
+    }
+    .d2h-file-wrapper {
+        margin-bottom: 0;
+        border: 0;
+    }
+    .d2h-diff-table {
+        font-size: 11px;
+    }
+}
+
+.ota-diff-empty,
+.ota-diff-note {
+    font-size: 12px;
+    color: #999999;
+    margin: 10px 0 0 0;
+}
+
+// the acknowledgement gate lives in the footer, so it stays visible however
+// long the diff and warnings above it get
+.ota-confirm-gate {
+    margin-bottom: 14px;
+
+    .ota-confirm-ack {
+        margin-top: 8px;
+
+        &:first-of-type {
+            margin-top: 0;
+        }
+    }
 }
 
 .ota-confirm-ack {
